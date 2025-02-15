@@ -21,21 +21,20 @@ The project follows a **modular structure** for better maintainability.
 
 ```
 car-explorer/
-│── assets/                  # Images, animations, and static assets
-│── src/
-│   ├── api/                 # API service modules
-│   ├── components/          # Reusable UI components (CarCard, NewsCard, etc.)
-│   ├── constants/           # Global constants (colors, assets, etc.)
-│   ├── context/             # Context providers (ThemeContext, LanguageContext, etc.)
-│   ├── hooks/               # Custom React hooks
-│   ├── navigation/          # App navigation setup
-│   ├── screens/             # App screens (Explore, Discover, News, Settings, etc.)
-│   ├── services/            # Utility services (translations, logos, quiz questions)
-│   ├── config/              # App configuration (API keys, environment settings)
-│── .env                     # Environment variables (API keys)
-│── babel.config.js          # Babel configuration (for Expo and environment variables)
-│── package.json             # Dependencies and scripts
-│── README.md                # Project documentation
+   │── assets/ # Images, animations, and static assets
+   │── src/
+   │   ├── api/ # API service modules
+   │   ├── components/ # Reusable UI components (CarCard, NewsCard, etc.)
+   │   ├── constants/ # Global constants (colors, assets, etc.)
+   │   ├── context/ # Context providers (ThemeContext, LanguageContext, etc.)
+   │   ├── hooks/ # Custom React hooks
+   │   ├── navigation/ # App navigation setup
+   │   ├── screens/ # App screens (Explore, Discover, News, Settings, etc.)
+   │   ├── services/ # Utility services (translations, logos, quiz questions)
+   │   ├── config/ # App configuration (API keys, environment settings)
+   │── .env # Environment variables (API keys)
+   │── package.json  # Dependencies and scripts
+   │── README.md # Project documentation
 ```
 
 ---
