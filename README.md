@@ -1,50 +1,144 @@
-# Welcome to your Expo app 👋
+# 🚗 Car Explorer
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Car Explorer is a React Native mobile app built with **Expo** that allows users to explore car models, check VIN details, view automotive news, take quizzes, and manage favorite vehicles. The app integrates multiple APIs to provide real-time data and offers a modern, theme-adaptive UI.
 
-## Get started
+## 📌 Features
 
-1. Install dependencies
+- **Explore Cars**: View car makes, models, and details using the NHTSA API.
+- **Discover**: Search for car descriptions and images via Wikipedia.
+- **VIN Checker**: Decode VIN numbers to retrieve car details.
+- **Favorites**: Save and manage favorite cars.
+- **News**: Read the latest automotive news from the News API.
+- **Quiz**: Test car knowledge with randomly generated quizzes.
+- **Theme Support**: Light and dark mode options.
+- **Multi-Language Support**: Available in English, German, Polish, and French.
 
-   ```bash
+---
+
+## 🏗 Project Structure
+
+The project follows a **modular structure** for better maintainability.
+
+```
+car-explorer/
+│── assets/                  # Images, animations, and static assets
+│── src/
+│   ├── api/                 # API service modules
+│   ├── components/          # Reusable UI components (CarCard, NewsCard, etc.)
+│   ├── constants/           # Global constants (colors, assets, etc.)
+│   ├── context/             # Context providers (ThemeContext, LanguageContext, etc.)
+│   ├── hooks/               # Custom React hooks
+│   ├── navigation/          # App navigation setup
+│   ├── screens/             # App screens (Explore, Discover, News, Settings, etc.)
+│   ├── services/            # Utility services (translations, logos, quiz questions)
+│   ├── config/              # App configuration (API keys, environment settings)
+│── .env                     # Environment variables (API keys)
+│── babel.config.js          # Babel configuration (for Expo and environment variables)
+│── package.json             # Dependencies and scripts
+│── README.md                # Project documentation
+```
+
+---
+
+## 🔗 API Integrations
+
+- **NHTSA Vehicle API** – Fetches car makes, models, and VIN details.
+- **Wikipedia API** – Retrieves car descriptions and images.
+- **News API** – Fetches automotive news articles.
+- **Open Trivia DB** – Provides quiz questions.
+- **Google Translate API** – Translates quiz questions dynamically.
+
+**API Configuration:**
+
+- API keys are stored in the `.env` file and accessed via `expo-constants`.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- **Node.js** (v16+)
+- **Expo CLI** (`npm install -g expo-cli`)
+- **Android Studio** / **Xcode** (for emulators)
+- **VS Code** (recommended IDE)
+
+### 🔧 Installation
+
+1. **Clone the repository**
+
+   ```sh
+   git clone https://github.com/rciesielski3/CarExplorer.git
+   ```
+
+   ```sh
+   cd CarExplorer
+   ```
+
+2. **Install dependencies**
+
+   ```sh
    npm install
    ```
 
-2. Start the app
+3. **Set up environment variables**
 
-   ```bash
-    npx expo start
+   - Create a `.env` file in the root directory:
+     ```sh
+     NEWS_API_KEY=your_api_key_here
+     ```
+   - Make sure `expo-constants` is configured to access environment variables.
+
+4. **Run the app**
+
+   ```sh
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   - **Android:** Press `a` to open in Android Emulator.
+   - **iOS:** Press `i` to open in iOS Simulator.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🎨 Best Practices & Development Approach
 
-## Get a fresh project
+- **📦 Modular Components:** UI elements are reusable and stored in `/components`.
+- **🔄 React Hooks:** Uses `useState`, `useEffect`, and custom hooks for data fetching.
+- **🌎 i18n Support:** Translations handled via `react-i18next`.
+- **🎭 Theming:** Dark/light mode via `ThemeContext`.
+- **💾 State Management:** Uses `React Context API` for global state (e.g., favorites, themes).
+- **🛠 TypeScript Support:** Ensures type safety across the app.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 🛠 Troubleshooting
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### API Key Issues
 
-## Learn more
+- Ensure `.env` contains valid API keys.
+- Restart Expo after adding `.env`:
+  ```sh
+  expo r -c
+  ```
 
-To learn more about developing your project with Expo, look at the following resources:
+### Metro Bundler Issues
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Clear cache:
+  ```sh
+  npx expo start --clear
+  ```
 
-## Join the community
+### Android Emulator Not Starting
 
-Join our community of developers creating universal apps.
+- Ensure **Android Studio** and **AVD Manager** are properly configured.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## 👨‍💻 Author
+
+**Rafał Ciesielski**  
+🚀 [Portfolio](https://rciesielski3.github.io/portfolio/)
+
+© 2025 Car Explorer. All rights reserved.
