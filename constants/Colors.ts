@@ -1,26 +1,26 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
-
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: "#2C2C54", // Darker blue-gray for readability
+    background: "#F7F9FC", // Soft light gray-blue for less strain
+    tint: "#5061a1", // Vibrant blue for accents
+    not: "#E74C3C", // Soft red for warnings
+    ok: "#259c58", // Bright green for confirmations
+    icon: "#9CA3AF", // Neutral gray for icons
+    card: "#94B0DA", // Subtle gray-blue for cards
+    border: "#D1D9E6", // Light border
+    tabIconDefault: "#7D8DA5", // Subtle gray-blue for unselected icons
+    tabIconSelected: "#5A7DFF", // Same vibrant blue for selected icons
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: "#F7F9FC", // Light text for dark background
+    background: "#1A1C2D", // Deep blue-black for reduced strain
+    tint: "#5A7DFF", // Vibrant blue for accents
+    not: "#9C0A07", // Bright red for warnings
+    ok: "#32C671", // Bright green for confirmations
+    icon: "#5A5A5A", // Neutral light gray for icons
+    card: "#252A3E", // Darker blue-gray for cards
+    border: "#3B4257", // Muted gray-blue for borders
+    tabIconDefault: "#7D8DA5", // Subtle gray-blue for unselected icons
+    tabIconSelected: "#5A7DFF", // Same vibrant blue for selected icons
   },
 };

@@ -1,0 +1,30 @@
+{
+  "cli": {
+    "version": ">= 15.0.10",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "NEWS_API_KEY": "${NEWS_API_KEY}"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "NEWS_API_KEY": "${NEWS_API_KEY}"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "NEWS_API_KEY": "${NEWS_API_KEY}"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

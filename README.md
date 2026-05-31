@@ -20,7 +20,7 @@ Car Explorer is a React Native mobile app built with **Expo** that allows users 
 The project follows a **modular structure** for better maintainability.
 
 ```
-car-explorer/
+carExplorer/
    │── assets/ # Images, animations, and static assets
    │── src/
    │   ├── api/ # API service modules
@@ -141,3 +141,43 @@ Ensure you have the following installed:
 🚀 [Portfolio](https://rciesielski3.github.io/portfolio/)
 
 © 2025 Car Explorer. All rights reserved.
+
+---
+
+# Building the Project Locally
+
+To build the project locally and get detailed logs, follow these steps:
+
+1. **Install Expo CLI**: Ensure you have the Expo CLI installed globally.
+
+   ```sh
+   npm install -g expo-cli
+   ```
+
+2. **Install EAS CLI**: Ensure you have the EAS CLI installed globally.
+
+   ```sh
+   npm install -g eas-cli
+   ```
+
+3. **Login to Expo**: Make sure you are logged into your Expo account.
+
+   ```sh
+   expo login
+   ```
+
+4. **Run the Gradle build with detailed logging**:
+
+   ```sh
+   eas build --platform android --local --profile development --log-level debug
+   ```
+
+   Alternatively, you can use the `--stacktrace`, `--info`, or `--debug` options directly with the Gradle command:
+
+   ```sh
+   ./gradlew assembleRelease --stacktrace --info
+   ```
+
+5. **Check the logs**: Review the logs to identify the root cause of the compilation error.
+
+By following these steps, you should be able to get more detailed information about the build failure and diagnose the issue.
