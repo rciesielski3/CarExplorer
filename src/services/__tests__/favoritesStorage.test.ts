@@ -40,4 +40,21 @@ describe("favoritesStorage", () => {
 
     await expect(loadFavorites()).resolves.toEqual([]);
   });
+
+  it("handles save failures without throwing", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    jest.spyOn(AsyncStorage, "setItem").mockRejectedValueOnce(new Error("full"));
+
+    await expect(
+      saveFavorites([{ make: "BMW", model: "M3" }])
+    ).resolves.toBeUndefined();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Failed to save favorites to storage:",
+      expect.any(Error)
+    );
+
+    consoleErrorSpy.mockRestore();
+  });
 });

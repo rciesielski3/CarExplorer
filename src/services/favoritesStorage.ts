@@ -35,5 +35,9 @@ export const loadFavorites = async (): Promise<FavoriteCar[]> => {
 export const saveFavorites = async (
   favorites: FavoriteCar[]
 ): Promise<void> => {
-  await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+  try {
+    await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+  } catch (error) {
+    console.error("Failed to save favorites to storage:", error);
+  }
 };

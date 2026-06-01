@@ -32,20 +32,19 @@ const FavoritesScreen = () => {
   const styles = createGlobalStyles(theme);
   const stylesHome = createHomeScreenStyles(theme);
 
-  const { favorites, clearFavorites } = useFavorites();
+  const { favorites, isHydrated, clearFavorites } = useFavorites();
 
   return (
     <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
       <View style={stylesHome.container}>
         <Text style={styles.title}>{t("favoritesTitle")}</Text>
-        {favorites.length === 0 ? (
+        {!isHydrated ? (
+          <LoadingIndicator type="EXPLORE" />
+        ) : favorites.length === 0 ? (
           <>
             <View style={styles.resultsContainer}>
               <Text style={styles.subtitle}>{t("favoritesEmptyTitle")}</Text>
               <Text style={styles.description}>{t("favoritesEmptyHint")}</Text>
-            </View>
-            <View style={{ marginTop: "20%" }}>
-              <LoadingIndicator type="EXPLORE" />
             </View>
             <View style={stylesHome.buttonContainer}>
               <TouchableOpacity
