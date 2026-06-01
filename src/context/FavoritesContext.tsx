@@ -1,9 +1,10 @@
 import React, { ReactNode } from "react";
 
-interface FavoriteCar {
-  make: string;
-  model: string;
-}
+import {
+  FavoriteCar,
+  loadFavorites,
+  saveFavorites,
+} from "../services/favoritesStorage";
 
 interface FavoritesContextProps {
   favorites: FavoriteCar[];
@@ -19,6 +20,23 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [favorites, setFavorites] = React.useState<FavoriteCar[]>([]);
+  const hasLoadedFavorites = React.useRef(false);
+
+  React.useEffect(() => {
+    const hydrateFavorites = async () => {
+      const storedFavorites = await loadFavorites();
+      setFavorites(storedFavorites);
+      hasLoadedFavorites.current = true;
+    };
+
+    hydrateFavorites();
+  }, []);
+
+  React.useEffect(() => {
+    if (hasLoadedFavorites.current) {
+      saveFavorites(favorites);
+    }
+  }, [favorites]);
 
   const toggleFavorite = (car: FavoriteCar) => {
     setFavorites((prevFavorites) => {
