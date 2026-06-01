@@ -1,12 +1,14 @@
 import React, { ReactNode } from "react";
 
-interface FavoriteCar {
-  make: string;
-  model: string;
-}
+import {
+  FavoriteCar,
+  loadFavorites,
+  saveFavorites,
+} from "../services/favoritesStorage";
 
 interface FavoritesContextProps {
   favorites: FavoriteCar[];
+  isHydrated: boolean;
   toggleFavorite: (car: FavoriteCar) => void;
   clearFavorites: () => void;
 }
@@ -19,6 +21,23 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [favorites, setFavorites] = React.useState<FavoriteCar[]>([]);
+  const [isHydrated, setIsHydrated] = React.useState(false);
+
+  React.useEffect(() => {
+    const hydrateFavorites = async () => {
+      const storedFavorites = await loadFavorites();
+      setFavorites(storedFavorites);
+      setIsHydrated(true);
+    };
+
+    hydrateFavorites();
+  }, []);
+
+  React.useEffect(() => {
+    if (isHydrated) {
+      saveFavorites(favorites);
+    }
+  }, [favorites, isHydrated]);
 
   const toggleFavorite = (car: FavoriteCar) => {
     setFavorites((prevFavorites) => {
@@ -40,7 +59,7 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <FavoritesContext.Provider
-      value={{ favorites, toggleFavorite, clearFavorites }}
+      value={{ favorites, isHydrated, toggleFavorite, clearFavorites }}
     >
       {children}
     </FavoritesContext.Provider>
