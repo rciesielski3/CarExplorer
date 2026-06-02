@@ -22,6 +22,13 @@ describe("vinUtils", () => {
     });
   });
 
+  it("validates the normalized VIN when input contains whitespace", () => {
+    expect(validateVin("1HG CM826 33A004352")).toEqual({
+      isValid: true,
+      normalizedVin: "1HGCM82633A004352",
+    });
+  });
+
   it("rejects VINs containing I, O, or Q", () => {
     expect(validateVin("1HGCM82633A00435Q")).toEqual({
       isValid: false,

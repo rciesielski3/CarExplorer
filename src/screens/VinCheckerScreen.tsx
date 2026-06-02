@@ -59,7 +59,7 @@ const VinCheckerScreen = () => {
   };
 
   const handleVinChange = (value: string) => {
-    setVin(normalizeVin(value));
+    setVin(value);
     setError("");
   };
 
@@ -67,8 +67,14 @@ const VinCheckerScreen = () => {
     const validation = validateVin(vin);
     setVin(validation.normalizedVin);
 
-    if (!validation.isValid && validation.reason) {
-      setError(t(getVinValidationMessage(validation.reason)));
+    if (!validation.isValid) {
+      setError(
+        t(
+          validation.reason
+            ? getVinValidationMessage(validation.reason)
+            : "vinError"
+        )
+      );
       setVehicleData(null);
       return;
     }
@@ -121,7 +127,7 @@ const VinCheckerScreen = () => {
           autoCorrect={false}
         />
         <Text style={styles.vinCounter}>
-          {vin.length}/17 · {t("vinFormatHint")}
+          {normalizeVin(vin).length}/17 · {t("vinFormatHint")}
         </Text>
         <View style={styles.buttonContainer}>
           <CustomButton
