@@ -160,6 +160,7 @@ export const decodeVin = async (vin: string) => {
     return {
       Make: vehicleData.Make || "Unknown",
       Manufacturer: vehicleData.Manufacturer || "Unknown",
+      Model: vehicleData.Model || "Unknown",
       ModelYear: vehicleData.ModelYear || "Unknown",
       VehicleType: vehicleData.VehicleType || "Unknown",
     };

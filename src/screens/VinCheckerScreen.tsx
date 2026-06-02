@@ -1,6 +1,13 @@
 import React from "react";
-import { View, Text, TextInput, ImageBackground } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  ImageBackground,
+  ScrollView,
+} from "react-native";
 import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
 
 import {
   createGlobalStyles,
@@ -12,10 +19,16 @@ import { decodeVin } from "../api/nhtsaApi";
 import { useTheme } from "../context/ThemeContext";
 import { CustomButton, ErrorMessage, LoadingIndicator } from "../components";
 import { IMAGES } from "../constants/Assets";
+import {
+  getVinValidationMessage,
+  normalizeVin,
+  validateVin,
+} from "../utils/vinUtils";
 
 interface VehicleData {
   Make: string;
   Manufacturer: string;
+  Model: string;
   ModelYear: string;
   VehicleType: string;
 }
@@ -40,27 +53,45 @@ const VinCheckerScreen = () => {
   const translationKeyMap: Record<keyof VehicleData, string> = {
     Make: "make",
     Manufacturer: "manufacturer",
+    Model: "model",
     ModelYear: "modelYear",
     VehicleType: "vehicleType",
   };
 
+  const handleVinChange = (value: string) => {
+    setVin(value);
+    setError("");
+  };
+
   const handleCheckVin = async () => {
-    if (!vin.trim()) {
-      setError(t("vinError"));
+    const validation = validateVin(vin);
+    setVin(validation.normalizedVin);
+
+    if (!validation.isValid) {
+      setError(
+        t(
+          validation.reason
+            ? getVinValidationMessage(validation.reason)
+            : "vinError"
+        )
+      );
+      setVehicleData(null);
       return;
     }
-    handleClear();
+
+    setVehicleData(null);
     setLoading(true);
     setError("");
 
     try {
-      const data = await decodeVin(vin);
+      const data = await decodeVin(validation.normalizedVin);
       if (!data || Object.keys(data).length === 0) {
         setError(t("noResultsFound"));
       } else {
         setVehicleData({
           Make: getValidData(data.Make),
           Manufacturer: getValidData(data.Manufacturer),
+          Model: getValidData(data.Model),
           ModelYear: getValidData(data.ModelYear),
           VehicleType: getValidData(data.VehicleType),
         });
@@ -80,19 +111,24 @@ const VinCheckerScreen = () => {
 
   return (
     <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
-      <View style={stylesHome.container}>
-        <View style={[stylesHome.buttonContainer, { marginBottom: "20%" }]}>
+      <ScrollView contentContainerStyle={stylesHome.scrollContent}>
+        <View style={styles.vinHero}>
           <LoadingIndicator type="CARCHECK" />
+          <Text style={styles.title}>{t("vinCheckerTitle")}</Text>
+          <Text style={styles.vinHint}>{t("vinCheckerSubtitle")}</Text>
         </View>
-        <Text style={styles.title}>{t("vinCheckerTitle")}</Text>
         <TextInput
           style={styles.input}
           placeholder={t("enterVin")}
           placeholderTextColor={Colors[theme].tabIconDefault}
           value={vin}
-          onChangeText={setVin}
+          onChangeText={handleVinChange}
           autoCapitalize="characters"
+          autoCorrect={false}
         />
+        <Text style={styles.vinCounter}>
+          {normalizeVin(vin).length}/17 · {t("vinFormatHint")}
+        </Text>
         <View style={styles.buttonContainer}>
           <CustomButton
             title={t("check")}
@@ -108,18 +144,34 @@ const VinCheckerScreen = () => {
         {loading && <LoadingIndicator />}
         {error && <ErrorMessage message={error} />}
         {vehicleData && !error && (
-          <View style={styles.resultsContainer}>
+          <View style={styles.vinResultsContainer}>
+            <View style={styles.vinResultHeader}>
+              <Ionicons
+                name="checkmark-circle"
+                size={24}
+                color={Colors[theme].ok}
+              />
+              <Text style={styles.subtitle}>{t("vinResultTitle")}</Text>
+            </View>
             {Object.entries(vehicleData).map(([key, value]) => (
-              <View key={key} style={styles.resultsRow}>
-                <Text style={styles.description}>
-                  {t(translationKeyMap[key as keyof VehicleData])}:
+              <View key={key} style={styles.vinResultRow}>
+                <Text style={styles.vinResultLabel}>
+                  {t(translationKeyMap[key as keyof VehicleData])}
                 </Text>
-                <Text style={styles.resultText}>{value}</Text>
+                <Text style={styles.vinResultValue}>{value}</Text>
               </View>
             ))}
+            <View style={styles.vinNextStep}>
+              <Ionicons
+                name="information-circle-outline"
+                size={18}
+                color={Colors[theme].tabIconSelected}
+              />
+              <Text style={styles.vinNextStepText}>{t("vinNextStepHint")}</Text>
+            </View>
           </View>
         )}
-      </View>
+      </ScrollView>
     </ImageBackground>
   );
 };
