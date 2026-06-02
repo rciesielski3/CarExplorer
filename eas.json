@@ -8,19 +8,28 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "NEWS_API_KEY": "${NEWS_API_KEY}"
+        "NEWS_API_KEY": "${NEWS_API_KEY}",
+        "EXPO_PUBLIC_ENABLE_ADS": "false",
+        "EXPO_PUBLIC_USE_TEST_ADS": "true",
+        "EXPO_PUBLIC_ADMOB_ANDROID_BANNER_ID": ""
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
-        "NEWS_API_KEY": "${NEWS_API_KEY}"
+        "NEWS_API_KEY": "${NEWS_API_KEY}",
+        "EXPO_PUBLIC_ENABLE_ADS": "false",
+        "EXPO_PUBLIC_USE_TEST_ADS": "true",
+        "EXPO_PUBLIC_ADMOB_ANDROID_BANNER_ID": ""
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "NEWS_API_KEY": "${NEWS_API_KEY}"
+        "NEWS_API_KEY": "${NEWS_API_KEY}",
+        "EXPO_PUBLIC_ENABLE_ADS": "false",
+        "EXPO_PUBLIC_USE_TEST_ADS": "true",
+        "EXPO_PUBLIC_ADMOB_ANDROID_BANNER_ID": ""
       }
     }
   },
