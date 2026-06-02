@@ -11,8 +11,8 @@ describe("monetizationConfig", () => {
   it("enables AdMob only when explicitly configured", () => {
     expect(
       createMonetizationConfig({
-        enableAds: "true",
-        useTestAds: "true",
+        enableAds: "TRUE",
+        useTestAds: "True",
         androidBannerAdUnitId: "ca-app-pub-test/banner",
       })
     ).toEqual({
@@ -29,5 +29,19 @@ describe("monetizationConfig", () => {
         useTestAds: "false",
       })
     ).toEqual(MONETIZATION_DEFAULTS);
+  });
+
+  it("handles false test-ad flags regardless of casing", () => {
+    expect(
+      createMonetizationConfig({
+        enableAds: "true",
+        useTestAds: "False",
+        androidBannerAdUnitId: "ca-app-pub-test/banner",
+      })
+    ).toEqual({
+      adsEnabled: true,
+      useTestAds: false,
+      androidBannerAdUnitId: "ca-app-pub-test/banner",
+    });
   });
 });

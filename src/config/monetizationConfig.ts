@@ -5,9 +5,9 @@ export interface MonetizationEnvironment {
 }
 
 export interface MonetizationConfig {
-  adsEnabled: boolean;
-  useTestAds: boolean;
-  androidBannerAdUnitId: string | null;
+  readonly adsEnabled: boolean;
+  readonly useTestAds: boolean;
+  readonly androidBannerAdUnitId: string | null;
 }
 
 export const MONETIZATION_DEFAULTS: MonetizationConfig = {
@@ -16,7 +16,8 @@ export const MONETIZATION_DEFAULTS: MonetizationConfig = {
   androidBannerAdUnitId: null,
 };
 
-const isEnabled = (value: string | undefined): boolean => value === "true";
+const isEnabled = (value: string | undefined): boolean =>
+  value?.toLowerCase() === "true";
 
 export const createMonetizationConfig = (
   environment: MonetizationEnvironment
@@ -30,7 +31,7 @@ export const createMonetizationConfig = (
 
   return {
     adsEnabled,
-    useTestAds: environment.useTestAds !== "false",
+    useTestAds: environment.useTestAds?.toLowerCase() !== "false",
     androidBannerAdUnitId,
   };
 };
