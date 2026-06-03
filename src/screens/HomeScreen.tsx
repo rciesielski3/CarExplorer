@@ -22,6 +22,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { RootStackParamList } from "../navigation/types";
 import { ANIMATIONS, IMAGES } from "../constants/Assets";
+import { AdBanner } from "../components";
 
 const HomeScreen = () => {
   const { t } = useTranslation();
@@ -111,6 +112,7 @@ const HomeScreen = () => {
             />
           )}
         </View>
+        <AdBanner />
       </ScrollView>
     </ImageBackground>
   );

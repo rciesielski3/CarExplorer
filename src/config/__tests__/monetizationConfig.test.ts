@@ -1,6 +1,8 @@
 import {
   createMonetizationConfig,
   MONETIZATION_DEFAULTS,
+  TEST_ANDROID_APP_ID,
+  TEST_ANDROID_BANNER_AD_UNIT_ID,
 } from "../monetizationConfig";
 
 describe("monetizationConfig", () => {
@@ -12,12 +14,14 @@ describe("monetizationConfig", () => {
     expect(
       createMonetizationConfig({
         enableAds: "TRUE",
-        useTestAds: "True",
+        useTestAds: "False",
+        androidAppId: "ca-app-pub-test~app",
         androidBannerAdUnitId: "ca-app-pub-test/banner",
       })
     ).toEqual({
       adsEnabled: true,
-      useTestAds: true,
+      useTestAds: false,
+      androidAppId: "ca-app-pub-test~app",
       androidBannerAdUnitId: "ca-app-pub-test/banner",
     });
   });
@@ -36,12 +40,28 @@ describe("monetizationConfig", () => {
       createMonetizationConfig({
         enableAds: "true",
         useTestAds: "False",
+        androidAppId: "ca-app-pub-test~app",
         androidBannerAdUnitId: "ca-app-pub-test/banner",
       })
     ).toEqual({
       adsEnabled: true,
       useTestAds: false,
+      androidAppId: "ca-app-pub-test~app",
       androidBannerAdUnitId: "ca-app-pub-test/banner",
+    });
+  });
+
+  it("uses Google test IDs when test ads are enabled", () => {
+    expect(
+      createMonetizationConfig({
+        enableAds: "true",
+        useTestAds: "true",
+      })
+    ).toEqual({
+      adsEnabled: true,
+      useTestAds: true,
+      androidAppId: TEST_ANDROID_APP_ID,
+      androidBannerAdUnitId: TEST_ANDROID_BANNER_AD_UNIT_ID,
     });
   });
 });
