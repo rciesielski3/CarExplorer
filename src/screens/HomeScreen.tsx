@@ -112,8 +112,8 @@ const HomeScreen = () => {
             />
           )}
         </View>
-        <AdBanner />
       </ScrollView>
+      <AdBanner />
     </ImageBackground>
   );
 };

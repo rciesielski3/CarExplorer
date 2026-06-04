@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import {
   BannerAd,
   BannerAdSize,
@@ -14,10 +14,13 @@ import { useTheme } from "../context/ThemeContext";
 const AdBanner = () => {
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
+  const [adFailed, setAdFailed] = React.useState(false);
 
   if (
+    Platform.OS !== "android" ||
     !monetizationConfig.adsEnabled ||
-    !monetizationConfig.androidBannerAdUnitId
+    !monetizationConfig.androidBannerAdUnitId ||
+    adFailed
   ) {
     return null;
   }
@@ -32,6 +35,7 @@ const AdBanner = () => {
         unitId={unitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+        onAdFailedToLoad={() => setAdFailed(true)}
       />
     </View>
   );
