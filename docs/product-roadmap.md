@@ -23,6 +23,7 @@ Status: planned, off by default.
    - Build Android production AAB with EAS.
    - Verify signing SHA1 before Play Console upload.
    - Record versionCode and artifact path.
+   - Keep ads disabled for the first store update after adding the AdMob SDK.
 
 ## EAS / Expo CLI Distribution
 
@@ -32,18 +33,27 @@ Status: planned, off by default.
 - Verify Android target SDK before store submission.
 - Verify upload certificate SHA1 before manual Play Console upload.
 - Do not submit automatically until the Play service account permissions are confirmed.
+- For the first AdMob-SDK build, keep `EXPO_PUBLIC_ENABLE_ADS=false`.
+- After the AAB is accepted by Google Play, enable real ads in a separate PR/build.
 
 ## AdMob Readiness Checklist
 
 - Create or confirm the AdMob app for package `com.adateo.carexplorer`.
-- Copy the Android AdMob App ID, formatted like `ca-app-pub-...~...`.
+- Android AdMob App ID: `ca-app-pub-4185040274135926~6045284737`.
 - Create Android banner ad unit.
-- Copy the Android banner ad unit ID, formatted like `ca-app-pub-.../...`.
+- Android banner ad unit ID: `ca-app-pub-4185040274135926/4639183818`.
 - Add the production banner ad unit ID to EAS env only after testing.
 - Add the production Android app ID to EAS env only after testing.
 - Keep `EXPO_PUBLIC_ENABLE_ADS=false` until policy copy and placement are approved.
 - Keep `EXPO_PUBLIC_USE_TEST_ADS=true` for development and preview.
 - Confirm privacy policy and store listing mention ads where required.
+
+## Current Release Decision
+
+- Build and upload the next Android AAB with ads disabled.
+- Use the real Android AdMob App ID in native config so the SDK is production-shaped.
+- Do not set the production banner ad unit in EAS until we intentionally enable ads.
+- Do not set `EXPO_PUBLIC_ENABLE_ADS=true` until the store listing and policy copy are ready.
 
 ## Ad Format Decision
 
