@@ -264,6 +264,13 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       borderRadius: 10,
       padding: 10,
     },
+    adBannerContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 16,
+      minHeight: 50,
+      width: "100%",
+    },
     vinHero: {
       alignItems: "center",
       marginBottom: 6,
