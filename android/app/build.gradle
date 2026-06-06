@@ -80,6 +80,16 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+def getReleaseSigningProperty = { name ->
+    return findProperty(name) ?: System.getenv(name)
+}
+
+def releaseStoreFile = getReleaseSigningProperty("CAREXPLORER_UPLOAD_STORE_FILE")
+def releaseStorePassword = getReleaseSigningProperty("CAREXPLORER_UPLOAD_STORE_PASSWORD")
+def releaseKeyAlias = getReleaseSigningProperty("CAREXPLORER_UPLOAD_KEY_ALIAS")
+def releaseKeyPassword = getReleaseSigningProperty("CAREXPLORER_UPLOAD_KEY_PASSWORD")
+def hasReleaseSigningConfig = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -101,12 +111,26 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseSigningConfig) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
+            if (!hasReleaseSigningConfig) {
+                throw new GradleException(
+                    "Release signing is not configured. Set CAREXPLORER_UPLOAD_STORE_FILE, CAREXPLORER_UPLOAD_STORE_PASSWORD, CAREXPLORER_UPLOAD_KEY_ALIAS, and CAREXPLORER_UPLOAD_KEY_PASSWORD before running ./gradlew bundleRelease."
+                )
+            }
+            signingConfig signingConfigs.release
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
