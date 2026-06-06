@@ -5,7 +5,13 @@ The keystore file must stay outside git.
 
 ## Required inputs
 
-Set these values as environment variables or Gradle properties before building:
+Copy the template and fill in your local upload-keystore values:
+
+```sh
+cp .env.release.example .env.release.local
+```
+
+The local file must contain:
 
 ```sh
 CAREXPLORER_UPLOAD_STORE_FILE=/absolute/path/to/upload-keystore.jks
@@ -14,7 +20,13 @@ CAREXPLORER_UPLOAD_KEY_ALIAS=...
 CAREXPLORER_UPLOAD_KEY_PASSWORD=...
 ```
 
-Then build from the Android project:
+Then build from the repository root:
+
+```sh
+bash scripts/build-android-release.sh
+```
+
+Alternatively, export the same values and build from the Android project:
 
 ```sh
 cd android
