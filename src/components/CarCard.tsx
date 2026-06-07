@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  GestureResponderEvent,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -32,9 +33,7 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
-  const [carDetails, setCarDetails] = React.useState<
-    Record<string, string | null>
-  >({});
+  const [carDetails, setCarDetails] = React.useState<string | null>(null);
   const [loadingDetails, setLoadingDetails] = React.useState<boolean>(false);
 
   const { t } = useTranslation();
@@ -44,6 +43,7 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
   const stylesHome = createHomeScreenStyles(theme);
 
   const { language } = useAppLanguage();
+  const activeLanguage = language || "en";
   const { favorites, toggleFavorite } = useFavorites();
   const isFavorite = favorites.some(
     (car) => car.make === make && car.model === model
@@ -52,15 +52,11 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
   const fetchCarDetails = async () => {
     setLoadingDetails(true);
     try {
-      const details = await getCarDetails(make, model, language);
-      if (details && Object.keys(details).length > 0) {
-        setCarDetails(details || "No details available.");
-      } else {
-        setCarDetails({});
-      }
+      const details = await getCarDetails(make, model, activeLanguage);
+      setCarDetails(details);
     } catch (error) {
       console.error("Error fetching car details:", error);
-      setCarDetails({});
+      setCarDetails(null);
     } finally {
       setLoadingDetails(false);
     }
@@ -68,15 +64,23 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
 
   const handleCloseModal = () => {
     setModalVisible(false);
-    setCarDetails({});
+    setCarDetails(null);
   };
 
   const handleCardPress = () => {
+    setModalVisible(true);
+    setCarDetails(null);
     fetchCarDetails();
+  };
+
+  const handleFavoritePress = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    toggleFavorite({ make, model });
   };
 
   React.useEffect(() => {
     const fetchImage = async () => {
+      setLoading(true);
       try {
         const url = await getCarImageUrl(make, model);
         setImageUrl(url);
@@ -90,14 +94,8 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
     fetchImage();
   }, [make, model]);
 
-  React.useEffect(() => {
-    if (Object.keys(carDetails).length > 0) {
-      setModalVisible(true);
-    }
-  }, [carDetails]);
-
   return (
-    <TouchableOpacity onPress={handleCardPress}>
+    <TouchableOpacity testID="car-card-pressable" onPress={handleCardPress}>
       <View style={styles.card}>
         {loading ? (
           <LoadingIndicator />
@@ -108,8 +106,9 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
           />
         )}
         <TouchableOpacity
+          testID="car-favorite-pressable"
           style={styles.favoriteIcon}
-          onPress={() => toggleFavorite({ make, model })}
+          onPress={handleFavoritePress}
         >
           <FontAwesome
             name={isFavorite ? "heart" : "heart-o"}
@@ -121,7 +120,13 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
           {make} {model}
         </Text>
       </View>
-      <Modal visible={modalVisible} transparent animationType="slide">
+      <Modal
+        testID="car-details-modal"
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={handleCloseModal}
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <ScrollView style={styles.scrollContainer}>
@@ -136,9 +141,7 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
                 <LoadingIndicator />
               ) : (
                 <Text style={styles.description}>
-                  {typeof carDetails === "string"
-                    ? carDetails
-                    : Object.values(carDetails).join(" ") || t("noDetails")}
+                  {carDetails || t("noDetails")}
                 </Text>
               )}
             </ScrollView>
