@@ -34,7 +34,6 @@ const TabNavigator = () => {
           backgroundColor: Colors[theme].surface,
           borderTopColor: Colors[theme].border,
           borderTopWidth: 1,
-          height: 66,
           paddingTop: 8,
           paddingBottom: 8,
           shadowColor: Colors[theme].shadow,

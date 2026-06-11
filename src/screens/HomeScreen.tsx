@@ -45,11 +45,16 @@ const HomeScreen = () => {
     <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
       <ScrollView contentContainerStyle={homeStyles.scrollContent}>
         <View style={homeStyles.hero}>
-          <Text style={homeStyles.eyebrow}>Car Explorer</Text>
+          <Text style={homeStyles.eyebrow}>
+            {t("heroEyebrow", "Car Explorer")}
+          </Text>
           <View style={homeStyles.heroTopRow}>
             <Text style={homeStyles.heroTitle}>
-              Drive{"\n"}
-              <Text style={homeStyles.heroAccent}>Curiosity</Text>
+              {t("heroTitleDrive", "Drive")}
+              {"\n"}
+              <Text style={homeStyles.heroAccent}>
+                {t("heroTitleCuriosity", "Curiosity")}
+              </Text>
             </Text>
             <LottieView
               source={ANIMATIONS.CAR}

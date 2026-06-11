@@ -236,6 +236,7 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       margin: 6,
       flex: 1,
       minWidth: 104,
+      maxWidth: 120,
       height: 112,
       justifyContent: "center",
       alignItems: "center",
@@ -250,6 +251,13 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       fontSize: 14,
       fontWeight: "700",
       textAlign: "center",
+    },
+    makeAbbreviationText: {
+      color: Colors[theme].icon,
+      fontSize: 22,
+      fontWeight: "800",
+      textAlign: "center",
+      marginBottom: 8,
     },
     pickerContainer: {
       flexDirection: "row",

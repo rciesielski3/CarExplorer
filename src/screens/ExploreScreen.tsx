@@ -176,7 +176,7 @@ const ExploreScreen = () => {
                   {logoUrl ? (
                     <Image source={{ uri: logoUrl }} style={styles.logo} />
                   ) : (
-                    <Text style={styles.makeButtonText}>
+                    <Text style={styles.makeAbbreviationText}>
                       {item.slice(0, 3).toUpperCase()}
                     </Text>
                   )}
