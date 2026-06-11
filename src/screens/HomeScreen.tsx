@@ -45,12 +45,19 @@ const HomeScreen = () => {
     <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
       <ScrollView contentContainerStyle={homeStyles.scrollContent}>
         <View style={homeStyles.hero}>
-          <LottieView
-            source={ANIMATIONS.CAR}
-            autoPlay
-            loop
-            style={homeStyles.animation}
-          />
+          <Text style={homeStyles.eyebrow}>Car Explorer</Text>
+          <View style={homeStyles.heroTopRow}>
+            <Text style={homeStyles.heroTitle}>
+              Drive{"\n"}
+              <Text style={homeStyles.heroAccent}>Curiosity</Text>
+            </Text>
+            <LottieView
+              source={ANIMATIONS.CAR}
+              autoPlay
+              loop
+              style={homeStyles.animation}
+            />
+          </View>
           <Text style={styles.title}>{t("homeTitle")}</Text>
           <Text style={homeStyles.subtitle}>{t("homeSubtitle")}</Text>
         </View>
@@ -142,7 +149,11 @@ const QuickAction = ({
         <Text style={homeStyles.quickTitle}>{title}</Text>
         <Text style={homeStyles.quickSubtitle}>{subtitle}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={Colors[theme].text} />
+      <Ionicons
+        name="chevron-forward"
+        size={18}
+        color={Colors[theme].tabIconSelected}
+      />
     </TouchableOpacity>
   );
 };

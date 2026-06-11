@@ -31,10 +31,24 @@ const TabNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors[theme].card,
+          backgroundColor: Colors[theme].surface,
+          borderTopColor: Colors[theme].border,
+          borderTopWidth: 1,
+          height: 66,
+          paddingTop: 8,
+          paddingBottom: 8,
+          shadowColor: Colors[theme].shadow,
+          shadowOpacity: 0.16,
+          shadowOffset: { width: 0, height: -6 },
+          shadowRadius: 16,
+          elevation: 12,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "700",
         },
         tabBarActiveTintColor: Colors[theme].tabIconSelected,
-        tabBarInactiveTintColor: Colors[theme].text,
+        tabBarInactiveTintColor: Colors[theme].tabIconDefault,
       }}
     >
       <Tab.Screen

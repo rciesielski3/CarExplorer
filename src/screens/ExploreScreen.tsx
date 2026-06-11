@@ -154,7 +154,10 @@ const ExploreScreen = () => {
   return (
     <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
       <View style={stylesHome.container}>
-        <Text style={styles.title}>{t("exploreCars")}</Text>
+        <Text style={styles.title}>{selectedMake || t("exploreCars")}</Text>
+        <Text style={stylesHome.subtitle}>
+          {selectedMake ? t("selectVehicleType") : t("quickExploreSubtitle")}
+        </Text>
         {loadingLogos ? (
           <LoadingIndicator />
         ) : !selectedMake ? (
@@ -173,8 +176,11 @@ const ExploreScreen = () => {
                   {logoUrl ? (
                     <Image source={{ uri: logoUrl }} style={styles.logo} />
                   ) : (
-                    <Text style={styles.makeButtonText}>{item}</Text>
+                    <Text style={styles.makeButtonText}>
+                      {item.slice(0, 3).toUpperCase()}
+                    </Text>
                   )}
+                  <Text style={styles.makeButtonText}>{item}</Text>
                 </TouchableOpacity>
               );
             }}
@@ -242,11 +248,18 @@ const ExploreScreen = () => {
               <TouchableOpacity
                 style={[
                   stylesHome.button,
-                  { backgroundColor: Colors[theme].tabIconSelected },
+                  { backgroundColor: Colors[theme].surfaceMuted },
                 ]}
                 onPress={handleBackToMakes}
               >
-                <Text style={stylesHome.buttonText}>{t("backToMakes")}</Text>
+                <Text
+                  style={[
+                    stylesHome.buttonText,
+                    { color: Colors[theme].tabIconSelected },
+                  ]}
+                >
+                  {t("backToMakes")}
+                </Text>
               </TouchableOpacity>
             </View>
           </>
