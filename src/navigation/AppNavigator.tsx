@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
@@ -25,6 +26,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const TabNavigator = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -34,7 +36,7 @@ const TabNavigator = () => {
           position: "absolute",
           left: 18,
           right: 18,
-          bottom: 12,
+          bottom: Math.max(insets.bottom, 12),
           minHeight: 68,
           borderRadius: 26,
           backgroundColor:

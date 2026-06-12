@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import Svg, { Circle, Path } from "react-native-svg";
 
 import {
   createGlobalStyles,
@@ -126,9 +127,13 @@ const HomeScreen = () => {
 
           <View style={homeStyles.aiFooter}>
             <View style={homeStyles.aiChips}>
-              {["Flat-6", "Best EV", "AWD vs 4WD"].map((chip) => (
-                <View key={chip} style={homeStyles.aiChip}>
-                  <Text style={homeStyles.aiChipText}>{chip}</Text>
+              {[
+                { key: "flat6", label: t("aiChipFlat6", "Flat-6") },
+                { key: "bestEv", label: t("aiChipBestEv", "Best EV") },
+                { key: "awdVs4wd", label: t("aiChipAwdVs4wd", "AWD vs 4WD") },
+              ].map((chip) => (
+                <View key={chip.key} style={homeStyles.aiChip}>
+                  <Text style={homeStyles.aiChipText}>{chip.label}</Text>
                 </View>
               ))}
             </View>
@@ -152,20 +157,52 @@ const HeroCarLine = () => {
   const homeStyles = createHomeScreenStyles(theme);
 
   return (
-    <View
+    <Svg
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={homeStyles.heroCarLine}
+      viewBox="0 0 220 82"
     >
-      <View style={homeStyles.carBodyLine} />
-      <View style={homeStyles.carFrontLine} />
-      <View style={homeStyles.carRoofLine} />
-      <View style={homeStyles.carHoodLine} />
-      <View style={homeStyles.carRearWindowLine} />
-      <View style={[homeStyles.carWheel, homeStyles.carWheelLeft]} />
-      <View style={[homeStyles.carWheel, homeStyles.carWheelRight]} />
-    </View>
+      <Path
+        d="M4 60h30M72 60h76M192 60h24"
+        stroke={Colors[theme].text}
+        strokeWidth={4}
+        strokeLinecap="round"
+        fill="none"
+      />
+      <Path
+        d="M36 60c4-22 15-29 35-31l28-16c19-11 61-13 86 5l21 15"
+        stroke={Colors[theme].text}
+        strokeWidth={4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <Path
+        d="M86 28l-4-14M148 21l6-15"
+        stroke={Colors[theme].text}
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        fill="none"
+      />
+      <Circle
+        cx={50}
+        cy={60}
+        r={22}
+        stroke={Colors[theme].text}
+        strokeWidth={4}
+        fill={Colors[theme].background}
+      />
+      <Circle
+        cx={170}
+        cy={60}
+        r={22}
+        stroke={Colors[theme].text}
+        strokeWidth={4}
+        fill={Colors[theme].background}
+      />
+    </Svg>
   );
 };
 

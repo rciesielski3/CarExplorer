@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { Appearance } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface ThemeContextType {
@@ -11,7 +12,9 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [theme, setTheme] = useState<"light" | "dark">(
+    Appearance.getColorScheme() || "dark"
+  );
 
   useEffect(() => {
     const loadTheme = async () => {
