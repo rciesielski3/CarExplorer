@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ImageBackground,
-  ScrollView,
-} from "react-native";
-import LottieView from "lottie-react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,9 +12,7 @@ import {
 import { Colors } from "@/constants/Colors";
 
 import { useTheme } from "../context/ThemeContext";
-import { useFavorites } from "../context/FavoritesContext";
 import { RootStackParamList } from "../navigation/types";
-import { ANIMATIONS, IMAGES } from "../constants/Assets";
 import { AdBanner } from "../components";
 
 const HomeScreen = () => {
@@ -30,25 +21,47 @@ const HomeScreen = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const { theme } = useTheme();
-  const { favorites } = useFavorites();
   const styles = createGlobalStyles(theme);
   const homeStyles = createHomeScreenStyles(theme);
 
   const navigateTo = React.useCallback(
-    (screen: "Explore" | "Quiz" | "Discover" | "Vin" | "Favorites") => {
+    (screen: "Explore" | "Quiz" | "Vin" | "Favorites" | "Settings") => {
       navigation.navigate(screen);
     },
     [navigation]
   );
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
-      <ScrollView contentContainerStyle={homeStyles.scrollContent}>
+    <View style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={homeStyles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={homeStyles.topBar}>
+          <Text style={homeStyles.logo}>{t("homeLogo", "Car Explorer")}</Text>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={t("settings")}
+            style={homeStyles.settingsButton}
+            onPress={() => navigateTo("Settings")}
+          >
+            <Ionicons
+              name="settings-outline"
+              size={17}
+              color={Colors[theme].icon}
+            />
+          </TouchableOpacity>
+        </View>
+
         <View style={homeStyles.hero}>
-          <Text style={homeStyles.eyebrow}>
-            {t("heroEyebrow", "Car Explorer")}
-          </Text>
-          <View style={homeStyles.heroTopRow}>
+          <View style={homeStyles.heroInner}>
+            <View style={homeStyles.heroEyebrowRow}>
+              <View style={homeStyles.heroEyebrowLine} />
+              <Text style={homeStyles.eyebrow}>
+                {t("heroEyebrow", "Your automotive companion")}
+              </Text>
+            </View>
+
             <Text style={homeStyles.heroTitle}>
               {t("heroTitleDrive", "Drive")}
               {"\n"}
@@ -56,77 +69,86 @@ const HomeScreen = () => {
                 {t("heroTitleCuriosity", "Curiosity")}
               </Text>
             </Text>
-            <LottieView
-              source={ANIMATIONS.CAR}
-              autoPlay
-              loop
-              style={homeStyles.animation}
-            />
-          </View>
-          <Text style={styles.title}>{t("homeTitle")}</Text>
-          <Text style={homeStyles.subtitle}>{t("homeSubtitle")}</Text>
-        </View>
 
-        <View style={homeStyles.statsRow}>
-          <View style={homeStyles.statPill}>
-            <Ionicons
-              name="heart"
-              size={18}
-              color={Colors[theme].tabIconSelected}
-            />
-            <Text style={homeStyles.statText}>
-              {favorites.length > 0
-                ? t("homeGarageCount", { count: favorites.length })
-                : t("homeGarageEmpty")}
+            <Text style={homeStyles.heroSubtitle}>
+              {t(
+                "heroSubtitle",
+                "Browse makes, decode VINs, compare specs side by side."
+              )}
             </Text>
           </View>
+
+          <Ionicons
+            name="car-sport-outline"
+            size={214}
+            color={Colors[theme].text}
+            style={homeStyles.heroCarOutline}
+          />
         </View>
 
         <View style={homeStyles.quickActions}>
           <QuickAction
-            icon="scan-outline"
-            title={t("vinCheckerTitle")}
-            subtitle={t("quickVinSubtitle")}
-            color={Colors[theme].ok}
-            onPress={() => navigateTo("Vin")}
-          />
-          <QuickAction
-            icon="car-sport-outline"
+            icon="search-outline"
             title={t("exploreCars")}
-            subtitle={t("quickExploreSubtitle")}
-            color={Colors[theme].tabIconSelected}
+            subtitle={t("quickExploreMockupSubtitle", "Browse makes & models")}
             onPress={() => navigateTo("Explore")}
           />
           <QuickAction
-            icon="help-circle-outline"
-            title={t("takeQuiz")}
-            subtitle={t("quickQuizSubtitle")}
-            color={Colors[theme].tint}
-            onPress={() => navigateTo("Quiz")}
+            icon="shield-checkmark-outline"
+            title={t("vinCheckerTitle")}
+            subtitle={t(
+              "quickVinMockupSubtitle",
+              "Decode any vehicle"
+            )}
+            onPress={() => navigateTo("Vin")}
           />
           <QuickAction
-            icon="book-outline"
-            title={t("discover")}
-            subtitle={t("quickDiscoverSubtitle")}
-            color={Colors[theme].icon}
-            onPress={() => navigateTo("Discover")}
+            icon="bar-chart-outline"
+            title={t("compare", "Compare")}
+            subtitle={t("quickCompareSubtitle", "Side-by-side specs")}
+            onPress={() => navigateTo("Explore")}
           />
-          {favorites.length > 0 && (
-            <QuickAction
-              icon="heart-outline"
-              title={t("browseFavorites")}
-              subtitle={favorites
-                .slice(0, 2)
-                .map((car) => `${car.make} ${car.model}`)
-                .join(" · ")}
-              color={Colors[theme].not}
-              onPress={() => navigateTo("Favorites")}
-            />
-          )}
+          <QuickAction
+            icon="bulb-outline"
+            title={t("carQuiz", "Car Quiz")}
+            subtitle={t("quickQuizMockupSubtitle", "Test your knowledge")}
+            onPress={() => navigateTo("Quiz")}
+          />
+        </View>
+
+        <View style={homeStyles.aiCard}>
+          <View style={homeStyles.aiHeader}>
+            <View style={homeStyles.aiLabelRow}>
+              <View style={homeStyles.aiLabelLine} />
+              <Text style={homeStyles.aiLabel}>{t("askAi", "Ask AI")}</Text>
+            </View>
+            <Text style={homeStyles.aiQuota}>{t("aiQuota", "5 left today")}</Text>
+          </View>
+
+          <Text style={homeStyles.aiPlaceholder}>
+            {t("aiPlaceholder", "Ask anything about cars...")}
+          </Text>
+
+          <View style={homeStyles.aiFooter}>
+            <View style={homeStyles.aiChips}>
+              {["Flat-6", "Best EV", "AWD vs 4WD"].map((chip) => (
+                <View key={chip} style={homeStyles.aiChip}>
+                  <Text style={homeStyles.aiChipText}>{chip}</Text>
+                </View>
+              ))}
+            </View>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={t("askAi", "Ask AI")}
+              style={homeStyles.aiSendButton}
+            >
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
       <AdBanner />
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -134,31 +156,28 @@ const QuickAction = ({
   icon,
   title,
   subtitle,
-  color,
   onPress,
 }: {
   icon: React.ComponentProps<typeof Ionicons>["name"];
   title: string;
   subtitle: string;
-  color: string;
   onPress: () => void;
 }) => {
   const { theme } = useTheme();
   const homeStyles = createHomeScreenStyles(theme);
+
   return (
-    <TouchableOpacity style={homeStyles.quickAction} onPress={onPress}>
-      <View style={[homeStyles.quickIcon, { backgroundColor: color }]}>
-        <Ionicons name={icon} size={22} color="#fff" />
+    <TouchableOpacity
+      accessibilityRole="button"
+      style={homeStyles.quickAction}
+      onPress={onPress}
+      activeOpacity={0.82}
+    >
+      <View style={homeStyles.quickIcon}>
+        <Ionicons name={icon} size={28} color={Colors[theme].accent} />
       </View>
-      <View style={homeStyles.quickCopy}>
-        <Text style={homeStyles.quickTitle}>{title}</Text>
-        <Text style={homeStyles.quickSubtitle}>{subtitle}</Text>
-      </View>
-      <Ionicons
-        name="chevron-forward"
-        size={18}
-        color={Colors[theme].tabIconSelected}
-      />
+      <Text style={homeStyles.quickTitle}>{title}</Text>
+      <Text style={homeStyles.quickSubtitle}>{subtitle}</Text>
     </TouchableOpacity>
   );
 };
