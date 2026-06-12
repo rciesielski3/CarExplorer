@@ -78,12 +78,7 @@ const HomeScreen = () => {
             </Text>
           </View>
 
-          <Ionicons
-            name="car-sport-outline"
-            size={214}
-            color={Colors[theme].text}
-            style={homeStyles.heroCarOutline}
-          />
+          <HeroCarLine />
         </View>
 
         <View style={homeStyles.quickActions}>
@@ -148,6 +143,28 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
       <AdBanner />
+    </View>
+  );
+};
+
+const HeroCarLine = () => {
+  const { theme } = useTheme();
+  const homeStyles = createHomeScreenStyles(theme);
+
+  return (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={homeStyles.heroCarLine}
+    >
+      <View style={homeStyles.carBodyLine} />
+      <View style={homeStyles.carFrontLine} />
+      <View style={homeStyles.carRoofLine} />
+      <View style={homeStyles.carHoodLine} />
+      <View style={homeStyles.carRearWindowLine} />
+      <View style={[homeStyles.carWheel, homeStyles.carWheelLeft]} />
+      <View style={[homeStyles.carWheel, homeStyles.carWheelRight]} />
     </View>
   );
 };
