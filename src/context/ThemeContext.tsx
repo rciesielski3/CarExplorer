@@ -13,7 +13,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [theme, setTheme] = useState<"light" | "dark">(
-    Appearance.getColorScheme() || "light"
+    Appearance.getColorScheme() || "dark"
   );
 
   useEffect(() => {

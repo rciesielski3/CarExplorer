@@ -10,6 +10,16 @@ import { FavoritesProvider } from "./src/context/FavoritesContext";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LanguageProvider } from "./src/context/LanguageContext";
 import { useFonts } from "expo-font";
+import {
+  BarlowCondensed_700Bold,
+  BarlowCondensed_800ExtraBold,
+  BarlowCondensed_900Black,
+} from "@expo-google-fonts/barlow-condensed";
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+} from "@expo-google-fonts/dm-sans";
 import * as SplashScreen from "expo-splash-screen";
 import "./i18n";
 
@@ -20,6 +30,12 @@ const AppContent = () => {
 
   const [fontsLoaded] = useFonts({
     PoetsenOne: require("./assets/fonts/PoetsenOne-Regular.ttf"),
+    BarlowCondensed_700Bold,
+    BarlowCondensed_800ExtraBold,
+    BarlowCondensed_900Black,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
   });
 
   React.useEffect(() => {
@@ -65,6 +81,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
   dark: {
-    backgroundColor: "#121212",
+    backgroundColor: "#0A0A0B",
   },
 });

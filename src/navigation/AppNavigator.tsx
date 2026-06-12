@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
@@ -25,26 +26,41 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const TabNavigator = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors[theme].surface,
+          position: "absolute",
+          left: 18,
+          right: 18,
+          bottom: Math.max(insets.bottom, 12),
+          minHeight: 68,
+          borderRadius: 26,
+          backgroundColor:
+            theme === "dark" ? "rgba(10,10,11,0.96)" : "rgba(242,239,233,0.97)",
           borderTopColor: Colors[theme].border,
-          borderTopWidth: 1,
-          paddingTop: 8,
-          paddingBottom: 8,
+          borderTopWidth: 0,
+          borderWidth: 1,
+          borderColor: Colors[theme].border,
+          paddingTop: 7,
+          paddingBottom: 9,
           shadowColor: Colors[theme].shadow,
-          shadowOpacity: 0.16,
-          shadowOffset: { width: 0, height: -6 },
-          shadowRadius: 16,
-          elevation: 12,
+          shadowOpacity: 0.24,
+          shadowOffset: { width: 0, height: 12 },
+          shadowRadius: 24,
+          elevation: 18,
+        },
+        tabBarItemStyle: {
+          minHeight: 48,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "700",
+          fontFamily: "DMSans_500Medium",
+          fontSize: 9,
+          letterSpacing: 0.7,
+          textTransform: "uppercase",
         },
         tabBarActiveTintColor: Colors[theme].tabIconSelected,
         tabBarInactiveTintColor: Colors[theme].tabIconDefault,
@@ -56,7 +72,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: t("home"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" color={color} size={size} />
+            <Ionicons name="home-outline" color={color} size={size + 1} />
           ),
         }}
       />
@@ -66,7 +82,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: t("explore"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="car" color={color} size={size} />
+            <Ionicons name="search-outline" color={color} size={size + 1} />
           ),
         }}
       />
@@ -76,17 +92,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: t("quiz"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="help-circle" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Vin"
-        component={VinCheckerScreen}
-        options={{
-          tabBarLabel: t("vin"),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="construct-outline" color={color} size={size} />
+            <Ionicons name="bulb-outline" color={color} size={size + 1} />
           ),
         }}
       />
@@ -94,9 +100,9 @@ const TabNavigator = () => {
         name="Favorites"
         component={FavoritesScreen}
         options={{
-          tabBarLabel: t("favorites"),
+          tabBarLabel: t("garage", "Garage"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart" color={color} size={size} />
+            <Ionicons name="heart-outline" color={color} size={size + 1} />
           ),
         }}
       />
@@ -106,17 +112,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: t("news"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="newspaper" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          tabBarLabel: t("settings"),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" color={color} size={size} />
+            <Ionicons name="newspaper-outline" color={color} size={size + 1} />
           ),
         }}
       />
@@ -125,10 +121,36 @@ const TabNavigator = () => {
 };
 
 const AppNavigator = () => {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          headerStyle: { backgroundColor: Colors[theme].background },
+          headerTintColor: Colors[theme].text,
+          headerTitleStyle: { fontFamily: "DMSans_600SemiBold" },
+        }}
+      >
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen
+          name="Vin"
+          component={VinCheckerScreen}
+          options={{
+            headerShown: true,
+            title: t("vinCheckerTitle"),
+          }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
+            headerShown: true,
+            title: t("settings"),
+          }}
+        />
         <Stack.Screen
           name="Discover"
           component={DiscoverScreen}
