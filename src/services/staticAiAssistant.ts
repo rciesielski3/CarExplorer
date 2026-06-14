@@ -779,12 +779,13 @@ const STATIC_AI_FAQ: StaticAiFaqEntry[] = [
   }),
 ];
 
-export const getStaticAiSuggestions = (): StaticAiSuggestion[] =>
-  STATIC_AI_FAQ.slice(0, 3).map(({ id, questionKey, fallbackQuestion }) => ({
-    id,
-    questionKey,
-    fallbackQuestion,
-  }));
+const STATIC_AI_SUGGESTIONS = STATIC_AI_FAQ.slice(0, 3).map(({ id, questionKey, fallbackQuestion }) => ({
+  id,
+  questionKey,
+  fallbackQuestion,
+}));
+
+export const getStaticAiSuggestions = (): StaticAiSuggestion[] => STATIC_AI_SUGGESTIONS;
 
 export const getStaticAiFaqCount = (): number => STATIC_AI_FAQ.length;
 
