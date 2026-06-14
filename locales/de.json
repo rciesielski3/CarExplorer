@@ -97,5 +97,19 @@
   "applyFilters": "Filter Anwenden",
   "resetFilters": "Filter Zurücksetzen",
   "noModelsFound": "Keine Modelle für ausgewählte Filter gefunden.",
-  "backToMakes": "Zurück zu Marken"
+  "backToMakes": "Zurück zu Marken",
+  "compareAdd": "Vergleichen",
+  "compareAdded": "Hinzugefügt",
+  "compareClear": "Vergleich löschen",
+  "compareDrive": "Antrieb",
+  "compareEmptyHint": "Wählen Sie bis zu 2 Modelle aus Explore oder Garage, um sie hier zu vergleichen.",
+  "compareEmptyTitle": "Zwei Autos wählen",
+  "compareEngine": "Motor",
+  "compareEyebrow": "Nebeneinander",
+  "comparePickCars": "Autos zum Vergleichen wählen",
+  "comparePower": "Leistung",
+  "compareSelectedCount": "{{count}} ausgewählt",
+  "compareTorque": "Drehmoment",
+  "compareAcceleration": "Beschleunigung",
+  "compareWeight": "Gewicht"
 }

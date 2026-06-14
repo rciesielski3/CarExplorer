@@ -97,5 +97,19 @@
   "applyFilters": "Zastosuj filtry",
   "resetFilters": "Resetuj filtry",
   "noModelsFound": "Nie znaleziono modeli dla wybranych filtrów.",
-  "backToMakes": "Powrót do marek"
+  "backToMakes": "Powrót do marek",
+  "compareAdd": "Porównaj",
+  "compareAdded": "Dodano",
+  "compareClear": "Wyczyść porównanie",
+  "compareDrive": "Napęd",
+  "compareEmptyHint": "Wybierz maksymalnie 2 modele z Odkrywaj albo Garażu, aby porównać je tutaj.",
+  "compareEmptyTitle": "Wybierz dwa auta",
+  "compareEngine": "Silnik",
+  "compareEyebrow": "Obok siebie",
+  "comparePickCars": "Wybierz auta do porównania",
+  "comparePower": "Moc",
+  "compareSelectedCount": "Wybrano: {{count}}",
+  "compareTorque": "Moment",
+  "compareAcceleration": "Przyspieszenie",
+  "compareWeight": "Masa"
 }

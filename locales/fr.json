@@ -97,5 +97,19 @@
   "applyFilters": "Appliquer les Filtres",
   "resetFilters": "Réinitialiser les Filtres",
   "noModelsFound": "Aucun modèle trouvé pour les filtres sélectionnés.",
-  "backToMakes": "Retour aux Marques"
+  "backToMakes": "Retour aux Marques",
+  "compareAdd": "Comparer",
+  "compareAdded": "Ajouté",
+  "compareClear": "Effacer la comparaison",
+  "compareDrive": "Transmission",
+  "compareEmptyHint": "Sélectionnez jusqu'à 2 modèles depuis Explorer ou Garage pour les comparer ici.",
+  "compareEmptyTitle": "Choisissez deux voitures",
+  "compareEngine": "Moteur",
+  "compareEyebrow": "Côte à côte",
+  "comparePickCars": "Choisir des voitures à comparer",
+  "comparePower": "Puissance",
+  "compareSelectedCount": "{{count}} sélectionnées",
+  "compareTorque": "Couple",
+  "compareAcceleration": "Accélération",
+  "compareWeight": "Poids"
 }

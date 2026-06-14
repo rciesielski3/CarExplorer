@@ -19,7 +19,7 @@ import { Colors } from "@/constants/Colors";
 import { useFavorites } from "../context/FavoritesContext";
 import { useTheme } from "../context/ThemeContext";
 import CarCard from "../components/CarCard";
-import { LoadingIndicator } from "../components";
+import { CompareFloatingBar, LoadingIndicator } from "../components";
 import { IMAGES } from "../constants/Assets";
 import { RootStackParamList } from "../navigation/types";
 
@@ -64,7 +64,7 @@ const FavoritesScreen = () => {
               data={favorites}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
-                <CarCard make={item.make} model={item.model} />
+                <CarCard make={item.make} model={item.model} showCompare />
               )}
             />
             <View
@@ -86,6 +86,7 @@ const FavoritesScreen = () => {
           </>
         )}
       </View>
+      <CompareFloatingBar />
     </ImageBackground>
   );
 };
