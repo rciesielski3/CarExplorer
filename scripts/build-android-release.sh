@@ -40,6 +40,8 @@ if [[ ! -f "$CAREXPLORER_UPLOAD_STORE_FILE" ]]; then
   exit 1
 fi
 
+node "$ROOT_DIR/scripts/patch-android-release-dependencies.js"
+
 (
   cd "$ROOT_DIR/android"
   ./gradlew clean bundleRelease
