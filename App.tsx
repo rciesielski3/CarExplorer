@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AppNavigator from "./src/navigation/AppNavigator";
+import { CompareProvider } from "./src/context/CompareContext";
 import { FavoritesProvider } from "./src/context/FavoritesContext";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LanguageProvider } from "./src/context/LanguageContext";
@@ -65,7 +66,9 @@ export default function App() {
     <LanguageProvider>
       <ThemeProvider>
         <FavoritesProvider>
-          <AppContent />
+          <CompareProvider>
+            <AppContent />
+          </CompareProvider>
         </FavoritesProvider>
       </ThemeProvider>
     </LanguageProvider>

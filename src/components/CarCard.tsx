@@ -20,6 +20,7 @@ import { Colors } from "@/constants/Colors";
 import { getCarImageUrl, getCarDetails } from "../api/wikipediaApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
+import { CompareCar, useCompare } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
 import { IMAGES } from "../constants/Assets";
 import LoadingIndicator from "./LoadingIndicator";
@@ -27,9 +28,16 @@ import LoadingIndicator from "./LoadingIndicator";
 interface CarCardProps {
   make: string;
   model: string;
+  showCompare?: boolean;
+  compareCar?: CompareCar;
 }
 
-const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
+const CarCard: React.FC<CarCardProps> = ({
+  make,
+  model,
+  showCompare = false,
+  compareCar,
+}) => {
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
@@ -45,9 +53,12 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
   const { language } = useAppLanguage();
   const activeLanguage = language || "en";
   const { favorites, toggleFavorite } = useFavorites();
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare();
+  const activeCompareCar = compareCar || { make, model };
   const isFavorite = favorites.some(
     (car) => car.make === make && car.model === model
   );
+  const isCompared = isInCompare(activeCompareCar);
 
   const fetchCarDetails = async () => {
     setLoadingDetails(true);
@@ -76,6 +87,15 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
   const handleFavoritePress = (event: GestureResponderEvent) => {
     event.stopPropagation();
     toggleFavorite({ make, model });
+  };
+
+  const handleComparePress = (event: GestureResponderEvent) => {
+    event.stopPropagation();
+    if (isCompared) {
+      removeFromCompare(activeCompareCar);
+      return;
+    }
+    addToCompare(activeCompareCar);
   };
 
   React.useEffect(() => {
@@ -119,6 +139,33 @@ const CarCard: React.FC<CarCardProps> = ({ make, model }) => {
         <Text style={styles.subtitle}>
           {make} {model}
         </Text>
+        {showCompare && (
+          <TouchableOpacity
+            testID="car-compare-pressable"
+            accessibilityRole="button"
+            style={[
+              styles.compareCardButton,
+              isCompared && styles.compareCardButtonSelected,
+            ]}
+            onPress={handleComparePress}
+          >
+            <FontAwesome
+              name={isCompared ? "check" : "bar-chart"}
+              size={14}
+              color={isCompared ? "#fff" : Colors[theme].accent}
+            />
+            <Text
+              style={[
+                styles.compareCardButtonText,
+                isCompared && styles.compareCardButtonTextSelected,
+              ]}
+            >
+              {isCompared
+                ? t("compareAdded", "Added")
+                : t("compareAdd", "Compare")}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
       <Modal
         testID="car-details-modal"

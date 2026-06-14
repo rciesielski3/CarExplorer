@@ -3,5 +3,13 @@ import CustomInput from "./CustomInput";
 import ErrorMessage from "./ErrorMessage";
 import LoadingIndicator from "./LoadingIndicator";
 import AdBanner from "./AdBanner";
+import CompareFloatingBar from "./CompareFloatingBar";
 
-export { AdBanner, CustomButton, ErrorMessage, CustomInput, LoadingIndicator };
+export {
+  AdBanner,
+  CompareFloatingBar,
+  CustomButton,
+  ErrorMessage,
+  CustomInput,
+  LoadingIndicator,
+};

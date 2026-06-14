@@ -9,18 +9,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
-import { RootStackParamList } from "../navigation/types";
+import { MainTabParamList, RootStackParamList } from "../navigation/types";
 import HomeScreen from "../screens/HomeScreen";
 import ExploreScreen from "../screens/ExploreScreen";
 import QuizScreen from "../screens/QuizScreen";
 import DiscoverScreen from "../screens/DiscoverScreen";
 import VinCheckerScreen from "../screens/VinCheckerScreen";
+import CompareScreen from "../screens/CompareScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import NewsScreen from "../screens/NewsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import WebViewScreen from "../screens/WebViewScreen";
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const TabNavigator = () => {
@@ -135,6 +136,13 @@ const AppNavigator = () => {
         }}
       >
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen
+          name="Compare"
+          component={CompareScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
         <Stack.Screen
           name="Vin"
           component={VinCheckerScreen}

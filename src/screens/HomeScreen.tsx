@@ -26,7 +26,9 @@ const HomeScreen = () => {
   const homeStyles = createHomeScreenStyles(theme);
 
   const navigateTo = React.useCallback(
-    (screen: "Explore" | "Quiz" | "Vin" | "Favorites" | "Settings") => {
+    (
+      screen: "Explore" | "Quiz" | "Vin" | "Favorites" | "Settings" | "Compare"
+    ) => {
       navigation.navigate(screen);
     },
     [navigation]
@@ -102,7 +104,7 @@ const HomeScreen = () => {
             icon="bar-chart-outline"
             title={t("compare", "Compare")}
             subtitle={t("quickCompareSubtitle", "Side-by-side specs")}
-            onPress={() => navigateTo("Explore")}
+            onPress={() => navigateTo("Compare")}
           />
           <QuickAction
             icon="bulb-outline"

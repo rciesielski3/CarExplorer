@@ -22,7 +22,12 @@ import {
   fetchModelsForMakeAndYear,
   fetchModelsForMakeAndType,
 } from "../api/nhtsaApi";
-import { CustomButton, ErrorMessage, LoadingIndicator } from "../components";
+import {
+  CompareFloatingBar,
+  CustomButton,
+  ErrorMessage,
+  LoadingIndicator,
+} from "../components";
 import CarCard from "../components/CarCard";
 import ReusableModalSelector from "../components/ReusableModalSelector";
 import { fetchCarLogos } from "../services/carLogoService";
@@ -235,7 +240,17 @@ const ExploreScreen = () => {
                 data={models}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
-                  <CarCard make={selectedMake!} model={item.name} />
+                  <CarCard
+                    make={selectedMake!}
+                    model={item.name}
+                    showCompare
+                    compareCar={{
+                      make: selectedMake!,
+                      model: item.name,
+                      year: modelYear,
+                      vehicleType,
+                    }}
+                  />
                 )}
               />
             )}
@@ -265,6 +280,7 @@ const ExploreScreen = () => {
           </>
         )}
       </View>
+      <CompareFloatingBar />
     </ImageBackground>
   );
 };
