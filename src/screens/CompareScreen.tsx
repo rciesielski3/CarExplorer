@@ -89,12 +89,12 @@ const CompareScreen = () => {
       >
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel={t("backToMakes")}
+          accessibilityLabel={t("back", "Back")}
           style={styles.compareBackButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="chevron-back" size={18} color={Colors[theme].text} />
-          <Text style={styles.compareBackText}>{t("home")}</Text>
+          <Text style={styles.compareBackText}>{t("back", "Back")}</Text>
         </TouchableOpacity>
 
         <Text style={styles.compareEyebrow}>
