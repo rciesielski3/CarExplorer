@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -15,6 +21,11 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "../navigation/types";
 import { AdBanner } from "../components";
+import {
+  findStaticAiAnswer,
+  getStaticAiSuggestions,
+  StaticAiMatch,
+} from "../services/staticAiAssistant";
 
 const HomeScreen = () => {
   const { t } = useTranslation();
@@ -24,6 +35,10 @@ const HomeScreen = () => {
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
   const homeStyles = createHomeScreenStyles(theme);
+  const aiSuggestions = React.useMemo(() => getStaticAiSuggestions(), []);
+  const [aiQuery, setAiQuery] = React.useState("");
+  const [aiMatch, setAiMatch] = React.useState<StaticAiMatch | null>(null);
+  const [aiSubmitted, setAiSubmitted] = React.useState(false);
 
   const navigateTo = React.useCallback(
     (
@@ -32,6 +47,24 @@ const HomeScreen = () => {
       navigation.navigate(screen);
     },
     [navigation]
+  );
+
+  const handleAskAi = React.useCallback(
+    (query = aiQuery) => {
+      setAiSubmitted(true);
+      setAiMatch(findStaticAiAnswer(query));
+    },
+    [aiQuery]
+  );
+
+  const handleAiSuggestionPress = React.useCallback(
+    (fallbackQuestion: string, questionKey: string) => {
+      const localizedQuestion = t(questionKey, fallbackQuestion);
+      setAiQuery(localizedQuestion);
+      setAiSubmitted(true);
+      setAiMatch(findStaticAiAnswer(fallbackQuestion));
+    },
+    [t]
   );
 
   return (
@@ -123,26 +156,61 @@ const HomeScreen = () => {
             <Text style={homeStyles.aiQuota}>{t("aiQuota", "5 left today")}</Text>
           </View>
 
-          <Text style={homeStyles.aiPlaceholder}>
-            {t("aiPlaceholder", "Ask anything about cars...")}
-          </Text>
+          <TextInput
+            accessibilityLabel={t("aiPlaceholder", "Ask anything about cars...")}
+            value={aiQuery}
+            onChangeText={(value) => {
+              setAiQuery(value);
+              setAiSubmitted(false);
+              setAiMatch(null);
+            }}
+            placeholder={t("aiPlaceholder", "Ask anything about cars...")}
+            placeholderTextColor={Colors[theme].tabIconDefault}
+            style={homeStyles.aiInput}
+            multiline
+            maxLength={120}
+            returnKeyType="send"
+            onSubmitEditing={() => handleAskAi()}
+          />
+
+          {aiSubmitted && (
+            <View style={homeStyles.aiAnswerCard}>
+              <Text style={homeStyles.aiAnswerText}>
+                {aiMatch
+                  ? t(aiMatch.answerKey, aiMatch.fallbackAnswer)
+                  : t(
+                      "aiNoMatch",
+                      "Try asking about engines, EVs, VINs, buying tips, or drivetrain differences."
+                    )}
+              </Text>
+            </View>
+          )}
 
           <View style={homeStyles.aiFooter}>
             <View style={homeStyles.aiChips}>
-              {[
-                { key: "flat6", label: t("aiChipFlat6", "Flat-6") },
-                { key: "bestEv", label: t("aiChipBestEv", "Best EV") },
-                { key: "awdVs4wd", label: t("aiChipAwdVs4wd", "AWD vs 4WD") },
-              ].map((chip) => (
-                <View key={chip.key} style={homeStyles.aiChip}>
-                  <Text style={homeStyles.aiChipText}>{chip.label}</Text>
-                </View>
+              {aiSuggestions.map((chip) => (
+                <TouchableOpacity
+                  key={chip.id}
+                  accessibilityRole="button"
+                  style={homeStyles.aiChip}
+                  onPress={() =>
+                    handleAiSuggestionPress(
+                      chip.fallbackQuestion,
+                      chip.questionKey
+                    )
+                  }
+                >
+                  <Text style={homeStyles.aiChipText}>
+                    {t(chip.questionKey, chip.fallbackQuestion)}
+                  </Text>
+                </TouchableOpacity>
               ))}
             </View>
             <TouchableOpacity
               accessibilityRole="button"
               accessibilityLabel={t("askAi", "Ask AI")}
               style={homeStyles.aiSendButton}
+              onPress={() => handleAskAi()}
             >
               <Ionicons name="arrow-forward" size={18} color="#fff" />
             </TouchableOpacity>
