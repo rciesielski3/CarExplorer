@@ -20,7 +20,7 @@ const CompareContext = React.createContext<CompareContextProps | undefined>(
 );
 
 const getCompareKey = (car: CompareCar) =>
-  [car.make, car.model, car.year || "", car.vehicleType || ""]
+  [car.make, car.model]
     .map((value) => value.trim().toLowerCase())
     .join("|");
 
