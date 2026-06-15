@@ -86,7 +86,14 @@ const STATIC_AI_FAQ: StaticAiFaqEntry[] = [
     answerKey: "aiAnswerAwdVs4wd",
     fallbackAnswer:
       "AWD is usually automatic and optimized for road grip in rain, snow, or quick acceleration. 4WD is often more rugged, with low-range gearing for off-road use, towing, or very loose surfaces.",
-    keywords: ["awd", "4wd", "four wheel", "all wheel", "drivetrain", "off road"],
+    keywords: [
+      "awd",
+      "4wd",
+      "four wheel",
+      "all wheel",
+      "drivetrain",
+      "off road",
+    ],
   }),
   faq({
     id: "vin",
@@ -104,7 +111,14 @@ const STATIC_AI_FAQ: StaticAiFaqEntry[] = [
     answerKey: "aiAnswerFirstCar",
     fallbackAnswer:
       "For a first car, prioritize reliability, insurance cost, service history, safety equipment, and simple maintenance. A less exciting car with clear history is usually a better buy than a bargain with hidden repairs.",
-    keywords: ["first car", "beginner", "buying", "used car", "reliable", "insurance"],
+    keywords: [
+      "first car",
+      "beginner",
+      "buying",
+      "used car",
+      "reliable",
+      "insurance",
+    ],
   }),
   faq({
     id: "hybridVsEv",
@@ -173,7 +187,13 @@ const STATIC_AI_FAQ: StaticAiFaqEntry[] = [
     fallbackQuestion: "What should I check on a test drive?",
     fallbackAnswer:
       "Listen for cold-start noises, check braking, steering, gear changes, suspension bumps, HVAC, infotainment, and whether the car tracks straight.",
-    keywords: ["test drive", "drive test", "braking", "steering", "gear changes"],
+    keywords: [
+      "test drive",
+      "drive test",
+      "braking",
+      "steering",
+      "gear changes",
+    ],
   }),
   faq({
     id: "coldStart",
@@ -509,7 +529,13 @@ const STATIC_AI_FAQ: StaticAiFaqEntry[] = [
     fallbackQuestion: "Does a roof box affect range?",
     fallbackAnswer:
       "Yes. Roof boxes increase aerodynamic drag, which can reduce fuel economy or EV range, especially at highway speeds.",
-    keywords: ["roof box", "roof rack", "aerodynamics", "range", "fuel economy"],
+    keywords: [
+      "roof box",
+      "roof rack",
+      "aerodynamics",
+      "range",
+      "fuel economy",
+    ],
   }),
   faq({
     id: "suvVsWagon",
@@ -834,7 +860,10 @@ export const findStaticAiAnswer = (query: string): StaticAiMatch | null => {
     return null;
   }
 
-  const { keywords: _keywords, processedKeywords: _processedKeywords, ...match } =
-    bestEntry;
+  const {
+    keywords: _keywords,
+    processedKeywords: _processedKeywords,
+    ...match
+  } = bestEntry;
   return match;
 };
