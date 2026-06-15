@@ -36,12 +36,12 @@ const normalizeQuery = (query: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-const keywordMatches = (normalizedQuery: string, normalizedKeyword: string) => {
-  if (normalizedKeyword.includes(" ")) {
-    return normalizedQuery.includes(normalizedKeyword);
-  }
-
-  return normalizedQuery.split(" ").includes(normalizedKeyword);
+type ProcessedFaqEntry = StaticAiFaqEntry & {
+  processedKeywords: {
+    normalized: string;
+    isMultiWord: boolean;
+    wordCount: number;
+  }[];
 };
 
 const faq = ({
@@ -779,6 +779,19 @@ const STATIC_AI_FAQ: StaticAiFaqEntry[] = [
   }),
 ];
 
+const PROCESSED_FAQ: ProcessedFaqEntry[] = STATIC_AI_FAQ.map((entry) => ({
+  ...entry,
+  processedKeywords: entry.keywords.map((keyword) => {
+    const normalized = normalizeQuery(keyword);
+
+    return {
+      normalized,
+      isMultiWord: normalized.includes(" "),
+      wordCount: Math.max(1, normalized.split(" ").length),
+    };
+  }),
+}));
+
 export const getStaticAiSuggestions = (): StaticAiSuggestion[] =>
   STATIC_AI_FAQ.slice(0, 3).map(({ id, questionKey, fallbackQuestion }) => ({
     id,
@@ -794,21 +807,34 @@ export const findStaticAiAnswer = (query: string): StaticAiMatch | null => {
     return null;
   }
 
-  const bestMatch = STATIC_AI_FAQ.map((entry) => {
-    const score = entry.keywords.reduce((currentScore, keyword) => {
-      const normalizedKeyword = normalizeQuery(keyword);
-      return keywordMatches(normalizedQuery, normalizedKeyword)
-        ? currentScore + Math.max(1, normalizedKeyword.split(" ").length)
-        : currentScore;
-    }, 0);
+  const queryWords = normalizedQuery.split(" ");
+  let bestEntry: ProcessedFaqEntry | null = null;
+  let bestScore = 0;
 
-    return { entry, score };
-  }).sort((left, right) => right.score - left.score)[0];
+  for (const entry of PROCESSED_FAQ) {
+    let score = 0;
 
-  if (!bestMatch || bestMatch.score < MIN_MATCH_SCORE) {
+    for (const keyword of entry.processedKeywords) {
+      const matches = keyword.isMultiWord
+        ? normalizedQuery.includes(keyword.normalized)
+        : queryWords.includes(keyword.normalized);
+
+      if (matches) {
+        score += keyword.wordCount;
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestEntry = entry;
+    }
+  }
+
+  if (!bestEntry || bestScore < MIN_MATCH_SCORE) {
     return null;
   }
 
-  const { keywords: _keywords, ...match } = bestMatch.entry;
+  const { keywords: _keywords, processedKeywords: _processedKeywords, ...match } =
+    bestEntry;
   return match;
 };
