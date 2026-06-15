@@ -42,19 +42,23 @@ const HomeScreen = () => {
 
   const navigateTo = React.useCallback(
     (
-      screen: "Explore" | "Quiz" | "Vin" | "Favorites" | "Settings" | "Compare"
+      screen: "Explore" | "Quiz" | "Vin" | "Favorites" | "Settings" | "Compare",
     ) => {
       navigation.navigate(screen);
     },
-    [navigation]
+    [navigation],
   );
 
   const handleAskAi = React.useCallback(
     (query = aiQuery) => {
+      const trimmed = query.trim();
+      if (!trimmed) {
+        return;
+      }
       setAiSubmitted(true);
-      setAiMatch(findStaticAiAnswer(query));
+      setAiMatch(findStaticAiAnswer(trimmed));
     },
-    [aiQuery]
+    [aiQuery],
   );
 
   const handleAiSuggestionPress = React.useCallback(
@@ -64,7 +68,7 @@ const HomeScreen = () => {
       setAiSubmitted(true);
       setAiMatch(findStaticAiAnswer(fallbackQuestion));
     },
-    [t]
+    [t],
   );
 
   return (
@@ -109,7 +113,7 @@ const HomeScreen = () => {
             <Text style={homeStyles.heroSubtitle}>
               {t(
                 "heroSubtitle",
-                "Browse makes, decode VINs, compare specs side by side."
+                "Browse makes, decode VINs, compare specs side by side.",
               )}
             </Text>
           </View>
@@ -127,10 +131,7 @@ const HomeScreen = () => {
           <QuickAction
             icon="shield-checkmark-outline"
             title={t("vinCheckerTitle")}
-            subtitle={t(
-              "quickVinMockupSubtitle",
-              "Decode any vehicle"
-            )}
+            subtitle={t("quickVinMockupSubtitle", "Decode any vehicle")}
             onPress={() => navigateTo("Vin")}
           />
           <QuickAction
@@ -153,11 +154,16 @@ const HomeScreen = () => {
               <View style={homeStyles.aiLabelLine} />
               <Text style={homeStyles.aiLabel}>{t("askAi", "Ask AI")}</Text>
             </View>
-            <Text style={homeStyles.aiQuota}>{t("aiQuota", "5 left today")}</Text>
+            <Text style={homeStyles.aiQuota}>
+              {t("aiQuota", "5 left today")}
+            </Text>
           </View>
 
           <TextInput
-            accessibilityLabel={t("aiPlaceholder", "Ask anything about cars...")}
+            accessibilityLabel={t(
+              "aiPlaceholder",
+              "Ask anything about cars...",
+            )}
             value={aiQuery}
             onChangeText={(value) => {
               setAiQuery(value);
@@ -170,6 +176,7 @@ const HomeScreen = () => {
             multiline
             maxLength={120}
             returnKeyType="send"
+            blurOnSubmit
             onSubmitEditing={() => handleAskAi()}
           />
 
@@ -180,7 +187,7 @@ const HomeScreen = () => {
                   ? t(aiMatch.answerKey, aiMatch.fallbackAnswer)
                   : t(
                       "aiNoMatch",
-                      "Try asking about engines, EVs, VINs, buying tips, or drivetrain differences."
+                      "Try asking about engines, EVs, VINs, buying tips, or drivetrain differences.",
                     )}
               </Text>
             </View>
@@ -196,7 +203,7 @@ const HomeScreen = () => {
                   onPress={() =>
                     handleAiSuggestionPress(
                       chip.fallbackQuestion,
-                      chip.questionKey
+                      chip.questionKey,
                     )
                   }
                 >
