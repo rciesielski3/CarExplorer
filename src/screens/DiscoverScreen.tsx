@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, ScrollView, ImageBackground } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -15,12 +15,12 @@ import {
 } from "../api/wikipediaApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import { IMAGES } from "../constants/Assets";
 import {
   CustomButton,
   CustomInput,
   ErrorMessage,
   LoadingIndicator,
+  ScreenContainer,
 } from "../components";
 
 interface CarDetails {
@@ -84,7 +84,7 @@ requestedLink,
   };
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
+    <ScreenContainer>
       <View style={stylesHome.container}>
         <Text style={styles.title}>{t("discover")}</Text>
         <CustomInput
@@ -118,7 +118,7 @@ requestedLink,
           </ScrollView>
         )}
       </View>
-    </ImageBackground>
+    </ScreenContainer>
   );
 };
 

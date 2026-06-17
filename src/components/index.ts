@@ -4,6 +4,7 @@ import ErrorMessage from "./ErrorMessage";
 import LoadingIndicator from "./LoadingIndicator";
 import AdBanner from "./AdBanner";
 import CompareFloatingBar from "./CompareFloatingBar";
+import ScreenContainer from "./ScreenContainer";
 
 export {
   AdBanner,
@@ -12,4 +13,5 @@ export {
   ErrorMessage,
   CustomInput,
   LoadingIndicator,
+  ScreenContainer,
 };

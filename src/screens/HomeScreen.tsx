@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -20,7 +22,7 @@ import { Colors } from "@/constants/Colors";
 
 import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "../navigation/types";
-import { AdBanner } from "../components";
+import { AdBanner, ScreenContainer } from "../components";
 import {
   findStaticAiAnswer,
   getStaticAiSuggestions,
@@ -72,11 +74,17 @@ const HomeScreen = () => {
   );
 
   return (
-    <View style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={homeStyles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <ScreenContainer>
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
+        <ScrollView
+          contentContainerStyle={homeStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
         <View style={homeStyles.topBar}>
           <Text style={homeStyles.logo}>{t("homeLogo", "Car Explorer")}</Text>
           <TouchableOpacity
@@ -223,9 +231,10 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
-      <AdBanner />
-    </View>
+        </ScrollView>
+        <AdBanner />
+      </KeyboardAvoidingView>
+    </ScreenContainer>
   );
 };
 

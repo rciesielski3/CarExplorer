@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Switch,
-  ImageBackground,
-  Linking,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Switch, Linking, TouchableOpacity } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -17,8 +10,8 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import { useAppLanguage } from "../context/LanguageContext";
 import ReusableModalSelector from "../components/ReusableModalSelector";
+import { ScreenContainer } from "../components";
 import { APP_CONFIG } from "../config/apiConfig";
-import { IMAGES } from "../constants/Assets";
 
 const SettingsScreen = () => {
   const { t } = useTranslation();
@@ -39,7 +32,7 @@ const SettingsScreen = () => {
   );
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
+    <ScreenContainer>
       <View style={homeStyles.container}>
         <Text style={styles.title}>{t("settings")}</Text>
         <View style={styles.settingRow}>
@@ -80,7 +73,7 @@ const SettingsScreen = () => {
           </Text>
         </View>
       </View>
-    </ImageBackground>
+    </ScreenContainer>
   );
 };
 

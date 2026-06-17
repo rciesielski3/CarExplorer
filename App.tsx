@@ -1,11 +1,8 @@
 import React from "react";
-import {
-  SafeAreaView,
-  ImageBackground,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { SafeAreaView, StyleSheet, ActivityIndicator } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import AppNavigator from "./src/navigation/AppNavigator";
+import { Colors } from "./constants/Colors";
 import { CompareProvider } from "./src/context/CompareContext";
 import { FavoritesProvider } from "./src/context/FavoritesContext";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
@@ -50,14 +47,16 @@ const AppContent = () => {
   }
 
   return (
-    <ImageBackground
-      source={require("./assets/images/background.png")}
-      style={[styles.background, theme === "dark" ? styles.dark : styles.light]}
+    <LinearGradient
+      colors={Colors[theme].gradient as [string, string, ...string[]]}
+      start={{ x: 0.1, y: 0 }}
+      end={{ x: 0.9, y: 1 }}
+      style={styles.background}
     >
       <SafeAreaView style={{ flex: 1 }}>
         <AppNavigator />
       </SafeAreaView>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
@@ -78,12 +77,5 @@ export default function App() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: "cover",
-  },
-  light: {
-    backgroundColor: "#ffffff",
-  },
-  dark: {
-    backgroundColor: "#0A0A0B",
   },
 });

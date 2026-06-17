@@ -10,6 +10,7 @@ import { Colors } from "@/constants/Colors";
 
 import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
+import { ScreenContainer } from "../components";
 import { RootStackParamList } from "../navigation/types";
 
 type SpecRow = {
@@ -82,7 +83,7 @@ const CompareScreen = () => {
   const hasFullComparison = compareList.length === 2;
 
   return (
-    <View style={styles.screen}>
+    <ScreenContainer>
       <ScrollView
         contentContainerStyle={styles.compareContent}
         showsVerticalScrollIndicator={false}
@@ -184,7 +185,7 @@ const CompareScreen = () => {
           </>
         )}
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 };
 

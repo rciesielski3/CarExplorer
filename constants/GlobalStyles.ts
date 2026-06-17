@@ -15,7 +15,13 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
     },
     screen: {
       flex: 1,
-      backgroundColor: Colors[theme].background,
+      backgroundColor: "transparent",
+    },
+    flexFill: {
+      flex: 1,
+    },
+    listContent: {
+      paddingBottom: 12,
     },
     animation: {
       width: 150,
@@ -307,8 +313,8 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
     },
     compareFloatingBar: {
       position: "absolute",
-      left: 22,
-      right: 22,
+      left: 18,
+      right: 18,
       zIndex: 10,
       minHeight: 58,
       borderRadius: 18,
@@ -353,7 +359,7 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       paddingHorizontal: 20,
       paddingTop: 18,
       paddingBottom: 120,
-      backgroundColor: Colors[theme].background,
+      backgroundColor: "transparent",
     },
     compareBackButton: {
       alignSelf: "flex-start",
@@ -586,14 +592,17 @@ export const createHomeScreenStyles = (theme: "light" | "dark") =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: Colors[theme].background,
+      backgroundColor: "transparent",
+      paddingHorizontal: 20,
+      paddingTop: 14,
+      paddingBottom: 96,
     },
     scrollContent: {
       flexGrow: 1,
       paddingHorizontal: 20,
       paddingTop: 14,
       paddingBottom: 112,
-      backgroundColor: Colors[theme].background,
+      backgroundColor: "transparent",
     },
     topBar: {
       flexDirection: "row",

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  ImageBackground,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -19,8 +13,11 @@ import { Colors } from "@/constants/Colors";
 import { useFavorites } from "../context/FavoritesContext";
 import { useTheme } from "../context/ThemeContext";
 import CarCard from "../components/CarCard";
-import { CompareFloatingBar, LoadingIndicator } from "../components";
-import { IMAGES } from "../constants/Assets";
+import {
+  CompareFloatingBar,
+  LoadingIndicator,
+  ScreenContainer,
+} from "../components";
 import { RootStackParamList } from "../navigation/types";
 
 const FavoritesScreen = () => {
@@ -35,7 +32,7 @@ const FavoritesScreen = () => {
   const { favorites, isHydrated, clearFavorites } = useFavorites();
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
+    <ScreenContainer>
       <View style={stylesHome.container}>
         <Text style={styles.title}>{t("favoritesTitle")}</Text>
         {!isHydrated ? (
@@ -63,16 +60,13 @@ const FavoritesScreen = () => {
             <FlatList
               data={favorites}
               keyExtractor={(item, index) => index.toString()}
+              style={styles.flexFill}
+              contentContainerStyle={styles.listContent}
               renderItem={({ item }) => (
                 <CarCard make={item.make} model={item.model} showCompare />
               )}
             />
-            <View
-              style={[
-                stylesHome.buttonContainer,
-                { marginTop: "2%", marginBottom: "-2%" },
-              ]}
-            >
+            <View style={[stylesHome.buttonContainer, { marginTop: 8 }]}>
               <TouchableOpacity
                 style={[
                   stylesHome.button,
@@ -87,7 +81,7 @@ const FavoritesScreen = () => {
         )}
       </View>
       <CompareFloatingBar />
-    </ImageBackground>
+    </ScreenContainer>
   );
 };
 

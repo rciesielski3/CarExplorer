@@ -3,7 +3,6 @@ import {
   View,
   Text,
   FlatList,
-  ImageBackground,
   TouchableOpacity,
   Image,
   Dimensions,
@@ -27,13 +26,13 @@ import {
   CustomButton,
   ErrorMessage,
   LoadingIndicator,
+  ScreenContainer,
 } from "../components";
 import CarCard from "../components/CarCard";
 import ReusableModalSelector from "../components/ReusableModalSelector";
 import { fetchCarLogos } from "../services/carLogoService";
 import { useTheme } from "../context/ThemeContext";
 import { POPULAR_CAR_MAKES } from "../../constants/carMakes";
-import { IMAGES } from "../constants/Assets";
 
 interface CarModel {
   id: number;
@@ -157,7 +156,7 @@ const ExploreScreen = () => {
   }, []);
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
+    <ScreenContainer>
       <View style={stylesHome.container}>
         <Text style={styles.title}>{selectedMake || t("exploreCars")}</Text>
         <Text style={stylesHome.subtitle}>
@@ -170,6 +169,7 @@ const ExploreScreen = () => {
             data={POPULAR_CAR_MAKES}
             keyExtractor={(item) => item}
             numColumns={numColumns}
+            style={styles.flexFill}
             contentContainerStyle={styles.makesContainer}
             renderItem={({ item }) => {
               const logoUrl = logos[item] || logos[item.toLowerCase()] || null;
@@ -239,6 +239,8 @@ const ExploreScreen = () => {
               <FlatList
                 data={models}
                 keyExtractor={(item) => item.id.toString()}
+                style={styles.flexFill}
+                contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
                   <CarCard
                     make={selectedMake!}
@@ -254,12 +256,7 @@ const ExploreScreen = () => {
                 )}
               />
             )}
-            <View
-              style={[
-                stylesHome.buttonContainer,
-                { marginTop: -2, marginBottom: -20 },
-              ]}
-            >
+            <View style={[stylesHome.buttonContainer, { marginTop: 4 }]}>
               <TouchableOpacity
                 style={[
                   stylesHome.button,
@@ -281,7 +278,7 @@ const ExploreScreen = () => {
         )}
       </View>
       <CompareFloatingBar />
-    </ImageBackground>
+    </ScreenContainer>
   );
 };
 
