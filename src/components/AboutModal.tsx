@@ -7,6 +7,7 @@ import { Colors } from "@/constants/Colors";
 
 import { APP_CONFIG } from "../config/apiConfig";
 import { useTheme } from "../context/ThemeContext";
+import CustomButton from "./CustomButton";
 
 interface AboutModalProps {
   visible: boolean;
@@ -75,13 +76,7 @@ const AboutModal: React.FC<AboutModalProps> = ({
               color={Colors[theme].accent}
             />
           </TouchableOpacity>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={styles.comparePrimaryButton}
-            onPress={onClose}
-          >
-            <Text style={styles.comparePrimaryButtonText}>{closeLabel}</Text>
-          </TouchableOpacity>
+          <CustomButton title={closeLabel} onPress={onClose} />
         </View>
       </View>
     </Modal>

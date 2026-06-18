@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,6 +25,22 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
       end={{ x: 0.9, y: 1 }}
       style={[styles.fill, style]}
     >
+      <View pointerEvents="none" style={styles.depthLayer}>
+        <LinearGradient
+          colors={["rgba(255,77,28,0.20)", "rgba(255,77,28,0)"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.depthBand, styles.depthBandTop]}
+        />
+        <LinearGradient
+          colors={["rgba(34,197,94,0.10)", "rgba(34,197,94,0)"]}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={[styles.depthBand, styles.depthBandBottom]}
+        />
+        <View style={styles.textureLineTop} />
+        <View style={styles.textureLineBottom} />
+      </View>
       <SafeAreaView style={styles.fill} edges={["top"]}>
         {children}
       </SafeAreaView>
@@ -35,6 +51,43 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
+  },
+  depthLayer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden",
+  },
+  depthBand: {
+    position: "absolute",
+    width: "82%",
+    height: 260,
+    opacity: 0.9,
+    transform: [{ rotate: "-16deg" }],
+  },
+  depthBandTop: {
+    top: -70,
+    right: -130,
+  },
+  depthBandBottom: {
+    bottom: 90,
+    left: -160,
+  },
+  textureLineTop: {
+    position: "absolute",
+    top: 118,
+    right: -42,
+    width: 220,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    transform: [{ rotate: "-20deg" }],
+  },
+  textureLineBottom: {
+    position: "absolute",
+    bottom: 188,
+    left: -34,
+    width: 260,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    transform: [{ rotate: "-20deg" }],
   },
 });
 

@@ -10,7 +10,7 @@ import { Colors } from "@/constants/Colors";
 
 import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
-import { ScreenContainer } from "../components";
+import { CustomButton, ScreenContainer } from "../components";
 import { RootStackParamList } from "../navigation/types";
 
 type SpecRow = {
@@ -120,17 +120,12 @@ const CompareScreen = () => {
                   "Select up to 2 models from Explore or Garage to compare them here."
                 )}
               </Text>
-              <TouchableOpacity
-                accessibilityRole="button"
-                style={styles.comparePrimaryButton}
+              <CustomButton
+                title={t("comparePickCars", "Pick cars to compare")}
                 onPress={() =>
                   navigation.navigate("MainTabs", { screen: "Explore" })
                 }
-              >
-                <Text style={styles.comparePrimaryButtonText}>
-                  {t("comparePickCars", "Pick cars to compare")}
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           </View>
         ) : (
@@ -175,15 +170,13 @@ const CompareScreen = () => {
               </View>
             ))}
 
-            <TouchableOpacity
-              accessibilityRole="button"
-              style={styles.compareGhostButton}
-              onPress={resetCompare}
-            >
-              <Text style={styles.compareGhostButtonText}>
-                {t("compareClear", "Clear comparison")}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.stickyFooter}>
+              <CustomButton
+                title={t("compareClear", "Clear comparison")}
+                onPress={resetCompare}
+                variant="secondary"
+              />
+            </View>
           </>
         )}
       </ScrollView>

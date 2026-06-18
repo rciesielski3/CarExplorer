@@ -51,11 +51,11 @@ const SettingsScreen = () => {
       <View style={homeStyles.container}>
         <Text style={styles.title}>{t("settings")}</Text>
         <View style={styles.settingRow}>
-          <Text style={styles.buttonText}>{t("darkMode")}</Text>
+          <Text style={styles.settingLabel}>{t("darkMode")}</Text>
           <Switch value={theme === "dark"} onValueChange={toggleTheme} />
         </View>
         <View style={styles.settingRow}>
-          <Text style={styles.buttonText}>{t("language")}</Text>
+          <Text style={styles.settingLabel}>{t("language")}</Text>
           <ReusableModalSelector
             label={t("selectLanguage")}
             data={languageOptions}
@@ -68,7 +68,7 @@ const SettingsScreen = () => {
           style={styles.settingRow}
           onPress={() => setShowResetModal(true)}
         >
-          <Text style={styles.buttonText}>
+          <Text style={styles.settingLabel}>
             {t("resetDataTitle", "Reset all data")}
           </Text>
           <Ionicons
@@ -87,7 +87,7 @@ const SettingsScreen = () => {
           style={styles.settingRow}
           onPress={() => setShowAbout(true)}
           >
-          <Text style={styles.buttonText}>{t("about", "About")}</Text>
+          <Text style={styles.settingLabel}>{t("about", "About")}</Text>
           <Ionicons
             name="chevron-forward"
             size={18}

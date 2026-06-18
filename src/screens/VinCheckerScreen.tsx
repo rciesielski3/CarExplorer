@@ -1,7 +1,9 @@
 import React from "react";
-import { View, Text, TextInput, ScrollView } from "react-native";
+import { View, Text, TextInput, ScrollView, TouchableOpacity } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import {
   createGlobalStyles,
@@ -22,6 +24,7 @@ import {
   normalizeVin,
   validateVin,
 } from "../utils/vinUtils";
+import { RootStackParamList } from "../navigation/types";
 
 interface VehicleData {
   Make: string;
@@ -41,6 +44,8 @@ const VinCheckerScreen = () => {
 
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const styles = createGlobalStyles(theme);
   const stylesHome = createHomeScreenStyles(theme);
@@ -109,6 +114,17 @@ const VinCheckerScreen = () => {
 
   return (
     <ScreenContainer>
+      <View style={{ paddingHorizontal: 20, paddingTop: 14 }}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t("back", "Back")}
+          style={styles.compareBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={18} color={Colors[theme].text} />
+          <Text style={styles.compareBackText}>{t("back", "Back")}</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView
         contentContainerStyle={[
           stylesHome.scrollContent,
@@ -137,12 +153,12 @@ const VinCheckerScreen = () => {
           <CustomButton
             title={t("check")}
             onPress={handleCheckVin}
-            color={Colors[theme].ok}
+            variant="success"
           />
           <CustomButton
             title={t("clear")}
             onPress={handleClear}
-            color={Colors[theme].tabIconSelected}
+            variant="secondary"
           />
         </View>
         {loading && <LoadingIndicator />}
