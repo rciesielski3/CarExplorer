@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleProp, StyleSheet, ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Colors } from "@/constants/Colors";
 
@@ -24,7 +25,9 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
       end={{ x: 0.9, y: 1 }}
       style={[styles.fill, style]}
     >
-      {children}
+      <SafeAreaView style={styles.fill} edges={["top"]}>
+        {children}
+      </SafeAreaView>
     </LinearGradient>
   );
 };

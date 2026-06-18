@@ -110,7 +110,10 @@ const VinCheckerScreen = () => {
   return (
     <ScreenContainer>
       <ScrollView
-        contentContainerStyle={stylesHome.scrollContent}
+        contentContainerStyle={[
+          stylesHome.scrollContent,
+          !vehicleData && !loading && styles.centeredContent,
+        ]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.vinHero}>

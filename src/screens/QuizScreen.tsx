@@ -81,7 +81,7 @@ const QuizScreen = () => {
         ) : questions.length === 0 ? (
           <ErrorMessage message={t("noQuestions")} />
         ) : showScore ? (
-          <View style={styles.resultContainer}>
+          <View style={[styles.resultContainer, styles.centeredContent]}>
             <Text style={styles.subtitle}>
               {t("yourScore")}: {score}/{questions.length}
             </Text>
@@ -102,11 +102,13 @@ const QuizScreen = () => {
             </TouchableOpacity>
           </View>
         ) : (
-          <QuizQuestion
-            question={questions[currentQuestion]?.question || t("loading")}
-            options={questions[currentQuestion]?.options || []}
-            onAnswer={handleAnswer}
-          />
+          <View style={styles.centeredContent}>
+            <QuizQuestion
+              question={questions[currentQuestion]?.question || t("loading")}
+              options={questions[currentQuestion]?.options || []}
+              onAnswer={handleAnswer}
+            />
+          </View>
         )}
         <Modal
           visible={showModal}
