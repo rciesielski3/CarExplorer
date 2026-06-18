@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$ROOT_DIR/.env.release.local"
 AAB_PATH="$ROOT_DIR/android/app/build/outputs/bundle/release/app-release.aab"
+RELEASE_MANIFEST_PATH="$ROOT_DIR/android/app/build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml"
 EXPECTED_SHA1="AC:F5:2A:DD:61:C8:8B:AA:B7:54:74:F9:B2:D5:6E:7E:9F:00:A4:E3"
 
 if [[ -f "$ENV_FILE" ]]; then
@@ -48,6 +49,15 @@ node "$ROOT_DIR/scripts/patch-android-release-dependencies.js"
   ./gradlew clean bundleRelease
 )
 
+if [[ -f "$RELEASE_MANIFEST_PATH" ]] &&
+  grep -A2 'android:name="com.google.android.gms.ads.APPLICATION_ID"' "$RELEASE_MANIFEST_PATH" |
+    grep -q 'android:value=""'; then
+  echo "Google Mobile Ads Android app id is empty in the release manifest."
+  echo "Check EXPO_PUBLIC_ADMOB_ANDROID_APP_ID before uploading to Google Play."
+  exit 1
+fi
+
+echo "Verified Google Mobile Ads Android app id in the release manifest."
 echo
 echo "Signed AAB:"
 echo "$AAB_PATH"
