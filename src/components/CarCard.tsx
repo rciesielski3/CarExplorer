@@ -17,17 +17,18 @@ import {
 } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
-import { getCarImageUrl, getCarDetails } from "../api/wikipediaApi";
+import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
+import { getCarImagesFallbackUrl } from "../api/carImagesApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { CompareCar, useCompare } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
-import { IMAGES } from "../constants/Assets";
 import LoadingIndicator from "./LoadingIndicator";
 
 interface CarCardProps {
   make: string;
   model: string;
+  year?: string | null;
   showCompare?: boolean;
   compareCar?: CompareCar;
 }
@@ -35,10 +36,14 @@ interface CarCardProps {
 const CarCard: React.FC<CarCardProps> = ({
   make,
   model,
+  year,
   showCompare = false,
   compareCar,
 }) => {
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+  const [imageUri, setImageUri] = React.useState<string | null>(null);
+  const [sourceStep, setSourceStep] = React.useState<
+    "wiki" | "carimages" | "fallback"
+  >("wiki");
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
   const [carDetails, setCarDetails] = React.useState<string | null>(null);
@@ -99,32 +104,80 @@ const CarCard: React.FC<CarCardProps> = ({
   };
 
   React.useEffect(() => {
+    let mounted = true;
+
     const fetchImage = async () => {
       setLoading(true);
+      setImageUri(null);
+      setSourceStep("wiki");
+
       try {
-        const url = await getCarImageUrl(make, model);
-        setImageUrl(url);
+        const wikiImage = await fetchWikipediaCarImage(make, model);
+        if (!mounted) {
+          return;
+        }
+
+        if (wikiImage) {
+          setImageUri(wikiImage);
+          setSourceStep("wiki");
+          return;
+        }
+
+        setImageUri(getCarImagesFallbackUrl({ make, model, year }));
+        setSourceStep("carimages");
       } catch (error) {
         console.error("Error fetching image:", error);
-        setImageUrl(null);
+        if (mounted) {
+          setImageUri(getCarImagesFallbackUrl({ make, model, year }));
+          setSourceStep("carimages");
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
+
     fetchImage();
-  }, [make, model]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [make, model, year]);
+
+  const handleImageError = () => {
+    if (sourceStep === "wiki") {
+      setImageUri(getCarImagesFallbackUrl({ make, model, year }));
+      setSourceStep("carimages");
+      return;
+    }
+
+    setImageUri(null);
+    setSourceStep("fallback");
+  };
+
+  const renderImageContent = () =>
+    imageUri ? (
+      <Image
+        source={{ uri: imageUri }}
+        style={styles.imageCard}
+        onError={handleImageError}
+      />
+    ) : (
+      <View style={[styles.imageCard, styles.imageFallback]}>
+        <Text style={styles.imageFallbackInitials}>
+          {make.slice(0, 2).toUpperCase()}
+        </Text>
+        <Text style={styles.imageFallbackModel} numberOfLines={1}>
+          {model}
+        </Text>
+      </View>
+    );
 
   return (
     <TouchableOpacity testID="car-card-pressable" onPress={handleCardPress}>
       <View style={styles.card}>
-        {loading ? (
-          <LoadingIndicator />
-        ) : (
-          <Image
-            source={imageUrl ? { uri: imageUrl } : IMAGES.PLACEHOLDER}
-            style={styles.imageCard}
-          />
-        )}
+        {loading ? <LoadingIndicator /> : renderImageContent()}
         <TouchableOpacity
           testID="car-favorite-pressable"
           style={styles.favoriteIcon}
@@ -177,10 +230,7 @@ const CarCard: React.FC<CarCardProps> = ({
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <ScrollView style={styles.scrollContainer}>
-              <Image
-                source={imageUrl ? { uri: imageUrl } : IMAGES.PLACEHOLDER}
-                style={styles.imageCard}
-              />
+              {renderImageContent()}
               <Text style={styles.subtitle}>
                 {make} {model}
               </Text>
