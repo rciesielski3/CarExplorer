@@ -1,5 +1,7 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
 
+const imageCache = new Map<string, string | null>();
+
 const buildQueryCandidates = (make: string, model: string) => {
   const normalizedMake = make.trim();
   const normalizedModel = model.trim();
@@ -9,6 +11,25 @@ const buildQueryCandidates = (make: string, model: string) => {
 
   return Array.from(new Set(candidates.filter(Boolean))).map((query) =>
     encodeURIComponent(query.replace(/\s+/g, "_"))
+  );
+};
+
+const buildWikipediaCandidates = (make: string, model: string): string[] => {
+  const normalizedMake = make.trim();
+  const normalizedModel = model.trim();
+  const fullName = `${normalizedMake} ${normalizedModel}`.trim();
+  const modelWithoutMake = normalizedModel.replace(normalizedMake, "").trim();
+
+  return Array.from(
+    new Set(
+      [
+        fullName,
+        `${fullName} automobile`,
+        `${fullName} car`,
+        `${normalizedMake} ${modelWithoutMake} automobile`.trim(),
+        normalizedMake,
+      ].filter(Boolean)
+    )
   );
 };
 
@@ -23,28 +44,44 @@ const getFirstPage = (data: any) => {
   return pageId ? pages[pageId] : null;
 };
 
-export const getCarImageUrl = async (make: string, model: string) => {
-  try {
-    const queries = buildQueryCandidates(make, model);
+export const fetchWikipediaCarImage = async (
+  make: string,
+  model: string
+): Promise<string | null> => {
+  const cacheKey = `${make}:${model}`.toLowerCase();
+  if (imageCache.has(cacheKey)) {
+    return imageCache.get(cacheKey) || null;
+  }
 
-    for (const query of queries) {
-      const url = WIKIPEDIA_API.BASE_URL + WIKIPEDIA_API.IMAGE_QUERY(query);
+  const candidates = buildWikipediaCandidates(make, model);
+
+  for (const title of candidates) {
+    try {
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+        title
+      )}`;
       const response = await fetch(url);
+      if (!response.ok) {
+        continue;
+      }
+
       const data = await response.json();
-      const page = getFirstPage(data);
-      const imageUrl = page?.thumbnail?.source;
+      const imageUrl = data?.thumbnail?.source || data?.originalimage?.source;
 
       if (imageUrl) {
+        imageCache.set(cacheKey, imageUrl);
         return imageUrl;
       }
+    } catch (error) {
+      console.error("❌ Error fetching car image from Wikipedia:", error);
     }
-
-    return null;
-  } catch (error) {
-    console.error("❌ Error fetching car image from Wikipedia:", error);
-    return null;
   }
+
+  imageCache.set(cacheKey, null);
+  return null;
 };
+
+export const getCarImageUrl = fetchWikipediaCarImage;
 
 export const getCarDetails = async (
   make: string,

@@ -245,6 +245,7 @@ const ExploreScreen = () => {
                   <CarCard
                     make={selectedMake!}
                     model={item.name}
+                    year={modelYear}
                     showCompare
                     compareCar={{
                       make: selectedMake!,
