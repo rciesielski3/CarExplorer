@@ -1,17 +1,20 @@
 import React from "react";
-import { View, Text, Modal, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, Modal, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
-import { Colors } from "@/constants/Colors";
-
 import { fetchQuizQuestions } from "../services/quizService";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import { ErrorMessage, LoadingIndicator, ScreenContainer } from "../components";
+import {
+  CustomButton,
+  ErrorMessage,
+  LoadingIndicator,
+  ScreenContainer,
+} from "../components";
 import QuizQuestion from "../components/QuizQuestion";
 
 interface Question {
@@ -85,21 +88,12 @@ const QuizScreen = () => {
             <Text style={styles.subtitle}>
               {t("yourScore")}: {score}/{questions.length}
             </Text>
-            <TouchableOpacity
-              style={[
-                stylesHome.button,
-                { backgroundColor: Colors[theme].tint },
-              ]}
-              onPress={loadQuestions}
-            >
-              <Text style={stylesHome.buttonText}>{t("restartQuiz")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[stylesHome.button, { backgroundColor: Colors[theme].ok }]}
+            <CustomButton title={t("restartQuiz")} onPress={loadQuestions} />
+            <CustomButton
+              title={t("viewAnswers")}
               onPress={() => setShowModal(true)}
-            >
-              <Text style={stylesHome.buttonText}>{t("viewAnswers")}</Text>
-            </TouchableOpacity>
+              variant="success"
+            />
           </View>
         ) : (
           <View style={styles.centeredContent}>
@@ -118,7 +112,10 @@ const QuizScreen = () => {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <ScrollView style={styles.scrollContainer}>
+              <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.modalScrollContent}
+              >
                 <Text style={styles.subtitle}>{t("yourAnswers")}</Text>
                 {questions.map((q, index) => (
                   <View key={index} style={styles.answerContainer}>
@@ -141,15 +138,11 @@ const QuizScreen = () => {
                   </View>
                 ))}
               </ScrollView>
-              <TouchableOpacity
-                style={[
-                  stylesHome.button,
-                  { backgroundColor: Colors[theme].not },
-                ]}
+              <CustomButton
+                title={t("close")}
                 onPress={() => setShowModal(false)}
-              >
-                <Text style={styles.buttonText}>{t("close")}</Text>
-              </TouchableOpacity>
+                variant="danger"
+              />
             </View>
           </View>
         </Modal>

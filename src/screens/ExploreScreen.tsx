@@ -14,7 +14,6 @@ import {
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
-import { Colors } from "@/constants/Colors";
 
 import {
   fetchModelsForMake,
@@ -223,12 +222,12 @@ const ExploreScreen = () => {
               <CustomButton
                 title={t("applyFilters")}
                 onPress={fetchModels}
-                color={Colors[theme].ok}
+                variant="success"
               />
               <CustomButton
                 title={t("resetFilters")}
                 onPress={resetFilters}
-                color={Colors[theme].not}
+                variant="secondary"
               />
             </View>
             {loading ? (
@@ -257,23 +256,12 @@ const ExploreScreen = () => {
                 )}
               />
             )}
-            <View style={[stylesHome.buttonContainer, { marginTop: 4 }]}>
-              <TouchableOpacity
-                style={[
-                  stylesHome.button,
-                  { backgroundColor: Colors[theme].surfaceMuted },
-                ]}
+            <View style={styles.stickyFooter}>
+              <CustomButton
+                title={t("backToMakes")}
                 onPress={handleBackToMakes}
-              >
-                <Text
-                  style={[
-                    stylesHome.buttonText,
-                    { color: Colors[theme].tabIconSelected },
-                  ]}
-                >
-                  {t("backToMakes")}
-                </Text>
-              </TouchableOpacity>
+                variant="secondary"
+              />
             </View>
           </>
         )}

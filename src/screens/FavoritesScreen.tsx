@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -8,13 +8,12 @@ import {
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
-import { Colors } from "@/constants/Colors";
-
 import { useFavorites } from "../context/FavoritesContext";
 import { useTheme } from "../context/ThemeContext";
 import CarCard from "../components/CarCard";
 import {
   CompareFloatingBar,
+  CustomButton,
   LoadingIndicator,
   ScreenContainer,
 } from "../components";
@@ -38,23 +37,18 @@ const FavoritesScreen = () => {
         {!isHydrated ? (
           <LoadingIndicator type="EXPLORE" />
         ) : favorites.length === 0 ? (
-          <>
-            <View style={styles.resultsContainer}>
+          <View style={styles.compareEmptyStateWrapper}>
+            <View style={styles.compareEmptyCard}>
               <Text style={styles.subtitle}>{t("favoritesEmptyTitle")}</Text>
-              <Text style={styles.description}>{t("favoritesEmptyHint")}</Text>
-            </View>
-            <View style={stylesHome.buttonContainer}>
-              <TouchableOpacity
-                style={[
-                  stylesHome.button,
-                  { backgroundColor: Colors[theme].tabIconSelected },
-                ]}
+              <Text style={styles.compareEmptyText}>
+                {t("favoritesEmptyHint")}
+              </Text>
+              <CustomButton
+                title={t("exploreCars")}
                 onPress={() => navigation.navigate("Explore")}
-              >
-                <Text style={stylesHome.buttonText}>{t("exploreCars")}</Text>
-              </TouchableOpacity>
+              />
             </View>
-          </>
+          </View>
         ) : (
           <>
             <FlatList
@@ -66,16 +60,12 @@ const FavoritesScreen = () => {
                 <CarCard make={item.make} model={item.model} showCompare />
               )}
             />
-            <View style={[stylesHome.buttonContainer, { marginTop: 8 }]}>
-              <TouchableOpacity
-                style={[
-                  stylesHome.button,
-                  { backgroundColor: Colors[theme].not },
-                ]}
+            <View style={styles.stickyFooter}>
+              <CustomButton
+                title={t("clearFavorites")}
                 onPress={clearFavorites}
-              >
-                <Text style={stylesHome.buttonText}>{t("clearFavorites")}</Text>
-              </TouchableOpacity>
+                variant="danger"
+              />
             </View>
           </>
         )}

@@ -6,7 +6,6 @@ import {
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
-import { Colors } from "@/constants/Colors";
 
 import {
   getCarImageUrl,
@@ -96,12 +95,12 @@ requestedLink,
           <CustomButton
             title={t("search")}
             onPress={handleSearch}
-            color={Colors[theme].ok}
+            variant="success"
           />
           <CustomButton
             title={t("clear")}
             onPress={handleClear}
-            color={Colors[theme].tabIconSelected}
+            variant="secondary"
           />
         </View>
         {loading && <LoadingIndicator />}

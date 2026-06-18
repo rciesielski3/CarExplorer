@@ -1,10 +1,9 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
-import ModalSelector from "react-native-modal-selector";
-
-import { Colors } from "@/constants/Colors";
+import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { useTheme } from "../context/ThemeContext";
+import { createGlobalStyles } from "@/constants/GlobalStyles";
 
 interface ReusableModalSelectorProps {
   label: string;
@@ -19,54 +18,70 @@ const ReusableModalSelector: React.FC<ReusableModalSelectorProps> = ({
   selectedValue,
   onValueChange,
 }) => {
+  const [visible, setVisible] = React.useState(false);
+  const { t } = useTranslation();
   const { theme } = useTheme();
-  const localStyles = customStyles(theme);
+  const styles = createGlobalStyles(theme);
 
   const selectedLabel =
     data.find((item) => item.value === selectedValue)?.label ?? label;
 
   return (
-    <View style={localStyles.container}>
-      <ModalSelector
-        data={data}
-        initValue={selectedLabel}
-        onChange={(option) => onValueChange(option.value)}
-        style={localStyles.selector}
-        initValueTextStyle={localStyles.valueText}
-        selectTextStyle={localStyles.valueText}
-        optionTextStyle={localStyles.valueText}
-        optionContainerStyle={localStyles.optionContainer}
-        cancelTextStyle={localStyles.cancelText}
-        cancelText="Cancel"
-      />
+    <View style={{ width: "48%" }}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        style={styles.pickerTrigger}
+        onPress={() => setVisible(true)}
+      >
+        <Text style={styles.pickerTriggerText} numberOfLines={1}>
+          {selectedLabel}
+        </Text>
+      </TouchableOpacity>
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.pickerModalContent}>
+            <View style={styles.pickerModalHeader}>
+              <Text style={styles.pickerModalTitle}>{label}</Text>
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={() => setVisible(false)}
+              >
+                <Text style={styles.pickerModalCloseText}>
+                  {t("close", "Close")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {data.map((item) => {
+                const isSelected = item.value === selectedValue;
+                return (
+                  <TouchableOpacity
+                    key={item.key}
+                    accessibilityRole="button"
+                    style={[
+                      styles.pickerOption,
+                      isSelected && styles.pickerOptionSelected,
+                    ]}
+                    onPress={() => {
+                      onValueChange(item.value);
+                      setVisible(false);
+                    }}
+                  >
+                    <Text style={styles.pickerOptionText}>{item.label}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
-
-const customStyles = (theme: "light" | "dark") =>
-  StyleSheet.create({
-    container: {
-      width: "48%",
-    },
-    selector: {
-      width: "100%",
-    },
-    valueText: {
-      color: Colors[theme].text,
-      fontWeight: "600",
-      textAlign: "center",
-      paddingVertical: 5,
-      fontFamily: "PoetsenOne",
-    },
-    optionContainer: {
-      backgroundColor: Colors[theme].card,
-    },
-    cancelText: {
-      color: Colors[theme].not,
-      fontWeight: "600",
-      textAlign: "center",
-      fontFamily: "PoetsenOne",
-    },
-  });
 
 export default ReusableModalSelector;

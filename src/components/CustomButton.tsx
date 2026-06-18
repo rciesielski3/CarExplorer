@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity, Text } from "react-native";
+import { StyleProp, Text, TouchableOpacity, ViewStyle } from "react-native";
 
 import { createGlobalStyles } from "@/constants/GlobalStyles";
 
@@ -9,18 +9,45 @@ interface ButtonProps {
   title: string;
   onPress: () => void;
   color?: string;
+  variant?: "primary" | "secondary" | "danger" | "success";
+  style?: StyleProp<ViewStyle>;
 }
 
-const CustomButton: React.FC<ButtonProps> = ({ title, onPress, color }) => {
+const CustomButton: React.FC<ButtonProps> = ({
+  title,
+  onPress,
+  color,
+  variant = "primary",
+  style,
+}) => {
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
+  const isSecondary = variant === "secondary";
+  const backgroundColor =
+    color ||
+    (variant === "danger"
+      ? "#EF4444"
+      : variant === "success"
+        ? "#22C55E"
+        : isSecondary
+          ? "transparent"
+          : undefined);
 
   return (
     <TouchableOpacity
-      style={[styles.button, color ? { backgroundColor: color } : null]}
+      style={[
+        styles.button,
+        backgroundColor ? { backgroundColor } : null,
+        isSecondary ? styles.confirmModalCancel : null,
+        style,
+      ]}
       onPress={onPress}
     >
-      <Text style={styles.buttonText}>{title}</Text>
+      <Text
+        style={[styles.buttonText, isSecondary && styles.buttonSecondaryText]}
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };

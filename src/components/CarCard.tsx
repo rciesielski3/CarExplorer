@@ -11,10 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { FontAwesome } from "@expo/vector-icons";
-import {
-  createGlobalStyles,
-  createHomeScreenStyles,
-} from "@/constants/GlobalStyles";
+import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
 import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
@@ -24,6 +21,7 @@ import { useFavorites } from "../context/FavoritesContext";
 import { CompareCar, useCompare } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
 import LoadingIndicator from "./LoadingIndicator";
+import CustomButton from "./CustomButton";
 
 interface CarCardProps {
   make: string;
@@ -53,7 +51,6 @@ const CarCard: React.FC<CarCardProps> = ({
 
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
-  const stylesHome = createHomeScreenStyles(theme);
 
   const { language } = useAppLanguage();
   const activeLanguage = language || "en";
@@ -178,6 +175,23 @@ const CarCard: React.FC<CarCardProps> = ({
     <TouchableOpacity testID="car-card-pressable" onPress={handleCardPress}>
       <View style={styles.card}>
         {loading ? <LoadingIndicator /> : renderImageContent()}
+        {showCompare && (
+          <TouchableOpacity
+            testID="car-compare-pressable"
+            accessibilityRole="button"
+            style={[
+              styles.compareCardIconButton,
+              isCompared && styles.compareCardIconButtonSelected,
+            ]}
+            onPress={handleComparePress}
+          >
+            <FontAwesome
+              name={isCompared ? "check" : "bar-chart"}
+              size={16}
+              color={isCompared ? "#fff" : Colors[theme].accent}
+            />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           testID="car-favorite-pressable"
           style={styles.favoriteIcon}
@@ -185,40 +199,13 @@ const CarCard: React.FC<CarCardProps> = ({
         >
           <FontAwesome
             name={isFavorite ? "heart" : "heart-o"}
-            size={24}
-            color={isFavorite ? Colors[theme].not : "black"}
+            size={21}
+            color={isFavorite ? Colors[theme].not : Colors[theme].text}
           />
         </TouchableOpacity>
         <Text style={styles.subtitle}>
           {make} {model}
         </Text>
-        {showCompare && (
-          <TouchableOpacity
-            testID="car-compare-pressable"
-            accessibilityRole="button"
-            style={[
-              styles.compareCardButton,
-              isCompared && styles.compareCardButtonSelected,
-            ]}
-            onPress={handleComparePress}
-          >
-            <FontAwesome
-              name={isCompared ? "check" : "bar-chart"}
-              size={14}
-              color={isCompared ? "#fff" : Colors[theme].accent}
-            />
-            <Text
-              style={[
-                styles.compareCardButtonText,
-                isCompared && styles.compareCardButtonTextSelected,
-              ]}
-            >
-              {isCompared
-                ? t("compareAdded", "Added")
-                : t("compareAdd", "Compare")}
-            </Text>
-          </TouchableOpacity>
-        )}
       </View>
       <Modal
         testID="car-details-modal"
@@ -229,7 +216,10 @@ const CarCard: React.FC<CarCardProps> = ({
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <ScrollView style={styles.scrollContainer}>
+            <ScrollView
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.modalScrollContent}
+            >
               {renderImageContent()}
               <Text style={styles.subtitle}>
                 {make} {model}
@@ -242,15 +232,11 @@ const CarCard: React.FC<CarCardProps> = ({
                 </Text>
               )}
             </ScrollView>
-            <TouchableOpacity
-              style={[
-                stylesHome.button,
-                { backgroundColor: Colors[theme].not },
-              ]}
+            <CustomButton
+              title={t("close")}
               onPress={handleCloseModal}
-            >
-              <Text style={styles.buttonText}>{t("close")}</Text>
-            </TouchableOpacity>
+              variant="danger"
+            />
           </View>
         </View>
       </Modal>

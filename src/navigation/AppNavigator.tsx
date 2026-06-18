@@ -37,8 +37,8 @@ const TabNavigator = () => {
           position: "absolute",
           left: 18,
           right: 18,
-          bottom: Math.max(insets.bottom, 12),
-          minHeight: 68,
+          bottom: Math.max(insets.bottom + 12, 18),
+          height: 70,
           borderRadius: 26,
           backgroundColor:
             theme === "dark" ? "rgba(10,10,11,0.96)" : "rgba(242,239,233,0.97)",
@@ -46,8 +46,8 @@ const TabNavigator = () => {
           borderTopWidth: 0,
           borderWidth: 1,
           borderColor: Colors[theme].border,
-          paddingTop: 7,
-          paddingBottom: 9,
+          paddingTop: 8,
+          paddingBottom: 8,
           shadowColor: Colors[theme].shadow,
           shadowOpacity: 0.24,
           shadowOffset: { width: 0, height: 12 },
@@ -55,7 +55,8 @@ const TabNavigator = () => {
           elevation: 18,
         },
         tabBarItemStyle: {
-          minHeight: 48,
+          height: 54,
+          paddingVertical: 0,
         },
         tabBarLabelStyle: {
           fontFamily: "DMSans_500Medium",
@@ -147,8 +148,7 @@ const AppNavigator = () => {
           name="Vin"
           component={VinCheckerScreen}
           options={{
-            headerShown: true,
-            title: t("vinCheckerTitle"),
+            headerShown: false,
           }}
         />
         <Stack.Screen
