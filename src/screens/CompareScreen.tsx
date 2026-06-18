@@ -104,32 +104,34 @@ const CompareScreen = () => {
         <Text style={styles.title}>{t("compare", "Compare")}</Text>
 
         {!hasFullComparison ? (
-          <View style={styles.compareEmptyCard}>
-            <Ionicons
-              name="bar-chart-outline"
-              size={36}
-              color={Colors[theme].accent}
-            />
-            <Text style={styles.compareEmptyTitle}>
-              {t("compareEmptyTitle", "Pick two cars")}
-            </Text>
-            <Text style={styles.compareEmptyText}>
-              {t(
-                "compareEmptyHint",
-                "Select up to 2 models from Explore or Garage to compare them here."
-              )}
-            </Text>
-            <TouchableOpacity
-              accessibilityRole="button"
-              style={styles.comparePrimaryButton}
-              onPress={() =>
-                navigation.navigate("MainTabs", { screen: "Explore" })
-              }
-            >
-              <Text style={styles.comparePrimaryButtonText}>
-                {t("comparePickCars", "Pick cars to compare")}
+          <View style={styles.compareEmptyStateWrapper}>
+            <View style={styles.compareEmptyCard}>
+              <Ionicons
+                name="bar-chart-outline"
+                size={36}
+                color={Colors[theme].accent}
+              />
+              <Text style={styles.compareEmptyTitle}>
+                {t("compareEmptyTitle", "Pick two cars")}
               </Text>
-            </TouchableOpacity>
+              <Text style={styles.compareEmptyText}>
+                {t(
+                  "compareEmptyHint",
+                  "Select up to 2 models from Explore or Garage to compare them here."
+                )}
+              </Text>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={styles.comparePrimaryButton}
+                onPress={() =>
+                  navigation.navigate("MainTabs", { screen: "Explore" })
+                }
+              >
+                <Text style={styles.comparePrimaryButtonText}>
+                  {t("comparePickCars", "Pick cars to compare")}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <>

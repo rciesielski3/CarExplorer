@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, StyleSheet, ActivityIndicator } from "react-native";
+import { StyleSheet, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { Colors } from "./constants/Colors";
@@ -53,9 +53,7 @@ const AppContent = () => {
       end={{ x: 0.9, y: 1 }}
       style={styles.background}
     >
-      <SafeAreaView style={{ flex: 1 }}>
-        <AppNavigator />
-      </SafeAreaView>
+      <AppNavigator />
     </LinearGradient>
   );
 };
