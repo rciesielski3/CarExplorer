@@ -11,14 +11,20 @@ Copy the template and fill in your local upload-keystore values:
 cp .env.release.example .env.release.local
 ```
 
-The local file must contain:
+The local file must contain the production Android AdMob app ID and upload
+keystore values:
 
 ```sh
+EXPO_PUBLIC_ADMOB_ANDROID_APP_ID=ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyy
 CAREXPLORER_UPLOAD_STORE_FILE=/absolute/path/to/upload-keystore.jks
 CAREXPLORER_UPLOAD_STORE_PASSWORD=...
 CAREXPLORER_UPLOAD_KEY_ALIAS=...
 CAREXPLORER_UPLOAD_KEY_PASSWORD=...
 ```
+
+The app config falls back to Google's official test AdMob app ID when this
+environment variable is not set, so local development builds do not accidentally
+load production ads.
 
 Then build from the repository root:
 

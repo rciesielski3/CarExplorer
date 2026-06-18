@@ -14,6 +14,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 required_vars=(
+  EXPO_PUBLIC_ADMOB_ANDROID_APP_ID
   CAREXPLORER_UPLOAD_STORE_FILE
   CAREXPLORER_UPLOAD_STORE_PASSWORD
   CAREXPLORER_UPLOAD_KEY_ALIAS
@@ -31,7 +32,7 @@ if (( ${#missing_vars[@]} > 0 )); then
   echo "Missing release signing values:"
   printf '  - %s\n' "${missing_vars[@]}"
   echo
-  echo "Create .env.release.local from .env.release.example and fill in the upload keystore values."
+  echo "Create .env.release.local from .env.release.example and fill in the release values."
   exit 1
 fi
 
