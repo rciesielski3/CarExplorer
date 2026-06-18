@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -20,7 +22,7 @@ import { Colors } from "@/constants/Colors";
 
 import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "../navigation/types";
-import { AdBanner } from "../components";
+import { AdBanner, ScreenContainer } from "../components";
 import {
   findStaticAiAnswer,
   getStaticAiSuggestions,
@@ -72,11 +74,17 @@ const HomeScreen = () => {
   );
 
   return (
-    <View style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={homeStyles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <ScreenContainer>
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
+        <ScrollView
+          contentContainerStyle={homeStyles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
         <View style={homeStyles.topBar}>
           <Text style={homeStyles.logo}>{t("homeLogo", "Car Explorer")}</Text>
           <TouchableOpacity
@@ -223,9 +231,10 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
-      <AdBanner />
-    </View>
+        </ScrollView>
+        <AdBanner />
+      </KeyboardAvoidingView>
+    </ScreenContainer>
   );
 };
 
@@ -239,44 +248,53 @@ const HeroCarLine = () => {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       style={homeStyles.heroCarLine}
-      viewBox="0 0 220 82"
+      viewBox="0 0 340 110"
     >
       <Path
-        d="M4 60h30M72 60h76M192 60h24"
-        stroke={Colors[theme].text}
-        strokeWidth={4}
+        d="M18 78h72M132 78h92M282 78h40"
+        stroke={Colors[theme].accent}
+        strokeWidth={3.5}
         strokeLinecap="round"
         fill="none"
       />
       <Path
-        d="M36 60c4-22 15-29 35-31l28-16c19-11 61-13 86 5l21 15"
-        stroke={Colors[theme].text}
-        strokeWidth={4}
+        d="M58 76c7-25 22-35 50-38l45-23c34-17 91-12 118 18l23 28"
+        stroke={Colors[theme].accent}
+        strokeWidth={3.5}
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
       <Path
-        d="M86 28l-4-14M148 21l6-15"
-        stroke={Colors[theme].text}
+        d="M150 17l-27 24M174 14l58 3M234 18l30 24M280 47l28-4"
+        stroke={Colors[theme].accent}
         strokeWidth={2.5}
         strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <Path
+        d="M25 55l-22 7M30 66l-26 8"
+        stroke={Colors[theme].accent}
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        opacity={0.4}
         fill="none"
       />
       <Circle
-        cx={50}
-        cy={60}
-        r={22}
-        stroke={Colors[theme].text}
-        strokeWidth={4}
+        cx={108}
+        cy={78}
+        r={24}
+        stroke={Colors[theme].accent}
+        strokeWidth={3.5}
         fill={Colors[theme].background}
       />
       <Circle
-        cx={170}
-        cy={60}
-        r={22}
-        stroke={Colors[theme].text}
-        strokeWidth={4}
+        cx={250}
+        cy={78}
+        r={24}
+        stroke={Colors[theme].accent}
+        strokeWidth={3.5}
         fill={Colors[theme].background}
       />
     </Svg>

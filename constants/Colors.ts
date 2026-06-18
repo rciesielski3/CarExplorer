@@ -15,6 +15,7 @@ export const Colors = {
     accent: "#E03A0A",
     accentSoft: "rgba(224,58,10,0.12)",
     shadow: "rgba(28, 26, 23, 0.16)",
+    gradient: ["#FFFFFF", "#F4F1EB", "#EDE9E1"],
   },
   dark: {
     text: "#EEEAE4",
@@ -32,5 +33,6 @@ export const Colors = {
     accent: "#FF4D1C",
     accentSoft: "rgba(255,77,28,0.12)",
     shadow: "rgba(0, 0, 0, 0.46)",
+    gradient: ["#17131A", "#0C0B0E", "#0A0A0B"],
   },
 };

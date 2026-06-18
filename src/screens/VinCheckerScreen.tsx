@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  ImageBackground,
-  ScrollView,
-} from "react-native";
+import { View, Text, TextInput, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -17,8 +11,12 @@ import { Colors } from "@/constants/Colors";
 
 import { decodeVin } from "../api/nhtsaApi";
 import { useTheme } from "../context/ThemeContext";
-import { CustomButton, ErrorMessage, LoadingIndicator } from "../components";
-import { IMAGES } from "../constants/Assets";
+import {
+  CustomButton,
+  ErrorMessage,
+  LoadingIndicator,
+  ScreenContainer,
+} from "../components";
 import {
   getVinValidationMessage,
   normalizeVin,
@@ -110,8 +108,14 @@ const VinCheckerScreen = () => {
   };
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
-      <ScrollView contentContainerStyle={stylesHome.scrollContent}>
+    <ScreenContainer>
+      <ScrollView
+        contentContainerStyle={[
+          stylesHome.scrollContent,
+          !vehicleData && !loading && styles.centeredContent,
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.vinHero}>
           <LoadingIndicator type="CARCHECK" />
           <Text style={styles.title}>{t("vinCheckerTitle")}</Text>
@@ -172,7 +176,7 @@ const VinCheckerScreen = () => {
           </View>
         )}
       </ScrollView>
-    </ImageBackground>
+    </ScreenContainer>
   );
 };
 

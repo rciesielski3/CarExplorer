@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Modal,
-  ScrollView,
-  TouchableOpacity,
-  ImageBackground,
-} from "react-native";
+import { View, Text, Modal, ScrollView, TouchableOpacity } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -18,9 +11,8 @@ import { Colors } from "@/constants/Colors";
 import { fetchQuizQuestions } from "../services/quizService";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import { ErrorMessage, LoadingIndicator } from "../components";
+import { ErrorMessage, LoadingIndicator, ScreenContainer } from "../components";
 import QuizQuestion from "../components/QuizQuestion";
-import { IMAGES } from "../constants/Assets";
 
 interface Question {
   question: string;
@@ -82,14 +74,14 @@ const QuizScreen = () => {
   }, [loadQuestions]);
 
   return (
-    <ImageBackground source={IMAGES.BACKGROUND} style={styles.background}>
+    <ScreenContainer>
       <View style={stylesHome.container}>
         {loading ? (
           <LoadingIndicator type="QUIZLOADING" />
         ) : questions.length === 0 ? (
           <ErrorMessage message={t("noQuestions")} />
         ) : showScore ? (
-          <View style={styles.resultContainer}>
+          <View style={[styles.resultContainer, styles.centeredContent]}>
             <Text style={styles.subtitle}>
               {t("yourScore")}: {score}/{questions.length}
             </Text>
@@ -110,11 +102,13 @@ const QuizScreen = () => {
             </TouchableOpacity>
           </View>
         ) : (
-          <QuizQuestion
-            question={questions[currentQuestion]?.question || t("loading")}
-            options={questions[currentQuestion]?.options || []}
-            onAnswer={handleAnswer}
-          />
+          <View style={styles.centeredContent}>
+            <QuizQuestion
+              question={questions[currentQuestion]?.question || t("loading")}
+              options={questions[currentQuestion]?.options || []}
+              onAnswer={handleAnswer}
+            />
+          </View>
         )}
         <Modal
           visible={showModal}
@@ -160,7 +154,7 @@ const QuizScreen = () => {
           </View>
         </Modal>
       </View>
-    </ImageBackground>
+    </ScreenContainer>
   );
 };
 

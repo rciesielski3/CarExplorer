@@ -1,12 +1,16 @@
-import { getCarDetails, getCarImageUrl } from "../wikipediaApi";
+import { fetchWikipediaCarImage, getCarDetails } from "../wikipediaApi";
 
 const mockFetch = jest.fn();
 
 global.fetch = mockFetch as jest.Mock;
 
-const wikipediaResponse = (pages: Record<string, unknown>) =>
+const wikipediaSummaryResponse = (
+  data: Record<string, unknown>,
+  ok: boolean = true
+) =>
   Promise.resolve({
-    json: () => Promise.resolve({ query: { pages } }),
+    ok,
+    json: () => Promise.resolve(data),
   });
 
 describe("wikipediaApi", () => {
@@ -14,29 +18,28 @@ describe("wikipediaApi", () => {
     mockFetch.mockReset();
   });
 
-  it("falls back from make and model image lookup to make-only lookup", async () => {
+  it("falls back through Wikipedia REST image candidates", async () => {
     mockFetch
-      .mockResolvedValueOnce(wikipediaResponse({ "1": {} }))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
       .mockResolvedValueOnce(
-        wikipediaResponse({
-          "2": { thumbnail: { source: "https://example.com/toyota.jpg" } },
+        wikipediaSummaryResponse({
+          thumbnail: { source: "https://example.com/toyota.jpg" },
         })
       );
 
-    await expect(getCarImageUrl("Toyota", "Corolla")).resolves.toBe(
+    await expect(fetchWikipediaCarImage("Toyota", "Corolla")).resolves.toBe(
       "https://example.com/toyota.jpg"
     );
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
   it("encodes image lookup queries before calling Wikipedia", async () => {
-    mockFetch
-      .mockResolvedValueOnce(wikipediaResponse({ "1": {} }))
-      .mockResolvedValueOnce(wikipediaResponse({ "2": {} }));
+    mockFetch.mockResolvedValue(wikipediaSummaryResponse({}, false));
 
-    await getCarImageUrl("Citroën", "C3");
+    await fetchWikipediaCarImage("Citroën", "C3");
 
-    expect(mockFetch.mock.calls[0][0]).toContain("Citro%C3%ABn_C3");
+    expect(mockFetch.mock.calls[0][0]).toContain("Citro%C3%ABn%20C3");
   });
 
   it("returns null when details response has no pages", async () => {
