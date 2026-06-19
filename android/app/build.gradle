@@ -101,8 +101,8 @@ android {
         applicationId 'com.adateo.carexplorer'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 57
-        versionName "2.0.3"
+        versionCode 58
+        versionName "2.0.4"
     }
     signingConfigs {
         debug {

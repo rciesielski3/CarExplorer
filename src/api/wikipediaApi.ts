@@ -8,9 +8,13 @@ const encodeWikipediaTitle = (title: string) =>
 const buildWikipediaCandidates = (make: string, model: string): string[] => {
   const normalizedMake = make.trim();
   const normalizedModel = model.trim();
-  const makePattern = new RegExp(`^${normalizedMake}\\s+`, "i");
-  const modelWithoutMake = normalizedModel.replace(makePattern, "").trim();
-  const fullName = normalizedModel.match(makePattern)
+  const startsWithMake = normalizedModel
+    .toLowerCase()
+    .startsWith(`${normalizedMake.toLowerCase()} `);
+  const modelWithoutMake = startsWithMake
+    ? normalizedModel.slice(normalizedMake.length).trim()
+    : normalizedModel;
+  const fullName = startsWithMake
     ? normalizedModel
     : `${normalizedMake} ${normalizedModel}`.trim();
 
@@ -84,16 +88,20 @@ export const fetchWikipediaCarImage = async (
         return summaryImage;
       }
 
-      const imageQueryUrl =
-        WIKIPEDIA_API.BASE_URL + WIKIPEDIA_API.IMAGE_QUERY(encodeWikipediaTitle(title));
-      const imageQueryResponse = await fetch(imageQueryUrl);
-      const imageQueryData = await imageQueryResponse.json();
-      const page = getFirstPage(imageQueryData);
-      const queryImage = page?.thumbnail?.source || page?.originalimage?.source;
+      if (summary) {
+        const imageQueryUrl =
+          WIKIPEDIA_API.BASE_URL +
+          WIKIPEDIA_API.IMAGE_QUERY(encodeWikipediaTitle(title));
+        const imageQueryResponse = await fetch(imageQueryUrl);
+        const imageQueryData = await imageQueryResponse.json();
+        const page = getFirstPage(imageQueryData);
+        const queryImage =
+          page?.thumbnail?.source || page?.originalimage?.source;
 
-      if (queryImage) {
-        imageCache.set(cacheKey, queryImage);
-        return queryImage;
+        if (queryImage) {
+          imageCache.set(cacheKey, queryImage);
+          return queryImage;
+        }
       }
     } catch {}
   }
@@ -128,11 +136,13 @@ export const getCarDetails = async (
           return extract;
         }
 
-        const summary = await fetchWikipediaSummary(title, activeLanguage);
-        const summaryExtract = getExtractFromSummary(summary);
+        if (page && !("missing" in page)) {
+          const summary = await fetchWikipediaSummary(title, activeLanguage);
+          const summaryExtract = getExtractFromSummary(summary);
 
-        if (summaryExtract) {
-          return summaryExtract;
+          if (summaryExtract) {
+            return summaryExtract;
+          }
         }
       } catch {}
     }

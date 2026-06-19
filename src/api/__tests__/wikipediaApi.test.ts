@@ -13,6 +13,11 @@ const wikipediaSummaryResponse = (
     json: () => Promise.resolve(data),
   });
 
+const wikipediaDetailsResponse = (page: Record<string, unknown>) =>
+  Promise.resolve({
+    json: () => Promise.resolve({ query: { pages: { "123": page } } }),
+  });
+
 describe("wikipediaApi", () => {
   beforeEach(() => {
     mockFetch.mockReset();
@@ -51,6 +56,15 @@ describe("wikipediaApi", () => {
     expect(mockFetch.mock.calls[0][0]).not.toContain("Ford%20Ford");
   });
 
+  it("handles makes with regexp special characters", async () => {
+    mockFetch.mockResolvedValue(wikipediaSummaryResponse({}, false));
+
+    await expect(
+      fetchWikipediaCarImage("A+B", "A+B Roadster")
+    ).resolves.toBeNull();
+    expect(mockFetch.mock.calls[0][0]).toContain("A%2BB%20Roadster");
+  });
+
   it("returns null when details response has no pages", async () => {
     mockFetch.mockResolvedValue(
       Promise.resolve({
@@ -64,11 +78,7 @@ describe("wikipediaApi", () => {
 
   it("falls back to Wikipedia summary extract when query details are empty", async () => {
     mockFetch
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(
         wikipediaSummaryResponse({
           extract: "The Ford Crown Victoria is a full-size sedan.",
@@ -82,41 +92,17 @@ describe("wikipediaApi", () => {
 
   it("uses English details fallback when selected language has no details", async () => {
     mockFetch
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(
         wikipediaSummaryResponse({
           extract: "The Toyota Corolla is a compact car.",
