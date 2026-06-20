@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   createGlobalStyles,
@@ -29,6 +30,7 @@ import {
 } from "../components";
 import CarCard from "../components/CarCard";
 import ReusableModalSelector from "../components/ReusableModalSelector";
+import { useCompare } from "../context/CompareContext";
 import { fetchCarLogos } from "../services/carLogoService";
 import { useTheme } from "../context/ThemeContext";
 import { POPULAR_CAR_MAKES } from "../../constants/carMakes";
@@ -51,10 +53,15 @@ const ExploreScreen = () => {
   const [logos, setLogos] = React.useState<Record<string, string>>({});
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const { theme } = useTheme();
+  const { compareList } = useCompare();
   const styles = createGlobalStyles(theme);
   const stylesHome = createHomeScreenStyles(theme);
+  const bottomNavOffset = Math.max(insets.bottom + 12, 18) + 78;
+  const stickyFooterBottom =
+    compareList.length >= 2 ? bottomNavOffset + 82 : bottomNavOffset;
 
   const MODEL_YEARS = Array.from({ length: 30 }, (_, i) => `${2025 - i}`);
   const VEHICLE_TYPES = [
@@ -239,7 +246,10 @@ const ExploreScreen = () => {
                 data={models}
                 keyExtractor={(item) => item.id.toString()}
                 style={styles.flexFill}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[
+                  styles.listContent,
+                  styles.listContentWithStickyAction,
+                ]}
                 renderItem={({ item }) => (
                   <CarCard
                     make={selectedMake!}
@@ -256,7 +266,12 @@ const ExploreScreen = () => {
                 )}
               />
             )}
-            <View style={styles.stickyFooter}>
+            <View
+              style={[
+                styles.stickyNavFooter,
+                { bottom: stickyFooterBottom },
+              ]}
+            >
               <CustomButton
                 title={t("backToMakes")}
                 onPress={handleBackToMakes}

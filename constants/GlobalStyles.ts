@@ -23,6 +23,9 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
     listContent: {
       paddingBottom: 128,
     },
+    listContentWithStickyAction: {
+      paddingBottom: 206,
+    },
     centeredContent: {
       flexGrow: 1,
       justifyContent: "center",
@@ -178,6 +181,9 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       backgroundColor: "rgba(0, 0, 0, 0.7)",
       paddingHorizontal: 18,
       paddingVertical: 28,
+    },
+    modalBackdropPressable: {
+      ...StyleSheet.absoluteFillObject,
     },
     modalContent: {
       backgroundColor: Colors[theme].card,
@@ -723,6 +729,13 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       paddingBottom: 112,
       backgroundColor: "transparent",
     },
+    stickyNavFooter: {
+      position: "absolute",
+      left: 20,
+      right: 20,
+      zIndex: 9,
+      backgroundColor: "transparent",
+    },
     pickerModalContent: {
       backgroundColor: Colors[theme].card,
       borderRadius: 8,
@@ -731,6 +744,12 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       borderWidth: 1,
       borderColor: Colors[theme].border,
       overflow: "hidden",
+    },
+    pickerOptionsScroll: {
+      width: "100%",
+    },
+    pickerOptionsContent: {
+      paddingBottom: 8,
     },
     pickerModalHeader: {
       minHeight: 54,
@@ -863,13 +882,21 @@ export const createHomeScreenStyles = (theme: "light" | "dark") =>
       height: 36,
       borderRadius: 18,
       borderWidth: 1,
-      borderColor: Colors[theme].border,
-      backgroundColor: Colors[theme].surface,
+      borderColor:
+        theme === "dark" ? "rgba(255,77,28,0.38)" : "rgba(224,58,10,0.28)",
+      backgroundColor:
+        theme === "dark" ? "rgba(255,77,28,0.12)" : "rgba(224,58,10,0.10)",
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: Colors[theme].accent,
+      shadowOpacity: 0.16,
+      shadowOffset: { width: 0, height: 4 },
+      shadowRadius: 10,
+      elevation: 2,
     },
     hero: {
-      backgroundColor: Colors[theme].surface,
+      backgroundColor:
+        theme === "dark" ? "rgba(17,17,20,0.94)" : "rgba(255,255,255,0.82)",
       borderRadius: 20,
       borderWidth: 1,
       borderColor: Colors[theme].border,
@@ -933,7 +960,7 @@ export const createHomeScreenStyles = (theme: "light" | "dark") =>
       bottom: -2,
       width: 312,
       height: 104,
-      opacity: theme === "dark" ? 0.42 : 0.28,
+      opacity: theme === "dark" ? 0.32 : 0.22,
     },
     quickActions: {
       flexDirection: "row",
@@ -943,7 +970,8 @@ export const createHomeScreenStyles = (theme: "light" | "dark") =>
       marginBottom: 14,
     },
     quickAction: {
-      backgroundColor: Colors[theme].surface,
+      backgroundColor:
+        theme === "dark" ? "rgba(17,17,20,0.96)" : "rgba(255,255,255,0.84)",
       borderRadius: 16,
       borderWidth: 1,
       borderColor: Colors[theme].border,
@@ -953,6 +981,11 @@ export const createHomeScreenStyles = (theme: "light" | "dark") =>
       width: "48.2%",
       minHeight: 142,
       alignItems: "flex-start",
+      shadowColor: Colors[theme].shadow,
+      shadowOpacity: theme === "dark" ? 0.18 : 0.1,
+      shadowOffset: { width: 0, height: 8 },
+      shadowRadius: 16,
+      elevation: 3,
     },
     quickIcon: {
       width: 44,
@@ -977,13 +1010,19 @@ export const createHomeScreenStyles = (theme: "light" | "dark") =>
       marginTop: 5,
     },
     aiCard: {
-      backgroundColor: Colors[theme].surface,
+      backgroundColor:
+        theme === "dark" ? "rgba(17,17,20,0.96)" : "rgba(255,255,255,0.86)",
       borderRadius: 20,
       borderWidth: 1,
       borderColor: Colors[theme].border,
       padding: 16,
       minHeight: 250,
       marginBottom: 16,
+      shadowColor: Colors[theme].shadow,
+      shadowOpacity: theme === "dark" ? 0.2 : 0.1,
+      shadowOffset: { width: 0, height: 8 },
+      shadowRadius: 18,
+      elevation: 3,
     },
     aiHeader: {
       flexDirection: "row",

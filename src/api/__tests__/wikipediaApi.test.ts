@@ -13,6 +13,11 @@ const wikipediaSummaryResponse = (
     json: () => Promise.resolve(data),
   });
 
+const wikipediaDetailsResponse = (page: Record<string, unknown>) =>
+  Promise.resolve({
+    json: () => Promise.resolve({ query: { pages: { "123": page } } }),
+  });
+
 describe("wikipediaApi", () => {
   beforeEach(() => {
     mockFetch.mockReset();
@@ -42,19 +47,70 @@ describe("wikipediaApi", () => {
     expect(mockFetch.mock.calls[0][0]).toContain("Citro%C3%ABn%20C3");
   });
 
+  it("does not duplicate make when model already includes it", async () => {
+    mockFetch.mockResolvedValue(wikipediaSummaryResponse({}, false));
+
+    await fetchWikipediaCarImage("Ford", "Ford Crown Victoria");
+
+    expect(mockFetch.mock.calls[0][0]).toContain("Ford%20Crown%20Victoria");
+    expect(mockFetch.mock.calls[0][0]).not.toContain("Ford%20Ford");
+  });
+
+  it("handles makes with regexp special characters", async () => {
+    mockFetch.mockResolvedValue(wikipediaSummaryResponse({}, false));
+
+    await expect(
+      fetchWikipediaCarImage("A+B", "A+B Roadster")
+    ).resolves.toBeNull();
+    expect(mockFetch.mock.calls[0][0]).toContain("A%2BB%20Roadster");
+  });
+
   it("returns null when details response has no pages", async () => {
+    mockFetch.mockResolvedValue(
+      Promise.resolve({
+        ok: false,
+        json: () => Promise.resolve({ query: {} }),
+      })
+    );
+
+    await expect(getCarDetails("Unknown", "Model", "en")).resolves.toBeNull();
+  });
+
+  it("falls back to Wikipedia summary extract when query details are empty", async () => {
     mockFetch
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
       .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          json: () => Promise.resolve({ query: {} }),
+        wikipediaSummaryResponse({
+          extract: "The Ford Crown Victoria is a full-size sedan.",
         })
       );
 
-    await expect(getCarDetails("Unknown", "Model", "en")).resolves.toBeNull();
+    await expect(getCarDetails("Ford", "Crown Victoria", "en")).resolves.toBe(
+      "The Ford Crown Victoria is a full-size sedan."
+    );
+  });
+
+  it("uses English details fallback when selected language has no details", async () => {
+    mockFetch
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      .mockResolvedValueOnce(
+        wikipediaSummaryResponse({
+          extract: "The Toyota Corolla is a compact car.",
+        })
+      );
+
+    await expect(getCarDetails("Toyota", "Corolla", "pl")).resolves.toBe(
+      "The Toyota Corolla is a compact car."
+    );
   });
 });

@@ -96,7 +96,7 @@ const HomeScreen = () => {
             <Ionicons
               name="settings-outline"
               size={17}
-              color={Colors[theme].icon}
+              color={Colors[theme].accent}
             />
           </TouchableOpacity>
         </View>
