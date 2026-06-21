@@ -18,6 +18,21 @@ const wikipediaDetailsResponse = (page: Record<string, unknown>) =>
     json: () => Promise.resolve({ query: { pages: { "123": page } } }),
   });
 
+const wikipediaNoPagesResponse = () =>
+  Promise.resolve({
+    json: () => Promise.resolve({ query: {} }),
+  });
+
+const wikipediaSearchResponse = (title?: string) =>
+  Promise.resolve({
+    json: () =>
+      Promise.resolve({
+        query: {
+          search: title ? [{ title }] : [],
+        },
+      }),
+  });
+
 describe("wikipediaApi", () => {
   beforeEach(() => {
     mockFetch.mockReset();
@@ -76,6 +91,69 @@ describe("wikipediaApi", () => {
     await expect(getCarDetails("Unknown", "Model", "en")).resolves.toBeNull();
   });
 
+  it("does not block REST details fallback when action API returns missing", async () => {
+    mockFetch
+      .mockResolvedValueOnce(wikipediaDetailsResponse({ missing: true }))
+      .mockResolvedValueOnce(
+        wikipediaSummaryResponse({
+          extract: "The Renault Zoe is a battery electric car.",
+        })
+      );
+
+    await expect(getCarDetails("Renault", "Zoe", "en")).resolves.toBe(
+      "The Renault Zoe is a battery electric car."
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses Wikipedia search fallback when exact detail candidates are empty", async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes("list=search")) {
+        return wikipediaSearchResponse("Mazda MX-5");
+      }
+
+      if (url.includes("titles=Mazda_MX-5")) {
+        return wikipediaDetailsResponse({
+          extract: "The Mazda MX-5 is a two-seat roadster.",
+        });
+      }
+
+      if (url.includes("/page/summary/")) {
+        return wikipediaSummaryResponse({}, false);
+      }
+
+      return wikipediaDetailsResponse({ extract: "" });
+    });
+
+    await expect(getCarDetails("Mazda", "Miata", "en")).resolves.toBe(
+      "The Mazda MX-5 is a two-seat roadster."
+    );
+  });
+
+  it("uses make-level details fallback after exact and search fallbacks fail", async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes("list=search")) {
+        return wikipediaSearchResponse();
+      }
+
+      if (url.includes("titles=Saab&")) {
+        return wikipediaDetailsResponse({
+          extract: "Saab Automobile AB was a car manufacturer.",
+        });
+      }
+
+      if (url.includes("/page/summary/")) {
+        return wikipediaSummaryResponse({}, false);
+      }
+
+      return wikipediaDetailsResponse({ missing: true });
+    });
+
+    await expect(getCarDetails("Saab", "Imaginary 9000", "en")).resolves.toBe(
+      "Saab Automobile AB was a car manufacturer."
+    );
+  });
+
   it("falls back to Wikipedia summary extract when query details are empty", async () => {
     mockFetch
       .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
@@ -91,26 +169,97 @@ describe("wikipediaApi", () => {
   });
 
   it("uses English details fallback when selected language has no details", async () => {
-    mockFetch
-      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
-      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
-      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
-      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
-      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
-      .mockResolvedValueOnce(wikipediaSummaryResponse({}, false))
-      .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
-      .mockResolvedValueOnce(
-        wikipediaSummaryResponse({
+    mockFetch.mockImplementation((url: string) => {
+      if (url.startsWith("https://pl.wikipedia.org")) {
+        if (url.includes("list=search")) {
+          return wikipediaSearchResponse();
+        }
+
+        if (url.includes("/page/summary/")) {
+          return wikipediaSummaryResponse({}, false);
+        }
+
+        return wikipediaDetailsResponse({ extract: "" });
+      }
+
+      if (url.includes("titles=Toyota_Corolla_automobile")) {
+        return wikipediaDetailsResponse({
           extract: "The Toyota Corolla is a compact car.",
-        })
-      );
+        });
+      }
+
+      if (url.includes("/page/summary/")) {
+        return wikipediaSummaryResponse({}, false);
+      }
+
+      return wikipediaDetailsResponse({ extract: "" });
+    });
 
     await expect(getCarDetails("Toyota", "Corolla", "pl")).resolves.toBe(
       "The Toyota Corolla is a compact car."
     );
+  });
+
+  it("uses pageimages from a searched title before make-level images", async () => {
+    mockFetch.mockImplementation((url: string) => {
+      if (url.includes("list=search")) {
+        return wikipediaSearchResponse("Nissan Leaf");
+      }
+
+      if (url.includes("prop=pageimages") && url.includes("Nissan_Leaf")) {
+        return Promise.resolve({
+          json: () =>
+            Promise.resolve({
+              query: {
+                pages: {
+                  "321": {
+                    thumbnail: {
+                      source: "https://example.com/nissan-leaf.jpg",
+                    },
+                  },
+                },
+              },
+            }),
+        });
+      }
+
+      if (url.includes("prop=pageimages")) {
+        return wikipediaNoPagesResponse();
+      }
+
+      return wikipediaSummaryResponse({}, false);
+    });
+
+    await expect(fetchWikipediaCarImage("Nissan", "EV")).resolves.toBe(
+      "https://example.com/nissan-leaf.jpg"
+    );
+  });
+
+  it("caches details and images separately", async () => {
+    mockFetch
+      .mockResolvedValueOnce(
+        wikipediaDetailsResponse({
+          extract: "The Volvo 240 is a compact executive car.",
+        })
+      )
+      .mockResolvedValueOnce(
+        wikipediaSummaryResponse({
+          thumbnail: { source: "https://example.com/volvo-240.jpg" },
+        })
+      );
+
+    await expect(getCarDetails("Volvo", "240", "en")).resolves.toBe(
+      "The Volvo 240 is a compact executive car."
+    );
+    await expect(getCarDetails("Volvo", "240", "en")).resolves.toBe(
+      "The Volvo 240 is a compact executive car."
+    );
+    await expect(fetchWikipediaCarImage("Volvo", "240")).resolves.toBe(
+      "https://example.com/volvo-240.jpg"
+    );
+    await expect(fetchWikipediaCarImage("Volvo", "240")).resolves.toBe(
+      "https://example.com/volvo-240.jpg"
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });

@@ -89,6 +89,7 @@ def releaseStorePassword = getReleaseSigningProperty("CAREXPLORER_UPLOAD_STORE_P
 def releaseKeyAlias = getReleaseSigningProperty("CAREXPLORER_UPLOAD_KEY_ALIAS")
 def releaseKeyPassword = getReleaseSigningProperty("CAREXPLORER_UPLOAD_KEY_PASSWORD")
 def hasReleaseSigningConfig = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+def releaseSigningTasks = ["assemblerelease", "bundlerelease"]
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -101,8 +102,8 @@ android {
         applicationId 'com.adateo.carexplorer'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 58
-        versionName "2.0.4"
+        versionCode 59
+        versionName "2.0.5"
     }
     signingConfigs {
         debug {
@@ -125,12 +126,9 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            if (!hasReleaseSigningConfig) {
-                throw new GradleException(
-                    "Release signing is not configured. Set CAREXPLORER_UPLOAD_STORE_FILE, CAREXPLORER_UPLOAD_STORE_PASSWORD, CAREXPLORER_UPLOAD_KEY_ALIAS, and CAREXPLORER_UPLOAD_KEY_PASSWORD before running ./gradlew bundleRelease."
-                )
+            if (hasReleaseSigningConfig) {
+                signingConfig signingConfigs.release
             }
-            signingConfig signingConfigs.release
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -144,6 +142,18 @@ android {
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    def requiresReleaseSigning = taskGraph.allTasks.any { task ->
+        releaseSigningTasks.contains(task.name.toLowerCase())
+    }
+
+    if (requiresReleaseSigning && !hasReleaseSigningConfig) {
+        throw new GradleException(
+            "Release signing is not configured. Set CAREXPLORER_UPLOAD_STORE_FILE, CAREXPLORER_UPLOAD_STORE_PASSWORD, CAREXPLORER_UPLOAD_KEY_ALIAS, and CAREXPLORER_UPLOAD_KEY_PASSWORD before running ./gradlew bundleRelease."
+        )
     }
 }
 

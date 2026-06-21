@@ -15,7 +15,6 @@ import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
 import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
-import { getCarImagesFallbackUrl } from "../api/carImagesApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { CompareCar, useCompare } from "../context/CompareContext";
@@ -34,18 +33,16 @@ interface CarCardProps {
 const CarCard: React.FC<CarCardProps> = ({
   make,
   model,
-  year,
   showCompare = false,
   compareCar,
 }) => {
   const [imageUri, setImageUri] = React.useState<string | null>(null);
-  const [sourceStep, setSourceStep] = React.useState<
-    "wiki" | "carimages" | "fallback"
-  >("wiki");
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
   const [carDetails, setCarDetails] = React.useState<string | null>(null);
-  const [loadingDetails, setLoadingDetails] = React.useState<boolean>(false);
+  const [detailsStatus, setDetailsStatus] = React.useState<
+    "idle" | "loading" | "loaded" | "noDetails"
+  >("idle");
 
   const { t } = useTranslation();
 
@@ -63,21 +60,23 @@ const CarCard: React.FC<CarCardProps> = ({
   const isCompared = isInCompare(activeCompareCar);
 
   const fetchCarDetails = async () => {
-    setLoadingDetails(true);
+    setDetailsStatus("loading");
     try {
       const details = await getCarDetails(make, model, activeLanguage);
-      setCarDetails(details);
+      const safeDetails = details?.trim() ? details : null;
+      setCarDetails(safeDetails);
+      setDetailsStatus(safeDetails ? "loaded" : "noDetails");
     } catch (error) {
       console.error("Error fetching car details:", error);
       setCarDetails(null);
-    } finally {
-      setLoadingDetails(false);
+      setDetailsStatus("noDetails");
     }
   };
 
   const handleCloseModal = () => {
     setModalVisible(false);
     setCarDetails(null);
+    setDetailsStatus("idle");
   };
 
   const handleCardPress = () => {
@@ -106,7 +105,6 @@ const CarCard: React.FC<CarCardProps> = ({
     const fetchImage = async () => {
       setLoading(true);
       setImageUri(null);
-      setSourceStep("wiki");
 
       try {
         const wikiImage = await fetchWikipediaCarImage(make, model);
@@ -116,18 +114,9 @@ const CarCard: React.FC<CarCardProps> = ({
 
         if (wikiImage) {
           setImageUri(wikiImage);
-          setSourceStep("wiki");
-          return;
         }
-
-        setImageUri(getCarImagesFallbackUrl({ make, model, year }));
-        setSourceStep("carimages");
       } catch (error) {
         console.error("Error fetching image:", error);
-        if (mounted) {
-          setImageUri(getCarImagesFallbackUrl({ make, model, year }));
-          setSourceStep("carimages");
-        }
       } finally {
         if (mounted) {
           setLoading(false);
@@ -140,17 +129,10 @@ const CarCard: React.FC<CarCardProps> = ({
     return () => {
       mounted = false;
     };
-  }, [make, model, year]);
+  }, [make, model]);
 
   const handleImageError = () => {
-    if (sourceStep === "wiki") {
-      setImageUri(getCarImagesFallbackUrl({ make, model, year }));
-      setSourceStep("carimages");
-      return;
-    }
-
     setImageUri(null);
-    setSourceStep("fallback");
   };
 
   const renderImageContent = () =>
@@ -224,7 +206,7 @@ const CarCard: React.FC<CarCardProps> = ({
               <Text style={styles.subtitle}>
                 {make} {model}
               </Text>
-              {loadingDetails ? (
+              {detailsStatus === "loading" ? (
                 <LoadingIndicator />
               ) : (
                 <Text style={styles.description}>

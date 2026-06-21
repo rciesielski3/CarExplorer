@@ -1,11 +1,12 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
 
 const imageCache = new Map<string, string | null>();
+const detailsCache = new Map<string, string | null>();
 
 const encodeWikipediaTitle = (title: string) =>
   encodeURIComponent(title.trim().replace(/\s+/g, "_"));
 
-const buildWikipediaCandidates = (make: string, model: string): string[] => {
+const normalizeCarNames = (make: string, model: string) => {
   const normalizedMake = make.trim();
   const normalizedModel = model.trim();
   const startsWithMake = normalizedModel
@@ -18,18 +19,45 @@ const buildWikipediaCandidates = (make: string, model: string): string[] => {
     ? normalizedModel
     : `${normalizedMake} ${normalizedModel}`.trim();
 
-  return Array.from(
+  return {
+    fullName,
+    modelWithoutMake,
+    normalizedMake,
+  };
+};
+
+const uniqueNonEmpty = (values: string[]) =>
+  Array.from(
     new Set(
-      [
-        fullName,
-        `${fullName} automobile`,
-        `${fullName} car`,
-        `${fullName} vehicle`,
-        `${normalizedMake} ${modelWithoutMake} automobile`.trim(),
-        normalizedMake,
-      ].filter(Boolean)
+      values
+        .map((value) => value.trim().replace(/\s+/g, " "))
+        .filter(Boolean)
     )
   );
+
+const buildWikipediaCandidates = (make: string, model: string): string[] => {
+  const { fullName, modelWithoutMake, normalizedMake } = normalizeCarNames(
+    make,
+    model
+  );
+
+  return uniqueNonEmpty([
+    fullName,
+    `${fullName} automobile`,
+    `${fullName} car`,
+    `${fullName} vehicle`,
+    `${normalizedMake} ${modelWithoutMake} automobile`,
+  ]);
+};
+
+const buildMakeCandidates = (make: string): string[] => {
+  const normalizedMake = make.trim();
+
+  return uniqueNonEmpty([
+    normalizedMake,
+    `${normalizedMake} automobile`,
+    `${normalizedMake} car`,
+  ]);
 };
 
 const getFirstPage = (data: any) => {
@@ -67,6 +95,87 @@ const fetchWikipediaSummary = async (
   return response.json();
 };
 
+const fetchWikipediaDetailsExtract = async (
+  title: string,
+  language: string = "en"
+): Promise<string | null> => {
+  const url = WIKIPEDIA_API.DETAILS_QUERY(
+    encodeWikipediaTitle(title),
+    language
+  );
+  const response = await fetch(url);
+  const data = await response.json();
+  const page = getFirstPage(data);
+  const extract = page?.extract;
+
+  return typeof extract === "string" && extract.trim() ? extract : null;
+};
+
+const fetchWikipediaSearchTitle = async (
+  query: string,
+  language: string = "en"
+): Promise<string | null> => {
+  const url = `https://${language}.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(
+    query
+  )}&origin=*`;
+  const response = await fetch(url);
+  const data = await response.json();
+  const results = data?.query?.search;
+
+  if (!Array.isArray(results)) {
+    return null;
+  }
+
+  const result = results.find((item) => {
+    const title = item?.title;
+
+    return (
+      typeof title === "string" &&
+      title.trim() &&
+      !title.toLowerCase().includes("disambiguation")
+    );
+  });
+
+  return result?.title || null;
+};
+
+const fetchWikipediaPageImage = async (
+  title: string
+): Promise<string | null> => {
+  const imageQueryUrl =
+    WIKIPEDIA_API.BASE_URL +
+    WIKIPEDIA_API.IMAGE_QUERY(encodeWikipediaTitle(title));
+  const imageQueryResponse = await fetch(imageQueryUrl);
+  const imageQueryData = await imageQueryResponse.json();
+  const page = getFirstPage(imageQueryData);
+
+  return page?.thumbnail?.source || page?.originalimage?.source || null;
+};
+
+const getDetailsForTitles = async (
+  titles: string[],
+  language: string
+): Promise<string | null> => {
+  for (const title of titles) {
+    try {
+      const actionExtract = await fetchWikipediaDetailsExtract(title, language);
+
+      if (actionExtract) {
+        return actionExtract;
+      }
+
+      const summary = await fetchWikipediaSummary(title, language);
+      const summaryExtract = getExtractFromSummary(summary);
+
+      if (summaryExtract) {
+        return summaryExtract;
+      }
+    } catch {}
+  }
+
+  return null;
+};
+
 export const fetchWikipediaCarImage = async (
   make: string,
   model: string
@@ -88,20 +197,56 @@ export const fetchWikipediaCarImage = async (
         return summaryImage;
       }
 
-      if (summary) {
-        const imageQueryUrl =
-          WIKIPEDIA_API.BASE_URL +
-          WIKIPEDIA_API.IMAGE_QUERY(encodeWikipediaTitle(title));
-        const imageQueryResponse = await fetch(imageQueryUrl);
-        const imageQueryData = await imageQueryResponse.json();
-        const page = getFirstPage(imageQueryData);
-        const queryImage =
-          page?.thumbnail?.source || page?.originalimage?.source;
+      const queryImage = await fetchWikipediaPageImage(title);
 
-        if (queryImage) {
-          imageCache.set(cacheKey, queryImage);
-          return queryImage;
-        }
+      if (queryImage) {
+        imageCache.set(cacheKey, queryImage);
+        return queryImage;
+      }
+    } catch {}
+  }
+
+  const { fullName } = normalizeCarNames(make, model);
+  let searchTitle: string | null = null;
+
+  try {
+    searchTitle = await fetchWikipediaSearchTitle(fullName);
+  } catch {}
+
+  if (searchTitle) {
+    try {
+      const summary = await fetchWikipediaSummary(searchTitle);
+      const summaryImage = getImageFromSummary(summary);
+
+      if (summaryImage) {
+        imageCache.set(cacheKey, summaryImage);
+        return summaryImage;
+      }
+
+      const queryImage = await fetchWikipediaPageImage(searchTitle);
+
+      if (queryImage) {
+        imageCache.set(cacheKey, queryImage);
+        return queryImage;
+      }
+    } catch {}
+  }
+
+  for (const title of buildMakeCandidates(make)) {
+    try {
+      const summary = await fetchWikipediaSummary(title);
+      const summaryImage = getImageFromSummary(summary);
+
+      if (summaryImage) {
+        imageCache.set(cacheKey, summaryImage);
+        return summaryImage;
+      }
+
+      const queryImage = await fetchWikipediaPageImage(title);
+
+      if (queryImage) {
+        imageCache.set(cacheKey, queryImage);
+        return queryImage;
       }
     } catch {}
   }
@@ -117,37 +262,54 @@ export const getCarDetails = async (
   model: string,
   language: string = "en"
 ) => {
+  const cacheKey = `${language}:${make}:${model}`.toLowerCase();
+  if (detailsCache.has(cacheKey)) {
+    return detailsCache.get(cacheKey) || null;
+  }
+
   const candidates = buildWikipediaCandidates(make, model);
   const languages = Array.from(new Set([language, "en"].filter(Boolean)));
+  const { fullName } = normalizeCarNames(make, model);
 
   for (const activeLanguage of languages) {
-    for (const title of candidates) {
-      try {
-        const url = WIKIPEDIA_API.DETAILS_QUERY(
-          encodeWikipediaTitle(title),
+    const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
+
+    if (exactDetails) {
+      detailsCache.set(cacheKey, exactDetails);
+      return exactDetails;
+    }
+
+    try {
+      const searchTitle = await fetchWikipediaSearchTitle(
+        fullName,
+        activeLanguage
+      );
+
+      if (searchTitle) {
+        const searchDetails = await getDetailsForTitles(
+          [searchTitle],
           activeLanguage
         );
-        const response = await fetch(url);
-        const data = await response.json();
-        const page = getFirstPage(data);
-        const extract = page?.extract || "";
 
-        if (extract.trim() !== "") {
-          return extract;
+        if (searchDetails) {
+          detailsCache.set(cacheKey, searchDetails);
+          return searchDetails;
         }
+      }
+    } catch {}
 
-        if (page && !("missing" in page)) {
-          const summary = await fetchWikipediaSummary(title, activeLanguage);
-          const summaryExtract = getExtractFromSummary(summary);
+    const makeDetails = await getDetailsForTitles(
+      buildMakeCandidates(make),
+      activeLanguage
+    );
 
-          if (summaryExtract) {
-            return summaryExtract;
-          }
-        }
-      } catch {}
+    if (makeDetails) {
+      detailsCache.set(cacheKey, makeDetails);
+      return makeDetails;
     }
   }
 
+  detailsCache.set(cacheKey, null);
   return null;
 };
 
