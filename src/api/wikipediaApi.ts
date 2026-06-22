@@ -197,7 +197,7 @@ export const fetchWikipediaCarImage = async (
         return summaryImage;
       }
 
-      const queryImage = await fetchWikipediaPageImage(title);
+      const queryImage = summary ? await fetchWikipediaPageImage(title) : null;
 
       if (queryImage) {
         imageCache.set(cacheKey, queryImage);
