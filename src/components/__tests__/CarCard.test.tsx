@@ -8,15 +8,10 @@ import { FavoritesProvider } from "../../context/FavoritesContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ThemeProvider } from "../../context/ThemeContext";
 import { fetchWikipediaCarImage, getCarDetails } from "../../api/wikipediaApi";
-import { getCarImagesFallbackUrl } from "../../api/carImagesApi";
 
 jest.mock("../../api/wikipediaApi", () => ({
   getCarDetails: jest.fn(),
   fetchWikipediaCarImage: jest.fn(),
-}));
-
-jest.mock("../../api/carImagesApi", () => ({
-  getCarImagesFallbackUrl: jest.fn(),
 }));
 
 jest.mock(
@@ -37,7 +32,9 @@ jest.mock("@expo/vector-icons", () => ({
 
 jest.mock("../LoadingIndicator", () => {
   const { Text } = require("react-native");
-  const MockLoadingIndicator = () => <Text>loading</Text>;
+  const MockLoadingIndicator = () => (
+    <Text testID="loading-indicator">loading</Text>
+  );
 
   return MockLoadingIndicator;
 });
@@ -47,9 +44,6 @@ const mockedGetCarDetails = getCarDetails as jest.MockedFunction<
 >;
 const mockedFetchWikipediaCarImage =
   fetchWikipediaCarImage as jest.MockedFunction<typeof fetchWikipediaCarImage>;
-const mockedGetCarImagesFallbackUrl = getCarImagesFallbackUrl as jest.MockedFunction<
-  typeof getCarImagesFallbackUrl
->;
 
 const renderCarCard = async () => {
   let renderer: TestRenderer.ReactTestRenderer;
@@ -76,17 +70,25 @@ const findImageByUri = (renderer: TestRenderer.ReactTestRenderer, uri: string) =
     .findAllByType(Image)
     .find((image) => image.props.source?.uri === uri);
 
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+
+  return { promise, resolve };
+};
+
 describe("CarCard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedFetchWikipediaCarImage.mockResolvedValue(null);
-    mockedGetCarImagesFallbackUrl.mockReturnValue(
-      "https://carimagesapi.com/image?make=Toyota&model=Supra"
-    );
     mockedGetCarDetails.mockResolvedValue("Toyota Supra details");
   });
 
-  it("opens the details modal immediately when the card is pressed", async () => {
+  it("opens the details modal immediately and shows loading details", async () => {
+    const details = createDeferred<string | null>();
+    mockedGetCarDetails.mockReturnValue(details.promise);
     const renderer = await renderCarCard();
     const [cardPressable] = renderer.root.findAllByProps({
       testID: "car-card-pressable",
@@ -102,6 +104,14 @@ describe("CarCard", () => {
 
     expect(modal.props.visible).toBe(true);
     expect(mockedGetCarDetails).toHaveBeenCalledWith("Toyota", "Supra", "en");
+    expect(
+      renderer.root.findAllByProps({ testID: "loading-indicator" }).length
+    ).toBeGreaterThan(0);
+
+    await act(async () => {
+      details.resolve("Toyota Supra details");
+      await details.promise;
+    });
   });
 
   it("toggles favorite without opening the details modal", async () => {
@@ -140,26 +150,29 @@ describe("CarCard", () => {
     expect(mockedGetCarDetails).not.toHaveBeenCalled();
   });
 
-  it("uses CarImages fallback when Wikipedia has no image", async () => {
+  it("renders the Wikipedia image when the API returns an image URL", async () => {
+    mockedFetchWikipediaCarImage.mockResolvedValue(
+      "https://upload.wikimedia.org/toyota-supra.jpg"
+    );
+
     const renderer = await renderCarCard();
     const image = findImageByUri(
       renderer,
-      "https://carimagesapi.com/image?make=Toyota&model=Supra"
+      "https://upload.wikimedia.org/toyota-supra.jpg"
     );
 
     expect(image).toBeTruthy();
-    expect(mockedGetCarImagesFallbackUrl).toHaveBeenCalledWith({
-      make: "Toyota",
-      model: "Supra",
-      year: undefined,
-    });
   });
 
-  it("shows initials fallback after image fallback fails", async () => {
+  it("shows initials fallback after the image fails to load", async () => {
+    mockedFetchWikipediaCarImage.mockResolvedValue(
+      "https://upload.wikimedia.org/toyota-supra.jpg"
+    );
+
     const renderer = await renderCarCard();
     const image = findImageByUri(
       renderer,
-      "https://carimagesapi.com/image?make=Toyota&model=Supra"
+      "https://upload.wikimedia.org/toyota-supra.jpg"
     );
 
     await act(async () => {
@@ -167,5 +180,45 @@ describe("CarCard", () => {
     });
 
     expect(renderer.root.findByProps({ children: "TO" })).toBeTruthy();
+  });
+
+  it("shows initials fallback when Wikipedia has no image without rendering a dead URL", async () => {
+    const renderer = await renderCarCard();
+
+    expect(renderer.root.findAllByType(Image)).toHaveLength(0);
+    expect(renderer.root.findByProps({ children: "TO" })).toBeTruthy();
+  });
+
+  it("shows loaded details in the modal", async () => {
+    const renderer = await renderCarCard();
+    const [cardPressable] = renderer.root.findAllByProps({
+      testID: "car-card-pressable",
+    });
+
+    await act(async () => {
+      cardPressable.props.onPress();
+    });
+
+    expect(
+      renderer.root.findByProps({ children: "Toyota Supra details" })
+    ).toBeTruthy();
+    expect(renderer.root.findAllByProps({ children: "noDetails" })).toHaveLength(
+      0
+    );
+  });
+
+  it("shows noDetails only after details finish without content", async () => {
+    mockedGetCarDetails.mockResolvedValue(null);
+
+    const renderer = await renderCarCard();
+    const [cardPressable] = renderer.root.findAllByProps({
+      testID: "car-card-pressable",
+    });
+
+    await act(async () => {
+      cardPressable.props.onPress();
+    });
+
+    expect(renderer.root.findByProps({ children: "noDetails" })).toBeTruthy();
   });
 });
