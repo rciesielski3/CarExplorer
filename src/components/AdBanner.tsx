@@ -34,7 +34,10 @@ const AdBanner = () => {
       <BannerAd
         unitId={unitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+        requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+          maxAdContentRating: "G",
+        }}
         onAdFailedToLoad={() => setAdFailed(true)}
       />
     </View>
