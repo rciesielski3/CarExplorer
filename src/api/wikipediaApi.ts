@@ -1,7 +1,23 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
 
-const imageCache = new Map<string, string | null>();
 const detailsCache = new Map<string, string | null>();
+
+const WIKIPEDIA_FETCH_OPTIONS = {
+  headers: {
+    Accept: "application/json",
+    "Api-User-Agent":
+      "CarExplorer/2.0.5 (https://rciesielski3.github.io/portfolio/#/contact)",
+  },
+};
+
+const fetchWikipediaJson = async (url: string) => {
+  const response = await fetch(url, WIKIPEDIA_FETCH_OPTIONS);
+  const data = await response.json().catch(() => null);
+
+  return { data, response };
+};
+
+const isFailedResponse = (response: Response): boolean => response.ok === false;
 
 const encodeWikipediaTitle = (title: string) =>
   encodeURIComponent(title.trim().replace(/\s+/g, "_"));
@@ -36,18 +52,13 @@ const uniqueNonEmpty = (values: string[]) =>
   );
 
 const buildWikipediaCandidates = (make: string, model: string): string[] => {
-  const { fullName, modelWithoutMake, normalizedMake } = normalizeCarNames(
-    make,
-    model
-  );
-
-  return uniqueNonEmpty([
-    fullName,
+  const fullName = `${make} ${model}`.trim();
+  return [
+    `${fullName}`,
     `${fullName} automobile`,
     `${fullName} car`,
-    `${fullName} vehicle`,
-    `${normalizedMake} ${modelWithoutMake} automobile`,
-  ]);
+    `${make} ${model.replace(make, "").trim()} automobile`,
+  ].filter(Boolean);
 };
 
 const buildMakeCandidates = (make: string): string[] => {
@@ -86,13 +97,18 @@ const fetchWikipediaSummary = async (
   const url = `https://${language}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
     title
   )}`;
-  const response = await fetch(url);
+  const { data, response } = await fetchWikipediaJson(url);
 
-  if (!response.ok) {
+  if (isFailedResponse(response)) {
+    console.warn("Wikipedia summary lookup failed", {
+      language,
+      status: response.status,
+      title,
+    });
     return null;
   }
 
-  return response.json();
+  return data;
 };
 
 const fetchWikipediaDetailsExtract = async (
@@ -103,8 +119,15 @@ const fetchWikipediaDetailsExtract = async (
     encodeWikipediaTitle(title),
     language
   );
-  const response = await fetch(url);
-  const data = await response.json();
+  const { data, response } = await fetchWikipediaJson(url);
+  if (isFailedResponse(response)) {
+    console.warn("Wikipedia details lookup failed", {
+      language,
+      status: response.status,
+      title,
+    });
+    return null;
+  }
   const page = getFirstPage(data);
   const extract = page?.extract;
 
@@ -118,8 +141,15 @@ const fetchWikipediaSearchTitle = async (
   const url = `https://${language}.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(
     query
   )}&origin=*`;
-  const response = await fetch(url);
-  const data = await response.json();
+  const { data, response } = await fetchWikipediaJson(url);
+  if (isFailedResponse(response)) {
+    console.warn("Wikipedia search lookup failed", {
+      language,
+      query,
+      status: response.status,
+    });
+    return null;
+  }
   const results = data?.query?.search;
 
   if (!Array.isArray(results)) {
@@ -137,19 +167,6 @@ const fetchWikipediaSearchTitle = async (
   });
 
   return result?.title || null;
-};
-
-const fetchWikipediaPageImage = async (
-  title: string
-): Promise<string | null> => {
-  const imageQueryUrl =
-    WIKIPEDIA_API.BASE_URL +
-    WIKIPEDIA_API.IMAGE_QUERY(encodeWikipediaTitle(title));
-  const imageQueryResponse = await fetch(imageQueryUrl);
-  const imageQueryData = await imageQueryResponse.json();
-  const page = getFirstPage(imageQueryData);
-
-  return page?.thumbnail?.source || page?.originalimage?.source || null;
 };
 
 const getDetailsForTitles = async (
@@ -170,90 +187,40 @@ const getDetailsForTitles = async (
       if (summaryExtract) {
         return summaryExtract;
       }
-    } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn("Wikipedia details candidate threw", {
+        error: message,
+        language,
+        title,
+      });
+    }
   }
 
   return null;
 };
-
-export const fetchWikipediaCarImage = async (
+export async function fetchWikipediaCarImage(
   make: string,
   model: string
-): Promise<string | null> => {
-  const cacheKey = `${make}:${model}`.toLowerCase();
-  if (imageCache.has(cacheKey)) {
-    return imageCache.get(cacheKey) || null;
-  }
-
+): Promise<string | null> {
   const candidates = buildWikipediaCandidates(make, model);
-
   for (const title of candidates) {
     try {
-      const summary = await fetchWikipediaSummary(title);
-      const summaryImage = getImageFromSummary(summary);
-
-      if (summaryImage) {
-        imageCache.set(cacheKey, summaryImage);
-        return summaryImage;
-      }
-
-      const queryImage = await fetchWikipediaPageImage(title);
-
-      if (queryImage) {
-        imageCache.set(cacheKey, queryImage);
-        return queryImage;
-      }
-    } catch {}
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+        title
+      )}`;
+      const response = await fetch(url);
+      if (!response.ok) continue;
+      const data = await response.json();
+      const imageUrl =
+        data?.thumbnail?.source || data?.originalimage?.source || null;
+      if (imageUrl) return imageUrl;
+    } catch {
+      continue;
+    }
   }
-
-  const { fullName } = normalizeCarNames(make, model);
-  let searchTitle: string | null = null;
-
-  try {
-    searchTitle = await fetchWikipediaSearchTitle(fullName);
-  } catch {}
-
-  if (searchTitle) {
-    try {
-      const summary = await fetchWikipediaSummary(searchTitle);
-      const summaryImage = getImageFromSummary(summary);
-
-      if (summaryImage) {
-        imageCache.set(cacheKey, summaryImage);
-        return summaryImage;
-      }
-
-      const queryImage = await fetchWikipediaPageImage(searchTitle);
-
-      if (queryImage) {
-        imageCache.set(cacheKey, queryImage);
-        return queryImage;
-      }
-    } catch {}
-  }
-
-  for (const title of buildMakeCandidates(make)) {
-    try {
-      const summary = await fetchWikipediaSummary(title);
-      const summaryImage = getImageFromSummary(summary);
-
-      if (summaryImage) {
-        imageCache.set(cacheKey, summaryImage);
-        return summaryImage;
-      }
-
-      const queryImage = await fetchWikipediaPageImage(title);
-
-      if (queryImage) {
-        imageCache.set(cacheKey, queryImage);
-        return queryImage;
-      }
-    } catch {}
-  }
-
-  imageCache.set(cacheKey, null);
   return null;
-};
+}
 
 export const getCarImageUrl = fetchWikipediaCarImage;
 
@@ -296,7 +263,14 @@ export const getCarDetails = async (
           return searchDetails;
         }
       }
-    } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn("Wikipedia details search threw", {
+        activeLanguage,
+        error: message,
+        fullName,
+      });
+    }
 
     const makeDetails = await getDetailsForTitles(
       buildMakeCandidates(make),

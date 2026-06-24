@@ -8,10 +8,15 @@ import { FavoritesProvider } from "../../context/FavoritesContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ThemeProvider } from "../../context/ThemeContext";
 import { fetchWikipediaCarImage, getCarDetails } from "../../api/wikipediaApi";
+import { getCarImagesFallbackUrl } from "../../api/carImagesApi";
 
 jest.mock("../../api/wikipediaApi", () => ({
   getCarDetails: jest.fn(),
   fetchWikipediaCarImage: jest.fn(),
+}));
+
+jest.mock("../../api/carImagesApi", () => ({
+  getCarImagesFallbackUrl: jest.fn(),
 }));
 
 jest.mock(
@@ -44,6 +49,8 @@ const mockedGetCarDetails = getCarDetails as jest.MockedFunction<
 >;
 const mockedFetchWikipediaCarImage =
   fetchWikipediaCarImage as jest.MockedFunction<typeof fetchWikipediaCarImage>;
+const mockedGetCarImagesFallbackUrl =
+  getCarImagesFallbackUrl as jest.MockedFunction<typeof getCarImagesFallbackUrl>;
 
 const renderCarCard = async () => {
   let renderer: TestRenderer.ReactTestRenderer;
@@ -83,6 +90,7 @@ describe("CarCard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedFetchWikipediaCarImage.mockResolvedValue(null);
+    mockedGetCarImagesFallbackUrl.mockResolvedValue(null);
     mockedGetCarDetails.mockResolvedValue("Toyota Supra details");
   });
 

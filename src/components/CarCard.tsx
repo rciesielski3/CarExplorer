@@ -14,6 +14,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
+import { getCarImagesFallbackUrl } from "../api/carImagesApi";
 import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
@@ -33,10 +34,14 @@ interface CarCardProps {
 const CarCard: React.FC<CarCardProps> = ({
   make,
   model,
+  year,
   showCompare = false,
   compareCar,
 }) => {
   const [imageUri, setImageUri] = React.useState<string | null>(null);
+  const [sourceStep, setSourceStep] = React.useState<
+    "wiki" | "carimages" | "fallback"
+  >("wiki");
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
   const [carDetails, setCarDetails] = React.useState<string | null>(null);
@@ -101,42 +106,52 @@ const CarCard: React.FC<CarCardProps> = ({
 
   React.useEffect(() => {
     let mounted = true;
-
-    const fetchImage = async () => {
+    async function loadImage() {
       setLoading(true);
-      setImageUri(null);
-
-      try {
-        const wikiImage = await fetchWikipediaCarImage(make, model);
-        if (!mounted) {
-          return;
-        }
-
-        if (wikiImage) {
-          setImageUri(wikiImage);
-        }
-      } catch (error) {
-        console.error("Error fetching image:", error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+      const wikiImage = await fetchWikipediaCarImage(make, model);
+      if (!mounted) return;
+      if (wikiImage) {
+        setImageUri(wikiImage);
+        setSourceStep("wiki");
+        setLoading(false);
+        return;
       }
-    };
 
-    fetchImage();
-
+      const carImagesUrl = await getCarImagesFallbackUrl({
+        make,
+        model,
+        year,
+      });
+      if (!mounted) return;
+      if (carImagesUrl) {
+        setImageUri(carImagesUrl);
+        setSourceStep("carimages");
+      } else {
+        setImageUri(null);
+        setSourceStep("fallback");
+      }
+      setLoading(false);
+    }
+    loadImage();
     return () => {
       mounted = false;
     };
-  }, [make, model]);
+  }, [make, model, year]);
 
   const handleImageError = () => {
+    if (sourceStep === "wiki") {
+      getCarImagesFallbackUrl({ make, model, year }).then((url) => {
+        setImageUri(url);
+        setSourceStep(url ? "carimages" : "fallback");
+      });
+      return;
+    }
     setImageUri(null);
+    setSourceStep("fallback");
   };
 
   const renderImageContent = () =>
-    imageUri ? (
+    imageUri && sourceStep !== "fallback" ? (
       <Image
         source={{ uri: imageUri }}
         style={styles.imageCard}
