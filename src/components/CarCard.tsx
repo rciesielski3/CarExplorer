@@ -14,8 +14,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
-import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
 import { getCarImagesFallbackUrl } from "../api/carImagesApi";
+import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { CompareCar, useCompare } from "../context/CompareContext";
@@ -45,7 +45,9 @@ const CarCard: React.FC<CarCardProps> = ({
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
   const [carDetails, setCarDetails] = React.useState<string | null>(null);
-  const [loadingDetails, setLoadingDetails] = React.useState<boolean>(false);
+  const [detailsStatus, setDetailsStatus] = React.useState<
+    "idle" | "loading" | "loaded" | "noDetails"
+  >("idle");
 
   const { t } = useTranslation();
 
@@ -63,21 +65,23 @@ const CarCard: React.FC<CarCardProps> = ({
   const isCompared = isInCompare(activeCompareCar);
 
   const fetchCarDetails = async () => {
-    setLoadingDetails(true);
+    setDetailsStatus("loading");
     try {
       const details = await getCarDetails(make, model, activeLanguage);
-      setCarDetails(details);
+      const safeDetails = details?.trim() ? details : null;
+      setCarDetails(safeDetails);
+      setDetailsStatus(safeDetails ? "loaded" : "noDetails");
     } catch (error) {
       console.error("Error fetching car details:", error);
       setCarDetails(null);
-    } finally {
-      setLoadingDetails(false);
+      setDetailsStatus("noDetails");
     }
   };
 
   const handleCloseModal = () => {
     setModalVisible(false);
     setCarDetails(null);
+    setDetailsStatus("idle");
   };
 
   const handleCardPress = () => {
@@ -102,41 +106,33 @@ const CarCard: React.FC<CarCardProps> = ({
 
   React.useEffect(() => {
     let mounted = true;
-
-    const fetchImage = async () => {
+    async function loadImage() {
       setLoading(true);
-      setImageUri(null);
-      setSourceStep("wiki");
-
-      try {
-        const wikiImage = await fetchWikipediaCarImage(make, model);
-        if (!mounted) {
-          return;
-        }
-
-        if (wikiImage) {
-          setImageUri(wikiImage);
-          setSourceStep("wiki");
-          return;
-        }
-
-        setImageUri(getCarImagesFallbackUrl({ make, model, year }));
-        setSourceStep("carimages");
-      } catch (error) {
-        console.error("Error fetching image:", error);
-        if (mounted) {
-          setImageUri(getCarImagesFallbackUrl({ make, model, year }));
-          setSourceStep("carimages");
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+      const wikiImage = await fetchWikipediaCarImage(make, model);
+      if (!mounted) return;
+      if (wikiImage) {
+        setImageUri(wikiImage);
+        setSourceStep("wiki");
+        setLoading(false);
+        return;
       }
-    };
 
-    fetchImage();
-
+      const carImagesUrl = await getCarImagesFallbackUrl({
+        make,
+        model,
+        year,
+      });
+      if (!mounted) return;
+      if (carImagesUrl) {
+        setImageUri(carImagesUrl);
+        setSourceStep("carimages");
+      } else {
+        setImageUri(null);
+        setSourceStep("fallback");
+      }
+      setLoading(false);
+    }
+    loadImage();
     return () => {
       mounted = false;
     };
@@ -144,17 +140,18 @@ const CarCard: React.FC<CarCardProps> = ({
 
   const handleImageError = () => {
     if (sourceStep === "wiki") {
-      setImageUri(getCarImagesFallbackUrl({ make, model, year }));
-      setSourceStep("carimages");
+      getCarImagesFallbackUrl({ make, model, year }).then((url) => {
+        setImageUri(url);
+        setSourceStep(url ? "carimages" : "fallback");
+      });
       return;
     }
-
     setImageUri(null);
     setSourceStep("fallback");
   };
 
   const renderImageContent = () =>
-    imageUri ? (
+    imageUri && sourceStep !== "fallback" ? (
       <Image
         source={{ uri: imageUri }}
         style={styles.imageCard}
@@ -224,7 +221,7 @@ const CarCard: React.FC<CarCardProps> = ({
               <Text style={styles.subtitle}>
                 {make} {model}
               </Text>
-              {loadingDetails ? (
+              {detailsStatus === "loading" ? (
                 <LoadingIndicator />
               ) : (
                 <Text style={styles.description}>

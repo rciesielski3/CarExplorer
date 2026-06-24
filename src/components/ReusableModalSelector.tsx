@@ -1,5 +1,13 @@
 import React from "react";
-import { Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { useTheme } from "../context/ThemeContext";
@@ -22,6 +30,8 @@ const ReusableModalSelector: React.FC<ReusableModalSelectorProps> = ({
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
+  const { height } = useWindowDimensions();
+  const modalMaxHeight = Math.min(height - 96, 420);
 
   const selectedLabel =
     data.find((item) => item.value === selectedValue)?.label ?? label;
@@ -44,7 +54,15 @@ const ReusableModalSelector: React.FC<ReusableModalSelectorProps> = ({
         onRequestClose={() => setVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.pickerModalContent}>
+          <Pressable
+            accessible={false}
+            accessibilityRole="button"
+            style={styles.modalBackdropPressable}
+            onPress={() => setVisible(false)}
+          />
+          <View
+            style={[styles.pickerModalContent, { maxHeight: modalMaxHeight }]}
+          >
             <View style={styles.pickerModalHeader}>
               <Text style={styles.pickerModalTitle}>{label}</Text>
               <TouchableOpacity
@@ -56,7 +74,10 @@ const ReusableModalSelector: React.FC<ReusableModalSelectorProps> = ({
                 </Text>
               </TouchableOpacity>
             </View>
-            <ScrollView>
+            <ScrollView
+              style={styles.pickerOptionsScroll}
+              contentContainerStyle={styles.pickerOptionsContent}
+            >
               {data.map((item) => {
                 const isSelected = item.value === selectedValue;
                 return (

@@ -1,11 +1,23 @@
 import React from "react";
-import { View, Text, Modal, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
+import { Colors } from "@/constants/Colors";
 import { fetchQuizQuestions } from "../services/quizService";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
@@ -16,6 +28,7 @@ import {
   ScreenContainer,
 } from "../components";
 import QuizQuestion from "../components/QuizQuestion";
+import { RootStackParamList } from "../navigation/types";
 
 interface Question {
   question: string;
@@ -35,6 +48,9 @@ const QuizScreen = () => {
   const { t } = useTranslation();
   const { language } = useAppLanguage();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const styles = createGlobalStyles(theme);
   const stylesHome = createHomeScreenStyles(theme);
@@ -79,6 +95,16 @@ const QuizScreen = () => {
   return (
     <ScreenContainer>
       <View style={stylesHome.container}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={t("back", "Back")}
+          style={styles.compareBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={18} color={Colors[theme].text} />
+          <Text style={styles.compareBackText}>{t("back", "Back")}</Text>
+        </TouchableOpacity>
+
         {loading ? (
           <LoadingIndicator type="QUIZLOADING" />
         ) : questions.length === 0 ? (
@@ -88,12 +114,14 @@ const QuizScreen = () => {
             <Text style={styles.subtitle}>
               {t("yourScore")}: {score}/{questions.length}
             </Text>
-            <CustomButton title={t("restartQuiz")} onPress={loadQuestions} />
-            <CustomButton
-              title={t("viewAnswers")}
-              onPress={() => setShowModal(true)}
-              variant="success"
-            />
+            <View style={quizStyles.scoreActions}>
+              <CustomButton title={t("restartQuiz")} onPress={loadQuestions} />
+              <CustomButton
+                title={t("viewAnswers")}
+                onPress={() => setShowModal(true)}
+                variant="success"
+              />
+            </View>
           </View>
         ) : (
           <View style={styles.centeredContent}>
@@ -110,11 +138,24 @@ const QuizScreen = () => {
           animationType="slide"
           onRequestClose={() => setShowModal(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContainer,
+              quizStyles.answersModalOverlay,
+              {
+                paddingTop: Math.max(insets.top + 24, 44),
+                paddingBottom: Math.max(insets.bottom + 24, 44),
+              },
+            ]}
+          >
+            <View style={[styles.modalContent, quizStyles.answersModalContent]}>
               <ScrollView
-                style={styles.scrollContainer}
-                contentContainerStyle={styles.modalScrollContent}
+                style={[styles.scrollContainer, quizStyles.answersScroll]}
+                contentContainerStyle={[
+                  styles.modalScrollContent,
+                  quizStyles.answersScrollContent,
+                ]}
+                showsVerticalScrollIndicator
               >
                 <Text style={styles.subtitle}>{t("yourAnswers")}</Text>
                 {questions.map((q, index) => (
@@ -142,6 +183,7 @@ const QuizScreen = () => {
                 title={t("close")}
                 onPress={() => setShowModal(false)}
                 variant="danger"
+                style={quizStyles.modalButton}
               />
             </View>
           </View>
@@ -150,5 +192,33 @@ const QuizScreen = () => {
     </ScreenContainer>
   );
 };
+
+const quizStyles = StyleSheet.create({
+  scoreActions: {
+    alignSelf: "stretch",
+    gap: 12,
+    marginTop: 12,
+  },
+  answersModalOverlay: {
+    justifyContent: "center",
+    paddingHorizontal: 18,
+  },
+  answersModalContent: {
+    alignSelf: "center",
+    flexShrink: 1,
+    maxHeight: "100%",
+    width: "100%",
+  },
+  answersScroll: {
+    flexShrink: 1,
+  },
+  answersScrollContent: {
+    paddingBottom: 8,
+  },
+  modalButton: {
+    alignSelf: "stretch",
+    marginTop: 12,
+  },
+});
 
 export default QuizScreen;
