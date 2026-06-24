@@ -209,9 +209,8 @@ export async function fetchWikipediaCarImage(
       const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
         title
       )}`;
-      const response = await fetch(url);
+      const { data, response } = await fetchWikipediaJson(url);
       if (!response.ok) continue;
-      const data = await response.json();
       const imageUrl =
         data?.thumbnail?.source || data?.originalimage?.source || null;
       if (imageUrl) return imageUrl;
