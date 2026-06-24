@@ -186,22 +186,27 @@ By following these steps, you should be able to get more detailed information ab
 
 ## 📦 Building Android Release for Production
 
+### Setup (one time)
+
+1. **Copy `.env.example` to `.env` and fill in API keys:**
+   ```sh
+   cp .env.example .env
+   # Edit .env with your actual API keys
+   ```
+
+2. **Copy `gradle.properties.example` to `android/gradle.properties` and add signing credentials:**
+   ```sh
+   cp gradle.properties.example android/gradle.properties
+   # Edit android/gradle.properties with your keystore path and passwords
+   ```
+   
+   (Find your keystore path: usually in `~/.android/debug.keystore` or Android Studio keystore manager)
+
 ### Prerequisites
 
-- Release signing credentials configured in environment variables:
-  ```
-  CAREXPLORER_UPLOAD_STORE_FILE=/path/to/keystore.jks
-  CAREXPLORER_UPLOAD_STORE_PASSWORD=your_password
-  CAREXPLORER_UPLOAD_KEY_ALIAS=your_key_alias
-  CAREXPLORER_UPLOAD_KEY_PASSWORD=your_key_password
-  ```
-- `.env` file with production API keys:
-  ```
-  NEWS_API_KEY=your_api_key
-  CAR_IMAGES_API_KEY=your_api_key
-  EXPO_PUBLIC_ADMOB_ANDROID_APP_ID=your_admob_id
-  EXPO_PUBLIC_ADMOB_ANDROID_BANNER_ID=your_banner_id
-  ```
+- `.env` file with API keys (see setup above)
+- `android/gradle.properties` with signing credentials (see setup above)
+- Android keystore file (`.jks`)
 
 ### Build Commands
 
