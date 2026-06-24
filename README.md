@@ -181,3 +181,49 @@ To build the project locally and get detailed logs, follow these steps:
 5. **Check the logs**: Review the logs to identify the root cause of the compilation error.
 
 By following these steps, you should be able to get more detailed information about the build failure and diagnose the issue.
+
+---
+
+## 📦 Building Android Release for Production
+
+### Prerequisites
+
+- Release signing credentials configured in environment variables:
+  ```
+  CAREXPLORER_UPLOAD_STORE_FILE=/path/to/keystore.jks
+  CAREXPLORER_UPLOAD_STORE_PASSWORD=your_password
+  CAREXPLORER_UPLOAD_KEY_ALIAS=your_key_alias
+  CAREXPLORER_UPLOAD_KEY_PASSWORD=your_key_password
+  ```
+- `.env` file with production API keys:
+  ```
+  NEWS_API_KEY=your_api_key
+  CAR_IMAGES_API_KEY=your_api_key
+  EXPO_PUBLIC_ADMOB_ANDROID_APP_ID=your_admob_id
+  EXPO_PUBLIC_ADMOB_ANDROID_BANNER_ID=your_banner_id
+  ```
+
+### Build Commands
+
+**App Bundle (recommended for Play Store):**
+```sh
+cd android && ./gradlew bundleRelease -x lint && cd ..
+```
+Output: `android/app/build/outputs/bundle/release/app-release.aab`
+
+**APK (alternative):**
+```sh
+cd android && ./gradlew assembleRelease -x lint && cd ..
+```
+Output: `android/app/build/outputs/apk/release/app-release.apk`
+
+**Version Management:**
+- Update version in `app.json` and `android/app/build.gradle`:
+  - `version`: semantic version (e.g., "2.0.6")
+  - `versionCode`: increment by 1 for each release
+
+### Submission
+
+1. Sign in to [Google Play Console](https://play.google.com/console)
+2. Upload `.aab` to Production track
+3. Fill in release notes and submit for review
