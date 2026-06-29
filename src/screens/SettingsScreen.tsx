@@ -30,12 +30,22 @@ const SettingsScreen = () => {
   const [showAbout, setShowAbout] = React.useState(false);
   const [showResetModal, setShowResetModal] = React.useState(false);
   const [resetSuccess, setResetSuccess] = React.useState(false);
+  const [showClearFavoritesModal, setShowClearFavoritesModal] = React.useState(false);
+  const [clearFavoritesSuccess, setClearFavoritesSuccess] = React.useState(false);
 
   const handleReset = () => {
     clearFavorites();
     resetCompare();
     setShowResetModal(false);
     setResetSuccess(true);
+  };
+
+  const handleClearFavorites = () => {
+    clearFavorites();
+    resetCompare();
+    setShowClearFavoritesModal(false);
+    setClearFavoritesSuccess(true);
+    setTimeout(() => setClearFavoritesSuccess(false), 3000);
   };
 
   const languageOptions = React.useMemo(
@@ -93,6 +103,25 @@ const SettingsScreen = () => {
             {t("resetDataSuccess", "All data cleared")}
           </Text>
         )}
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.settingRow}
+          onPress={() => setShowClearFavoritesModal(true)}
+        >
+          <Text style={styles.settingLabel}>
+            {t("clearFavorites", "Clear Favorites & Garage")}
+          </Text>
+          <Ionicons
+            name="trash-outline"
+            size={18}
+            color={Colors[theme].icon}
+          />
+        </TouchableOpacity>
+        {clearFavoritesSuccess && (
+          <Text style={styles.emptyText}>
+            {t("clearFavoritesSuccess", "Favorites and Garage cleared")}
+          </Text>
+        )}
           <TouchableOpacity
           accessibilityRole="button"
           style={styles.settingRow}
@@ -117,6 +146,18 @@ const SettingsScreen = () => {
         confirmLabel={t("resetDataConfirm", "Reset")}
         onCancel={() => setShowResetModal(false)}
         onConfirm={handleReset}
+      />
+      <ConfirmModal
+        visible={showClearFavoritesModal}
+        title={t("clearFavoritesTitle", "Clear Favorites & Garage")}
+        message={t(
+          "clearFavoritesMessage",
+          "This will permanently remove all your saved favorites and garage selections. This action cannot be undone."
+        )}
+        cancelLabel={t("clearFavoritesCancel", "Cancel")}
+        confirmLabel={t("clearFavoritesConfirm", "Clear")}
+        onCancel={() => setShowClearFavoritesModal(false)}
+        onConfirm={handleClearFavorites}
       />
       <AboutModal
         visible={showAbout}
