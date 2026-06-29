@@ -11,12 +11,12 @@ const WIKIPEDIA_FETCH_OPTIONS = {
 };
 
 const fetchWikipediaJson = async (url: string) => {
-  console.log('📡 Fetching:', url);
+  console.log('[FETCH] Fetching:', url);
   const response = await fetch(url, WIKIPEDIA_FETCH_OPTIONS);
   const data = await response.json().catch(() => null);
 
-  console.log('✅ Status:', response.status);
-  console.log('📦 Response data (first 200 chars):', JSON.stringify(data).slice(0, 200));
+  console.log('[STATUS] Status:', response.status);
+  console.log('[DATA] Response data (first 200 chars):', JSON.stringify(data).slice(0, 200));
 
   return { data, response };
 };
@@ -208,7 +208,7 @@ export async function fetchWikipediaCarImage(
   model: string
 ): Promise<string | null> {
   const candidates = buildWikipediaCandidates(make, model);
-  console.log('🔍 Image candidates:', candidates);
+  console.log('[IMAGE_CANDIDATES]', candidates);
 
   for (const title of candidates) {
     try {
@@ -218,22 +218,22 @@ export async function fetchWikipediaCarImage(
       const { data, response } = await fetchWikipediaJson(url);
 
       if (!response.ok) {
-        console.warn('⚠️ Wikipedia image lookup failed for', title, 'status:', response.status);
+        console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
         continue;
       }
 
       const imageUrl =
         data?.thumbnail?.source || data?.originalimage?.source || null;
-      console.log('🖼️ Found image for', title, ':', imageUrl);
+      console.log('[IMAGE_FOUND]', title, ':', imageUrl);
 
       if (imageUrl) return imageUrl;
     } catch (error) {
-      console.error('❌ Error fetching image for', title, error);
+      console.error('[IMAGE_ERROR]', title, error);
       continue;
     }
   }
 
-  console.log('❌ No image found for', make, model);
+  console.log('[NO_IMAGE]', make, model);
   return null;
 }
 
@@ -244,10 +244,10 @@ export const getCarDetails = async (
   model: string,
   language: string = "en"
 ) => {
-  console.log('📖 Getting car details for', make, model, 'language:', language);
+  console.log('[DETAILS_REQUEST]', make, model, 'language:', language);
   const cacheKey = `${language}:${make}:${model}`.toLowerCase();
   if (detailsCache.has(cacheKey)) {
-    console.log('✅ Found in cache for', cacheKey);
+    console.log('[CACHE_HIT]', cacheKey);
     return detailsCache.get(cacheKey) || null;
   }
 
@@ -259,7 +259,7 @@ export const getCarDetails = async (
     const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
 
     if (exactDetails) {
-      console.log('✅ Found details from candidates for', activeLanguage);
+      console.log('[DETAILS_FROM_CANDIDATES]', activeLanguage);
       detailsCache.set(cacheKey, exactDetails);
       return exactDetails;
     }
@@ -277,7 +277,7 @@ export const getCarDetails = async (
         );
 
         if (searchDetails) {
-          console.log('✅ Found details from search title', searchTitle, 'for', activeLanguage);
+          console.log('[DETAILS_FROM_SEARCH]', searchTitle, 'for', activeLanguage);
           detailsCache.set(cacheKey, searchDetails);
           return searchDetails;
         }
@@ -297,13 +297,13 @@ export const getCarDetails = async (
     );
 
     if (makeDetails) {
-      console.log('✅ Found details from make candidates for', activeLanguage);
+      console.log('[DETAILS_FROM_MAKE]', activeLanguage);
       detailsCache.set(cacheKey, makeDetails);
       return makeDetails;
     }
   }
 
-  console.log('❌ No details found for', make, model);
+  console.log('[NO_DETAILS]', make, model);
   detailsCache.set(cacheKey, null);
   return null;
 };
