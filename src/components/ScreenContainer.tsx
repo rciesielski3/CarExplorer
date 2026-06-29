@@ -27,16 +27,22 @@ const ScreenContainer: React.FC<ScreenContainerProps> = ({
     >
       <View pointerEvents="none" style={styles.depthLayer}>
         <LinearGradient
-          colors={["rgba(255,77,28,0.10)", "rgba(255,77,28,0)"]}
+          colors={["rgba(255,77,28,0.25)", "rgba(255,77,28,0)"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.depthBand, styles.depthBandTop]}
         />
         <LinearGradient
-          colors={["rgba(34,197,94,0.05)", "rgba(34,197,94,0)"]}
+          colors={["rgba(34,197,94,0.15)", "rgba(34,197,94,0)"]}
           start={{ x: 1, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={[styles.depthBand, styles.depthBandBottom]}
+        />
+        <LinearGradient
+          colors={["rgba(59,130,246,0.10)", "rgba(59,130,246,0)"]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={[styles.depthBand, styles.depthBandCenter]}
         />
         <View style={styles.textureLineTop} />
         <View style={styles.textureLineBottom} />
@@ -70,6 +76,12 @@ const styles = StyleSheet.create({
   depthBandBottom: {
     bottom: 90,
     left: -160,
+  },
+  depthBandCenter: {
+    top: 200,
+    left: -100,
+    width: 600,
+    height: 300,
   },
   textureLineTop: {
     position: "absolute",
