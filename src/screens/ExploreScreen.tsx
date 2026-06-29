@@ -22,6 +22,7 @@ import {
   fetchModelsForMakeAndType,
 } from "../api/nhtsaApi";
 import {
+  AdBanner,
   CompareFloatingBar,
   CustomButton,
   ErrorMessage,
@@ -282,6 +283,7 @@ const ExploreScreen = () => {
         )}
       </View>
       <CompareFloatingBar />
+      <AdBanner />
     </ScreenContainer>
   );
 };
