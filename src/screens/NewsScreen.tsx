@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useFocusEffect } from "@react-navigation/native";
 import {
+  AdBanner,
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
@@ -51,7 +52,8 @@ const NewsScreen = () => {
         <View style={homeStyles.container}>
           <LoadingIndicator />
         </View>
-      </ScreenContainer>
+            <AdBanner />
+    </ScreenContainer>
     );
   }
 
@@ -74,6 +76,7 @@ const NewsScreen = () => {
           />
         )}
       </View>
+          <AdBanner />
     </ScreenContainer>
   );
 };
