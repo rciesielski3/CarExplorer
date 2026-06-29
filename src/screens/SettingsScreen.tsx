@@ -14,6 +14,7 @@ import ReusableModalSelector from "../components/ReusableModalSelector";
 import { AboutModal, ConfirmModal, ScreenContainer } from "../components";
 import { useFavorites } from "../context/FavoritesContext";
 import { useCompare } from "../context/CompareContext";
+import { usePremium } from "../context/PremiumContext";
 import { Colors } from "@/constants/Colors";
 
 const SettingsScreen = () => {
@@ -23,6 +24,7 @@ const SettingsScreen = () => {
   const { theme, toggleTheme } = useTheme();
   const { clearFavorites } = useFavorites();
   const { resetCompare } = useCompare();
+  const { isPremium, setIsPremium } = usePremium();
   const styles = createGlobalStyles(theme);
   const homeStyles = createHomeScreenStyles(theme);
   const [showAbout, setShowAbout] = React.useState(false);
@@ -61,6 +63,15 @@ const SettingsScreen = () => {
             data={languageOptions}
             selectedValue={language}
             onValueChange={setLanguage}
+          />
+        </View>
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>{t("premium", "Remove Ads")}</Text>
+          <Switch
+            value={isPremium}
+            onValueChange={setIsPremium}
+            accessible={true}
+            accessibilityLabel={t("premiumAccessibility", "Toggle ad-free mode")}
           />
         </View>
         <TouchableOpacity
