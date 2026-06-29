@@ -1,5 +1,5 @@
 import React from "react";
-import { Linking, Modal, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { createGlobalStyles } from "@/constants/GlobalStyles";
@@ -14,7 +14,6 @@ interface AboutModalProps {
   title: string;
   description: string;
   developerLabel: string;
-  contactLabel: string;
   closeLabel: string;
   onClose: () => void;
 }
@@ -24,16 +23,11 @@ const AboutModal: React.FC<AboutModalProps> = ({
   title,
   description,
   developerLabel,
-  contactLabel,
   closeLabel,
   onClose,
 }) => {
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
-
-  const openPortfolio = () => {
-    Linking.openURL(APP_CONFIG.PORTFOLIO_URL);
-  };
 
   return (
     <Modal
@@ -64,18 +58,6 @@ const AboutModal: React.FC<AboutModalProps> = ({
               {APP_CONFIG.COPYRIGHT}
             </Text>
           </View>
-          <TouchableOpacity
-            accessibilityRole="link"
-            style={styles.aboutModalLink}
-            onPress={openPortfolio}
-          >
-            <Text style={styles.aboutModalLinkText}>{contactLabel}</Text>
-            <Ionicons
-              name="open-outline"
-              size={16}
-              color={Colors[theme].accent}
-            />
-          </TouchableOpacity>
           <CustomButton title={closeLabel} onPress={onClose} />
         </View>
       </View>
