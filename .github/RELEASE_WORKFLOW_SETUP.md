@@ -5,17 +5,18 @@
 Configure these in GitHub Settings → Secrets and variables → Actions:
 
 1. **ANDROID_KEYSTORE_BASE64**
-   - Value: Base64-encoded Android release keystore
-   - Generate: `base64 -i ~/.android/carexplorer-release-key.jks`
+   - Value: Base64-encoded Android release keystore (@adateo__car-explorer.jks)
+   - Generate: `base64 -i /Users/rafalciesielski/Developer/carExplorer/@adateo__car-explorer.jks`
+   - Certificate SHA1: AC:F5:2A:DD:61:C8:8B:AA:B7:54:74:F9:B2:D5:6E:7E:9F:00:A4:E3 ✅
 
 2. **KEYSTORE_PASSWORD**
-   - Value: Password for the keystore file
+   - Value: `3d3e66c0b1c16f8c5a5a649081abe945` (from .env.release.local)
 
 3. **KEY_ALIAS**
-   - Value: Alias of the signing key (usually "carexplorer-release")
+   - Value: `130f695a3887657c5eefb66ddee9db90` (from .env.release.local)
 
 4. **KEY_PASSWORD**
-   - Value: Password for the signing key
+   - Value: `a30e3a263456fcb2cdd5f7e917a8819a` (from .env.release.local)
 
 5. **PLAY_STORE_SERVICE_ACCOUNT_JSON**
    - Value: JSON service account key from Google Play Console
