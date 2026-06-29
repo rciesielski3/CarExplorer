@@ -10,7 +10,7 @@ import { Colors } from "@/constants/Colors";
 
 import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
-import { CustomButton, ScreenContainer } from "../components";
+import { AdBanner, CustomButton, ScreenContainer } from "../components";
 import { RootStackParamList } from "../navigation/types";
 
 type SpecRow = {
@@ -180,6 +180,7 @@ const CompareScreen = () => {
           </>
         )}
       </ScrollView>
+      <AdBanner />
     </ScreenContainer>
   );
 };
