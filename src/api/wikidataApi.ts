@@ -30,12 +30,13 @@ const isFailedResponse = (response: Response): boolean => response.ok === false;
  */
 export const searchWikidataForCar = async (
   make: string,
-  model: string
+  model: string,
+  language: string = "en"
 ): Promise<string | null> => {
   const query = `${make} ${model}`;
   const searchUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(
     query
-  )}&language=en&format=json&origin=*`;
+  )}&language=${encodeURIComponent(language)}&format=json&origin=*`;
 
   try {
     const { data, response } = await fetchWikidataJson(searchUrl);
@@ -55,12 +56,12 @@ export const searchWikidataForCar = async (
       return null;
     }
 
-    // Find the first result that looks like a car entity (often has "automobile" in description)
+    // Find the first result that looks like a car entity (prioritize items with "automobile" or "car" in description)
     const carEntity = results.find(
       (item: any) =>
         item?.id &&
-        (!item?.description ||
-          item.description.toLowerCase().includes("automobile") ||
+        item?.description &&
+        (item.description.toLowerCase().includes("automobile") ||
           item.description.toLowerCase().includes("car"))
     );
 
@@ -92,11 +93,12 @@ export const searchWikidataForCar = async (
  * This helps identify what type of entity it is.
  */
 export const getWikidataDescription = async (
-  wikidataId: string
+  wikidataId: string,
+  language: string = "en"
 ): Promise<string | null> => {
   const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${encodeURIComponent(
     wikidataId
-  )}&props=descriptions&languages=en&format=json&origin=*`;
+  )}&props=descriptions&languages=${encodeURIComponent(language)}&format=json&origin=*`;
 
   try {
     const { data, response } = await fetchWikidataJson(url);
@@ -114,7 +116,7 @@ export const getWikidataDescription = async (
       return null;
     }
 
-    const description = entity?.descriptions?.en?.value;
+    const description = entity?.descriptions?.[language]?.value;
     if (typeof description === "string" && description.trim()) {
       console.log("[WIKIDATA_DESC_FOUND]", wikidataId, ":", description);
       return description;
@@ -150,7 +152,7 @@ export const getCarDetailsFromWikidata = async (
 
   try {
     // Step 1: Search for the car entity
-    const wikidataId = await searchWikidataForCar(make, model);
+    const wikidataId = await searchWikidataForCar(make, model, language);
     if (!wikidataId) {
       console.log("[WIKIDATA_NO_ENTITY]", make, model);
       wikidataCache.set(cacheKey, null);
@@ -158,7 +160,7 @@ export const getCarDetailsFromWikidata = async (
     }
 
     // Step 2: Get the description
-    const description = await getWikidataDescription(wikidataId);
+    const description = await getWikidataDescription(wikidataId, language);
     if (description) {
       console.log("[WIKIDATA_DETAILS_FOUND]", make, model);
       wikidataCache.set(cacheKey, description);
@@ -168,7 +170,7 @@ export const getCarDetailsFromWikidata = async (
     // If no description, try to fetch full entity data and extract labels/descriptions
     const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${encodeURIComponent(
       wikidataId
-    )}&props=labels|descriptions|claims&languages=en&format=json&origin=*`;
+    )}&props=labels|descriptions|claims&languages=${encodeURIComponent(language)}&format=json&origin=*`;
 
     const { data, response } = await fetchWikidataJson(url);
 
@@ -188,7 +190,7 @@ export const getCarDetailsFromWikidata = async (
     }
 
     // Try to get label as fallback
-    const label = entity?.labels?.en?.value;
+    const label = entity?.labels?.[language]?.value;
     if (typeof label === "string" && label.trim()) {
       console.log("[WIKIDATA_LABEL_FOUND]", wikidataId, ":", label);
       wikidataCache.set(cacheKey, label);
