@@ -126,7 +126,6 @@ const SettingsScreen = () => {
           "Your automotive companion — browse makes, decode VINs, compare models."
         )}
         developerLabel={t("aboutDeveloper", "Developer")}
-        contactLabel={t("aboutContact", "Contact")}
         closeLabel={t("aboutClose", "Close")}
         onClose={() => setShowAbout(false)}
       />
