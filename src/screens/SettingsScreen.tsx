@@ -10,6 +10,7 @@ import {
 
 import { useTheme } from "../context/ThemeContext";
 import { useAppLanguage } from "../context/LanguageContext";
+import { usePremium } from "../context/PremiumContext";
 import ReusableModalSelector from "../components/ReusableModalSelector";
 import { AboutModal, ConfirmModal, ScreenContainer } from "../components";
 import { useFavorites } from "../context/FavoritesContext";
@@ -21,6 +22,7 @@ const SettingsScreen = () => {
 
   const { language, setLanguage } = useAppLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { isPremium, setIsPremium } = usePremium();
   const { clearFavorites } = useFavorites();
   const { resetCompare } = useCompare();
   const styles = createGlobalStyles(theme);
@@ -61,6 +63,15 @@ const SettingsScreen = () => {
             data={languageOptions}
             selectedValue={language}
             onValueChange={setLanguage}
+          />
+        </View>
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>{t("premium", "Remove Ads")}</Text>
+          <Switch
+            value={isPremium}
+            onValueChange={setIsPremium}
+            accessible={true}
+            accessibilityLabel={t("premiumAccessibility", "Toggle ad-free mode")}
           />
         </View>
         <TouchableOpacity
