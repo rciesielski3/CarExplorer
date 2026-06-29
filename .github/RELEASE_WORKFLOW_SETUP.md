@@ -21,6 +21,12 @@ Configure these in GitHub Settings → Secrets and variables → Actions:
    - Value: JSON service account key from Google Play Console
    - Setup: https://github.com/r0adkll/upload-google-play#setup
 
+6. **EXPO_PUBLIC_ADMOB_ANDROID_APP_ID**
+   - Value: Production AdMob Android App ID (e.g. `ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY`)
+   - Required for production releases — if unset, the build falls back to Google's
+     test AdMob App ID (`ca-app-pub-3940256099942544~3347511713`), which violates
+     Play Store policy for production releases.
+
 ## Triggering a Release
 
 ### Automatic (on tag push)
@@ -37,3 +43,11 @@ Go to GitHub → Actions → Build Release Bundle → Run workflow → Select bu
 - Signed AAB uploaded to Play Store Console (internal track, draft status)
 - APK attached to GitHub Release
 - Artifacts retained for 30 days
+
+## Known follow-ups
+
+- `actions/create-release@v1` is archived/unmaintained. It still works but should
+  be migrated to `softprops/action-gh-release@v2` in a future change (requires
+  reworking the release step's inputs/outputs).
+- Release notes file must be named `RELEASE_NOTES_<tag>.md`, matching the pushed
+  tag exactly (including the `v` prefix), e.g. tag `v2.0.7` → `RELEASE_NOTES_v2.0.7.md`.
