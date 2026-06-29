@@ -15,6 +15,7 @@ import {
 import { useAppLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import {
+  AdBanner,
   CustomButton,
   CustomInput,
   ErrorMessage,
@@ -117,6 +118,7 @@ requestedLink,
           </ScrollView>
         )}
       </View>
+      <AdBanner />
     </ScreenContainer>
   );
 };
