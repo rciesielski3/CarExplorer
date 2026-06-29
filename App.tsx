@@ -7,6 +7,7 @@ import { CompareProvider } from "./src/context/CompareContext";
 import { FavoritesProvider } from "./src/context/FavoritesContext";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LanguageProvider } from "./src/context/LanguageContext";
+import { PremiumProvider } from "./src/context/PremiumContext";
 import { useFonts } from "expo-font";
 import {
   BarlowCondensed_700Bold,
@@ -64,7 +65,9 @@ export default function App() {
       <ThemeProvider>
         <FavoritesProvider>
           <CompareProvider>
-            <AppContent />
+            <PremiumProvider>
+              <AppContent />
+            </PremiumProvider>
           </CompareProvider>
         </FavoritesProvider>
       </ThemeProvider>
