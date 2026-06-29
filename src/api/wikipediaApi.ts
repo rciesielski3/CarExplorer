@@ -1,4 +1,5 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
+import { getCarDetailsFromWikidata } from "./wikidataApi";
 
 const detailsCache = new Map<string, string | null>();
 
@@ -301,6 +302,24 @@ export const getCarDetails = async (
       detailsCache.set(cacheKey, makeDetails);
       return makeDetails;
     }
+  }
+
+  // Fallback to Wikidata when Wikipedia fails
+  console.log('[WIKIPEDIA_FAILED_TRYING_WIKIDATA]', make, model);
+  try {
+    const wikidataDetails = await getCarDetailsFromWikidata(make, model, language);
+    if (wikidataDetails) {
+      console.log('[DETAILS_FROM_WIKIDATA]', make, model);
+      detailsCache.set(cacheKey, wikidataDetails);
+      return wikidataDetails;
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn("Wikidata fallback threw", {
+      error: message,
+      make,
+      model,
+    });
   }
 
   console.log('[NO_DETAILS]', make, model);
