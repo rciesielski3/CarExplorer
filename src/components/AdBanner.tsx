@@ -10,13 +10,16 @@ import { createGlobalStyles } from "@/constants/GlobalStyles";
 
 import { monetizationConfig } from "../config/monetizationConfig";
 import { useTheme } from "../context/ThemeContext";
+import { usePremium } from "../context/PremiumContext";
 
 const AdBanner = () => {
   const { theme } = useTheme();
+  const { isPremium } = usePremium();
   const styles = createGlobalStyles(theme);
   const [adFailed, setAdFailed] = React.useState(false);
 
   if (
+    isPremium ||
     Platform.OS !== "android" ||
     !monetizationConfig.adsEnabled ||
     !monetizationConfig.androidBannerAdUnitId ||
