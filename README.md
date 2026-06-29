@@ -232,3 +232,38 @@ Output: `android/app/build/outputs/apk/release/app-release.apk`
 1. Sign in to [Google Play Console](https://play.google.com/console)
 2. Upload `.aab` to Production track
 3. Fill in release notes and submit for review
+
+---
+
+## 🔄 GitHub Actions Workflows
+
+The project uses two automated workflows for building and releasing to Google Play Store.
+
+### Workflow 1: Build Release Bundle
+
+**Triggers:**
+- **Automatic:** Push a Git tag matching `v*.*.*` (e.g., `git tag v2.0.8 && git push origin v2.0.8`)
+- **Manual:** Go to **Actions → Build Release Bundle → Run workflow**
+
+**Manual dispatch options:**
+- `version_tag` — Tag name for artifact (optional; uses timestamp if blank)
+- `build_type` — Choose: `bundle`, `apk`, or `both`
+
+**Output:** Signed AAB/APK stored as GitHub Actions artifact (30-day retention)
+
+### Workflow 2: Upload to Play Store
+
+**Trigger:** Manual dispatch only — **Actions → Upload to Play Store → Run workflow**
+
+**Inputs:**
+- `version_tag` — Tag to upload (e.g., `v2.0.8`)
+- `track` — Play Store track: `internal`, `alpha`, `beta`, or `production`
+- `status` — `draft` (reviewable) or `completed` (goes live)
+- `create_github_release` — Create GitHub Release (automatic for production)
+
+**Smart features:**
+- Reuses pre-built artifact if available (fast)
+- Automatically builds from source if artifact expired (safe fallback)
+- Creates GitHub Release on production track
+
+For detailed setup and troubleshooting, see [`.github/RELEASE_WORKFLOW_SETUP.md`](.github/RELEASE_WORKFLOW_SETUP.md)
