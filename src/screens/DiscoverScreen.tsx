@@ -3,11 +3,13 @@ import { View, Text, Image, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import {
+  AdBanner,
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
 
 import {
+  AdBanner,
   getCarImageUrl,
   getCarDetails,
   generateRequestedLink,
@@ -15,6 +17,7 @@ import {
 import { useAppLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import {
+  AdBanner,
   CustomButton,
   CustomInput,
   ErrorMessage,
@@ -117,6 +120,7 @@ requestedLink,
           </ScrollView>
         )}
       </View>
+          <AdBanner />
     </ScreenContainer>
   );
 };
