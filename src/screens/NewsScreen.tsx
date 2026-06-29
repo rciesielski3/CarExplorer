@@ -51,7 +51,8 @@ const NewsScreen = () => {
         <View style={homeStyles.container}>
           <LoadingIndicator />
         </View>
-      </ScreenContainer>
+            <AdBanner />
+    </ScreenContainer>
     );
   }
 
@@ -74,6 +75,7 @@ const NewsScreen = () => {
           />
         )}
       </View>
+          <AdBanner />
     </ScreenContainer>
   );
 };

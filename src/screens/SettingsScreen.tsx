@@ -14,6 +14,7 @@ import ReusableModalSelector from "../components/ReusableModalSelector";
 import { AboutModal, ConfirmModal, ScreenContainer } from "../components";
 import { useFavorites } from "../context/FavoritesContext";
 import { useCompare } from "../context/CompareContext";
+import { usePremium } from "../context/PremiumContext";
 import { Colors } from "@/constants/Colors";
 
 const SettingsScreen = () => {
@@ -23,17 +24,28 @@ const SettingsScreen = () => {
   const { theme, toggleTheme } = useTheme();
   const { clearFavorites } = useFavorites();
   const { resetCompare } = useCompare();
+  const { isPremium, setIsPremium } = usePremium();
   const styles = createGlobalStyles(theme);
   const homeStyles = createHomeScreenStyles(theme);
   const [showAbout, setShowAbout] = React.useState(false);
   const [showResetModal, setShowResetModal] = React.useState(false);
   const [resetSuccess, setResetSuccess] = React.useState(false);
+  const [showClearFavoritesModal, setShowClearFavoritesModal] = React.useState(false);
+  const [clearFavoritesSuccess, setClearFavoritesSuccess] = React.useState(false);
 
   const handleReset = () => {
     clearFavorites();
     resetCompare();
     setShowResetModal(false);
     setResetSuccess(true);
+  };
+
+  const handleClearFavorites = () => {
+    clearFavorites();
+    resetCompare();
+    setShowClearFavoritesModal(false);
+    setClearFavoritesSuccess(true);
+    setTimeout(() => setClearFavoritesSuccess(false), 3000);
   };
 
   const languageOptions = React.useMemo(
@@ -63,6 +75,15 @@ const SettingsScreen = () => {
             onValueChange={setLanguage}
           />
         </View>
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>{t("premium", "Remove Ads")}</Text>
+          <Switch
+            value={isPremium}
+            onValueChange={setIsPremium}
+            accessible={true}
+            accessibilityLabel={t("premiumAccessibility", "Toggle ad-free mode")}
+          />
+        </View>
         <TouchableOpacity
           accessibilityRole="button"
           style={styles.settingRow}
@@ -80,6 +101,25 @@ const SettingsScreen = () => {
         {resetSuccess && (
           <Text style={styles.emptyText}>
             {t("resetDataSuccess", "All data cleared")}
+          </Text>
+        )}
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.settingRow}
+          onPress={() => setShowClearFavoritesModal(true)}
+        >
+          <Text style={styles.settingLabel}>
+            {t("clearFavorites", "Clear Favorites & Garage")}
+          </Text>
+          <Ionicons
+            name="trash-outline"
+            size={18}
+            color={Colors[theme].icon}
+          />
+        </TouchableOpacity>
+        {clearFavoritesSuccess && (
+          <Text style={styles.emptyText}>
+            {t("clearFavoritesSuccess", "Favorites and Garage cleared")}
           </Text>
         )}
           <TouchableOpacity
@@ -107,6 +147,18 @@ const SettingsScreen = () => {
         onCancel={() => setShowResetModal(false)}
         onConfirm={handleReset}
       />
+      <ConfirmModal
+        visible={showClearFavoritesModal}
+        title={t("clearFavoritesTitle", "Clear Favorites & Garage")}
+        message={t(
+          "clearFavoritesMessage",
+          "This will permanently remove all your saved favorites and garage selections. This action cannot be undone."
+        )}
+        cancelLabel={t("clearFavoritesCancel", "Cancel")}
+        confirmLabel={t("clearFavoritesConfirm", "Clear")}
+        onCancel={() => setShowClearFavoritesModal(false)}
+        onConfirm={handleClearFavorites}
+      />
       <AboutModal
         visible={showAbout}
         title={t("aboutTitle", "Car Explorer")}
@@ -115,7 +167,6 @@ const SettingsScreen = () => {
           "Your automotive companion — browse makes, decode VINs, compare models."
         )}
         developerLabel={t("aboutDeveloper", "Developer")}
-        contactLabel={t("aboutContact", "Contact")}
         closeLabel={t("aboutClose", "Close")}
         onClose={() => setShowAbout(false)}
       />

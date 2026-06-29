@@ -180,6 +180,7 @@ const CompareScreen = () => {
           </>
         )}
       </ScrollView>
+          <AdBanner />
     </ScreenContainer>
   );
 };

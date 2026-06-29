@@ -37,10 +37,10 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       height: 150,
     },
     title: {
-      fontSize: 34,
+      fontSize: 24,
       fontWeight: "800",
-      marginTop: 10,
-      marginBottom: 10,
+      marginTop: 0,
+      marginBottom: 16,
       textAlign: "left",
       color: Colors[theme].text,
       fontFamily: "PoetsenOne",
