@@ -90,6 +90,7 @@ def releaseKeyAlias = getReleaseSigningProperty("CAREXPLORER_UPLOAD_KEY_ALIAS")
 def releaseKeyPassword = getReleaseSigningProperty("CAREXPLORER_UPLOAD_KEY_PASSWORD")
 def hasReleaseSigningConfig = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
 def releaseSigningTasks = ["assemblerelease", "bundlerelease"]
+def hermesEnabled = (findProperty('expo.jsEngine') ?: "hermes") == "hermes"
 def testAndroidAdmobAppId = "ca-app-pub-3940256099942544~3347511713"
 def androidAdmobAppId =
     findProperty("EXPO_PUBLIC_ADMOB_ANDROID_APP_ID")
