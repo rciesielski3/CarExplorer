@@ -11,8 +11,12 @@ const WIKIPEDIA_FETCH_OPTIONS = {
 };
 
 const fetchWikipediaJson = async (url: string) => {
+  console.log('📡 Fetching:', url);
   const response = await fetch(url, WIKIPEDIA_FETCH_OPTIONS);
   const data = await response.json().catch(() => null);
+
+  console.log('✅ Status:', response.status);
+  console.log('📦 Response data (first 200 chars):', JSON.stringify(data).slice(0, 200));
 
   return { data, response };
 };
@@ -204,20 +208,32 @@ export async function fetchWikipediaCarImage(
   model: string
 ): Promise<string | null> {
   const candidates = buildWikipediaCandidates(make, model);
+  console.log('🔍 Image candidates:', candidates);
+
   for (const title of candidates) {
     try {
       const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
         title
       )}`;
       const { data, response } = await fetchWikipediaJson(url);
-      if (!response.ok) continue;
+
+      if (!response.ok) {
+        console.warn('⚠️ Wikipedia image lookup failed for', title, 'status:', response.status);
+        continue;
+      }
+
       const imageUrl =
         data?.thumbnail?.source || data?.originalimage?.source || null;
+      console.log('🖼️ Found image for', title, ':', imageUrl);
+
       if (imageUrl) return imageUrl;
-    } catch {
+    } catch (error) {
+      console.error('❌ Error fetching image for', title, error);
       continue;
     }
   }
+
+  console.log('❌ No image found for', make, model);
   return null;
 }
 
@@ -228,8 +244,10 @@ export const getCarDetails = async (
   model: string,
   language: string = "en"
 ) => {
+  console.log('📖 Getting car details for', make, model, 'language:', language);
   const cacheKey = `${language}:${make}:${model}`.toLowerCase();
   if (detailsCache.has(cacheKey)) {
+    console.log('✅ Found in cache for', cacheKey);
     return detailsCache.get(cacheKey) || null;
   }
 
@@ -241,6 +259,7 @@ export const getCarDetails = async (
     const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
 
     if (exactDetails) {
+      console.log('✅ Found details from candidates for', activeLanguage);
       detailsCache.set(cacheKey, exactDetails);
       return exactDetails;
     }
@@ -258,6 +277,7 @@ export const getCarDetails = async (
         );
 
         if (searchDetails) {
+          console.log('✅ Found details from search title', searchTitle, 'for', activeLanguage);
           detailsCache.set(cacheKey, searchDetails);
           return searchDetails;
         }
@@ -277,11 +297,13 @@ export const getCarDetails = async (
     );
 
     if (makeDetails) {
+      console.log('✅ Found details from make candidates for', activeLanguage);
       detailsCache.set(cacheKey, makeDetails);
       return makeDetails;
     }
   }
 
+  console.log('❌ No details found for', make, model);
   detailsCache.set(cacheKey, null);
   return null;
 };
