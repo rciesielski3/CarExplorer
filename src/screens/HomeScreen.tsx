@@ -205,7 +205,7 @@ const HomeScreen = () => {
             <View style={homeStyles.aiAnswerCard}>
               {aiLoading ? (
                 <View style={{ alignItems: "center", paddingVertical: 16 }}>
-                  <LoadingIndicator type="THINKING" />
+                  <LoadingIndicator type="LOADING" />
                   <Text style={[homeStyles.aiAnswerText, { marginTop: 12, opacity: 0.7 }]}>
                     {t("aiThinking", "Thinking...")}
                   </Text>
