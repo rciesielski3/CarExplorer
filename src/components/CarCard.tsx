@@ -68,7 +68,12 @@ const CarCard: React.FC<CarCardProps> = ({
     setDetailsStatus("loading");
     try {
       const details = await getCarDetails(make, model, activeLanguage);
-      const safeDetails = details?.trim() ? details : null;
+      // Extract text from either string or object format
+      const detailsText =
+        typeof details === "string"
+          ? details?.trim()
+          : details?.basicDetails?.trim();
+      const safeDetails = detailsText ? detailsText : null;
       setCarDetails(safeDetails);
       setDetailsStatus(safeDetails ? "loaded" : "noDetails");
     } catch (error) {

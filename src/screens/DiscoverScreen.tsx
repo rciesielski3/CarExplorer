@@ -58,7 +58,11 @@ const query = `${searchQuery}`.replace(/\s+/g, "_");
       const details = await getCarDetails(searchQuery, "", language);
 const requestedLink = generateRequestedLink(query, language);
 
-      if (!details) {
+      // Extract text from either string or object format
+      const detailsText =
+        typeof details === "string" ? details : details?.basicDetails;
+
+      if (!detailsText) {
         return setError(t("noResultsFound"));
       }
 
@@ -66,7 +70,7 @@ const requestedLink = generateRequestedLink(query, language);
         make: searchQuery,
         model: "",
         image: imageUrl,
-        description: details || t("noDescriptionAvailable"),
+        description: detailsText || t("noDescriptionAvailable"),
 requestedLink,
       });
     } catch (err) {
