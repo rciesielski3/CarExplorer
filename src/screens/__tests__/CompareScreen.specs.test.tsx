@@ -1,4 +1,4 @@
-jest.mock('../../../components/AdBanner', () => ({
+jest.mock('../../components/AdBanner', () => ({
   AdBanner: () => null,
 }));
 
