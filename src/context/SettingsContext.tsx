@@ -7,7 +7,7 @@ export type Settings = {
 
 interface SettingsContextProps {
   settings: Settings;
-  setPreferredUnitSystem: (system: 'metric' | 'imperial') => void;
+  setPreferredUnitSystem: (system: 'metric' | 'imperial') => Promise<void>;
   isHydrated: boolean;
 }
 
