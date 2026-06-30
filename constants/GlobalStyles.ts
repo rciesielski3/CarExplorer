@@ -47,7 +47,7 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       letterSpacing: 0,
     },
     subtitle: {
-      fontSize: 23,
+      fontSize: 20,
       fontWeight: "600",
       marginTop: 10,
       marginBottom: 10,
@@ -406,7 +406,7 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
     },
     makesContainer: {
       flexGrow: 1,
-      paddingBottom: 24,
+      paddingBottom: 120,
       justifyContent: "flex-start",
     },
     makeButton: {
