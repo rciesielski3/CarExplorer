@@ -53,16 +53,12 @@ const DiscoverScreen = () => {
     setResult(null);
 
     try {
-const query = `${searchQuery}`.replace(/\s+/g, "_");
+      const query = `${searchQuery}`.replace(/\s+/g, "_");
       const imageUrl = await getCarImageUrl(searchQuery, "");
       const details = await getCarDetails(searchQuery, "", language);
-const requestedLink = generateRequestedLink(query, language);
+      const requestedLink = generateRequestedLink(query, language);
 
-      // Extract text from either string or object format
-      const detailsText =
-        typeof details === "string" ? details : details?.basicDetails;
-
-      if (!detailsText) {
+      if (!details) {
         return setError(t("noResultsFound"));
       }
 
@@ -70,8 +66,8 @@ const requestedLink = generateRequestedLink(query, language);
         make: searchQuery,
         model: "",
         image: imageUrl,
-        description: detailsText || t("noDescriptionAvailable"),
-requestedLink,
+        description: details || t("noDescriptionAvailable"),
+        requestedLink,
       });
     } catch (err) {
       setError(t("errorFetchingData"));

@@ -1,11 +1,7 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
-import { getCarDetailsFromWikidata, searchWikidataForCar, getCarSpecificationsFromWikidata } from "./wikidataApi";
-import { CarSpecification } from "../types/CarSpecification";
+import { getCarDetailsFromWikidata } from "./wikidataApi";
 
-export type CarDetailsResult =
-  | string
-  | { basicDetails: string | null; specifications: CarSpecification | null }
-  | null;
+export type CarDetailsResult = string | null;
 
 const detailsCache = new Map<string, CarDetailsResult>();
 
@@ -313,21 +309,11 @@ export const getCarDetails = async (
   // Fallback to Wikidata when Wikipedia fails
   console.log('[WIKIPEDIA_FAILED_TRYING_WIKIDATA]', make, model);
   try {
-    const wikidataId = await searchWikidataForCar(make, model, language);
-    if (wikidataId) {
-      const basicDetails = await getCarDetailsFromWikidata(make, model, language);
-      const specifications = await getCarSpecificationsFromWikidata(
-        wikidataId,
-        language
-      );
-
-      const result = {
-        basicDetails,
-        specifications,
-      };
+    const basicDetails = await getCarDetailsFromWikidata(make, model, language);
+    if (basicDetails) {
       console.log('[DETAILS_FROM_WIKIDATA]', make, model);
-      detailsCache.set(cacheKey, result);
-      return result;
+      detailsCache.set(cacheKey, basicDetails);
+      return basicDetails;
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
