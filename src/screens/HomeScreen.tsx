@@ -22,7 +22,7 @@ import { Colors } from "@/constants/Colors";
 
 import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "../navigation/types";
-import { AdBanner, ScreenContainer } from "../components";
+import { AdBanner, LoadingIndicator, ScreenContainer } from "../components";
 import {
   findStaticAiAnswer,
   getStaticAiSuggestions,
@@ -41,6 +41,7 @@ const HomeScreen = () => {
   const [aiQuery, setAiQuery] = React.useState("");
   const [aiMatch, setAiMatch] = React.useState<StaticAiMatch | null>(null);
   const [aiSubmitted, setAiSubmitted] = React.useState(false);
+  const [aiLoading, setAiLoading] = React.useState(false);
 
   const navigateTo = React.useCallback(
     (
@@ -52,23 +53,35 @@ const HomeScreen = () => {
   );
 
   const handleAskAi = React.useCallback(
-    (query = aiQuery) => {
+    async (query = aiQuery) => {
       const trimmed = query.trim();
       if (!trimmed) {
         return;
       }
       setAiSubmitted(true);
+      setAiLoading(true);
+
+      // Simulate thinking for 1 second
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setAiMatch(findStaticAiAnswer(trimmed));
+      setAiLoading(false);
     },
     [aiQuery],
   );
 
   const handleAiSuggestionPress = React.useCallback(
-    (fallbackQuestion: string, questionKey: string) => {
+    async (fallbackQuestion: string, questionKey: string) => {
       const localizedQuestion = t(questionKey, fallbackQuestion);
       setAiQuery(localizedQuestion);
       setAiSubmitted(true);
+      setAiLoading(true);
+
+      // Simulate thinking for 1 second
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       setAiMatch(findStaticAiAnswer(fallbackQuestion));
+      setAiLoading(false);
     },
     [t],
   );
@@ -190,14 +203,23 @@ const HomeScreen = () => {
 
           {aiSubmitted && (
             <View style={homeStyles.aiAnswerCard}>
-              <Text style={homeStyles.aiAnswerText}>
-                {aiMatch
-                  ? t(aiMatch.answerKey, aiMatch.fallbackAnswer)
-                  : t(
-                      "aiNoMatch",
-                      "Try asking about engines, EVs, VINs, buying tips, or drivetrain differences.",
-                    )}
-              </Text>
+              {aiLoading ? (
+                <View style={{ alignItems: "center", paddingVertical: 16 }}>
+                  <LoadingIndicator type="THINKING" />
+                  <Text style={[homeStyles.aiAnswerText, { marginTop: 12, opacity: 0.7 }]}>
+                    {t("aiThinking", "Thinking...")}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={homeStyles.aiAnswerText}>
+                  {aiMatch
+                    ? t(aiMatch.answerKey, aiMatch.fallbackAnswer)
+                    : t(
+                        "aiNoMatch",
+                        "Try asking about engines, EVs, VINs, buying tips, or drivetrain differences.",
+                      )}
+                </Text>
+              )}
             </View>
           )}
 

@@ -110,7 +110,7 @@ const QuizScreen = () => {
         ) : questions.length === 0 ? (
           <ErrorMessage message={t("noQuestions")} />
         ) : showScore ? (
-          <View style={[styles.resultContainer, styles.centeredContent]}>
+          <View style={[styles.resultContainer, styles.centeredContent, { paddingHorizontal: 16, paddingVertical: 24 }]}>
             <Text style={styles.subtitle}>
               {t("yourScore")}: {score}/{questions.length}
             </Text>
@@ -206,11 +206,14 @@ const quizStyles = StyleSheet.create({
   answersModalContent: {
     alignSelf: "center",
     flexShrink: 1,
-    maxHeight: "100%",
+    maxHeight: "90%",
     width: "100%",
+    borderRadius: 12,
+    backgroundColor: Colors["light"].card,
   },
   answersScroll: {
     flexShrink: 1,
+    maxHeight: "85vh",
   },
   answersScrollContent: {
     paddingBottom: 8,
