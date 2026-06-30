@@ -1,3 +1,7 @@
+jest.mock('../../../components/AdBanner', () => ({
+  AdBanner: () => null,
+}));
+
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
