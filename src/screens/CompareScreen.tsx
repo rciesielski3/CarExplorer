@@ -10,13 +10,20 @@ import { Colors } from "@/constants/Colors";
 
 import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
-import { AdBanner, CustomButton, ScreenContainer } from "../components";
+import { useSettings } from "../context/SettingsContext";
+import { AdBanner, CustomButton, ScreenContainer, SpecRange } from "../components";
 import { RootStackParamList } from "../navigation/types";
+import {
+  convertPower,
+  convertWeight,
+  convertSpeed,
+} from "../utils/unitConverter";
 
 type SpecRow = {
   labelKey: string;
   fallback: string;
-  getValue: (car: CompareCar) => string | null | undefined;
+  getValue: (car: CompareCar, isImperial?: boolean) => string | null | undefined;
+  isArray?: boolean;
 };
 
 const SPEC_ROWS: SpecRow[] = [
@@ -41,34 +48,118 @@ const SPEC_ROWS: SpecRow[] = [
     getValue: (car) => car.vehicleType,
   },
   {
+    labelKey: "compareEngine",
+    fallback: "Engine",
+    getValue: (car, imperial) =>
+      car.specifications?.engine
+        ? car.specifications.engine.map(e => e).join(", ")
+        : null,
+    isArray: true,
+  },
+  {
     labelKey: "comparePower",
     fallback: "Power",
-    getValue: () => null,
+    getValue: (car, imperial) => {
+      if (!car.specifications?.power || car.specifications.power.length === 0) {
+        return null;
+      }
+      return car.specifications.power
+        .map(p => {
+          const kwMatch = p.match(/(\d+(?:\.\d+)?)\s*kW/);
+          if (kwMatch) {
+            const kw = parseFloat(kwMatch[1]);
+            return convertPower(kw, imperial || false);
+          }
+          return p;
+        })
+        .join(", ");
+    },
+    isArray: true,
   },
   {
     labelKey: "compareTorque",
     fallback: "Torque",
-    getValue: () => null,
+    getValue: (car) =>
+      car.specifications?.torque
+        ? car.specifications.torque.join(", ")
+        : null,
+    isArray: true,
   },
   {
     labelKey: "compareAcceleration",
-    fallback: "Acceleration",
-    getValue: () => null,
-  },
-  {
-    labelKey: "compareDrive",
-    fallback: "Drive",
-    getValue: () => null,
+    fallback: "Acceleration (0-100)",
+    getValue: (car) =>
+      car.specifications?.acceleration
+        ? car.specifications.acceleration.join(", ")
+        : null,
+    isArray: true,
   },
   {
     labelKey: "compareWeight",
     fallback: "Weight",
-    getValue: () => null,
+    getValue: (car, imperial) => {
+      if (!car.specifications?.weight || car.specifications.weight.length === 0) {
+        return null;
+      }
+      return car.specifications.weight
+        .map(w => {
+          const kgMatch = w.match(/(\d+(?:\.\d+)?)\s*kg/);
+          if (kgMatch) {
+            const kg = parseFloat(kgMatch[1]);
+            return convertWeight(kg, imperial || false);
+          }
+          return w;
+        })
+        .join(", ");
+    },
+    isArray: true,
   },
   {
-    labelKey: "compareEngine",
-    fallback: "Engine",
-    getValue: () => null,
+    labelKey: "compareDimensions",
+    fallback: "Dimensions",
+    getValue: (car) =>
+      car.specifications?.dimensions
+        ? car.specifications.dimensions.join(", ")
+        : null,
+    isArray: true,
+  },
+  {
+    labelKey: "compareFuelType",
+    fallback: "Fuel Type",
+    getValue: (car) =>
+      car.specifications?.fuelType
+        ? car.specifications.fuelType.join(", ")
+        : null,
+    isArray: true,
+  },
+  {
+    labelKey: "compareTransmission",
+    fallback: "Transmission",
+    getValue: (car) =>
+      car.specifications?.transmission
+        ? car.specifications.transmission.join(", ")
+        : null,
+    isArray: true,
+  },
+  {
+    labelKey: "compareTopSpeed",
+    fallback: "Top Speed",
+    getValue: (car, imperial) => {
+      if (!car.specifications?.topSpeed || car.specifications.topSpeed.length === 0) {
+        return null;
+      }
+      return car.specifications.topSpeed
+        .map(s => {
+          const kmhMatch = s.match(/(\d+(?:\.\d+)?)\s*km\/h/);
+          if (kmhMatch) {
+            const kmh = parseFloat(kmhMatch[1]);
+            return convertSpeed(kmh, imperial || false);
+          }
+          return s;
+        })
+        .join(", ");
+    },
+    isArray: true,
   },
 ];
 
@@ -79,6 +170,8 @@ const CompareScreen = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { compareList, resetCompare, removeFromCompare } = useCompare();
+  const { settings } = useSettings();
+  const isImperial = settings.preferredUnitSystem === "imperial";
 
   const hasFullComparison = compareList.length === 2;
 
@@ -156,16 +249,26 @@ const CompareScreen = () => {
                   {t(row.labelKey, row.fallback)}
                 </Text>
                 <View style={styles.compareValueGrid}>
-                  {compareList.map((car) => (
-                    <View
-                      key={`${row.labelKey}-${car.make}-${car.model}`}
-                      style={styles.compareValueCell}
-                    >
-                      <Text style={styles.compareValueText}>
-                        {row.getValue(car) || "—"}
-                      </Text>
-                    </View>
-                  ))}
+                  {compareList.map((car) => {
+                    const value = row.getValue(car, isImperial);
+                    return (
+                      <View
+                        key={`${row.labelKey}-${car.make}-${car.model}`}
+                        style={styles.compareValueCell}
+                      >
+                        {row.isArray && value ? (
+                          <SpecRange
+                            values={value.split(", ").filter(v => v)}
+                            fallback="—"
+                          />
+                        ) : (
+                          <Text style={styles.compareValueText}>
+                            {value || "—"}
+                          </Text>
+                        )}
+                      </View>
+                    );
+                  })}
                 </View>
               </View>
             ))}
