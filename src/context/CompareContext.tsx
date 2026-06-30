@@ -1,10 +1,12 @@
 import React, { ReactNode } from "react";
+import { CarSpecification } from "../types/CarSpecification";
 
 export type CompareCar = {
   make: string;
   model: string;
   year?: string | null;
   vehicleType?: string | null;
+  specifications?: CarSpecification;
 };
 
 interface CompareContextProps {
