@@ -11,6 +11,7 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import { useAppLanguage } from "../context/LanguageContext";
 import { usePremium } from "../context/PremiumContext";
+import { useSettings } from "../context/SettingsContext";
 import ReusableModalSelector from "../components/ReusableModalSelector";
 import { AboutModal, ConfirmModal, ScreenContainer } from "../components";
 import { useFavorites } from "../context/FavoritesContext";
@@ -25,6 +26,7 @@ const SettingsScreen = () => {
   const { isPremium, setIsPremium } = usePremium();
   const { clearFavorites } = useFavorites();
   const { resetCompare } = useCompare();
+  const { settings, setPreferredUnitSystem } = useSettings();
   const styles = createGlobalStyles(theme);
   const homeStyles = createHomeScreenStyles(theme);
   const [showAbout, setShowAbout] = React.useState(false);
@@ -83,6 +85,31 @@ const SettingsScreen = () => {
             accessible={true}
             accessibilityLabel={t("premiumAccessibility", "Toggle ad-free mode")}
           />
+        </View>
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>
+            {t('unitSystem', 'Unit System')}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity
+              style={[
+                styles.unitButton,
+                settings.preferredUnitSystem === 'metric' && styles.unitButtonActive,
+              ]}
+              onPress={() => setPreferredUnitSystem('metric')}
+            >
+              <Text style={styles.unitButtonText}>Metric</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.unitButton,
+                settings.preferredUnitSystem === 'imperial' && styles.unitButtonActive,
+              ]}
+              onPress={() => setPreferredUnitSystem('imperial')}
+            >
+              <Text style={styles.unitButtonText}>Imperial</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <TouchableOpacity
           accessibilityRole="button"
