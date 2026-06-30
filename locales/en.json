@@ -139,6 +139,11 @@
   "comparePower": "Power",
   "compareSelectedCount": "{{count}} selected",
   "compareTorque": "Torque",
-  "compareAcceleration": "Acceleration",
-  "compareWeight": "Weight"
+  "compareAcceleration": "Acceleration (0-100 km/h)",
+  "compareWeight": "Weight",
+  "compareDimensions": "Dimensions",
+  "compareFuelType": "Fuel Type",
+  "compareTransmission": "Transmission",
+  "compareTopSpeed": "Top Speed",
+  "unitSystem": "Unit System"
 }

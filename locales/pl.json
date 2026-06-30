@@ -138,7 +138,12 @@
   "comparePickCars": "Wybierz auta do porównania",
   "comparePower": "Moc",
   "compareSelectedCount": "Wybrano: {{count}}",
-  "compareTorque": "Moment",
-  "compareAcceleration": "Przyspieszenie",
-  "compareWeight": "Masa"
+  "compareTorque": "Moment obrotowy",
+  "compareAcceleration": "Przyspieszenie (0-100 km/h)",
+  "compareWeight": "Waga",
+  "compareDimensions": "Wymiary",
+  "compareFuelType": "Typ paliwa",
+  "compareTransmission": "Skrzynia biegów",
+  "compareTopSpeed": "Prędkość maksymalna",
+  "unitSystem": "System jednostek"
 }
