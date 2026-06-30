@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { createGlobalStyles } from '@/constants/GlobalStyles';
 
 interface SpecRangeProps {
@@ -19,12 +19,12 @@ export const SpecRange: React.FC<SpecRangeProps> = ({
   const [expanded, setExpanded] = useState(false);
 
   if (!values || values.length === 0) {
-    return <Text style={styles.text}>{fallback}</Text>;
+    return <Text style={styles.compareValueText}>{fallback}</Text>;
   }
 
   // 1-2 values: show all
   if (values.length <= 2) {
-    return <Text style={styles.text}>{values.join(', ')}</Text>;
+    return <Text style={styles.compareValueText}>{values.join(', ')}</Text>;
   }
 
   // 3+ values: show range with expand button
@@ -34,7 +34,7 @@ export const SpecRange: React.FC<SpecRangeProps> = ({
   if (!expanded) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text style={styles.text}>
+        <Text style={styles.compareValueText}>
           {min} - {max}
         </Text>
         <TouchableOpacity
@@ -60,7 +60,7 @@ export const SpecRange: React.FC<SpecRangeProps> = ({
           key={`${value}-${index}`}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
         >
-          <Text style={styles.text}>{value}</Text>
+          <Text style={styles.compareValueText}>{value}</Text>
           {index === values.length - 1 && (
             <TouchableOpacity
               onPress={() => setExpanded(false)}

@@ -52,7 +52,7 @@ const SPEC_ROWS: SpecRow[] = [
     fallback: "Engine",
     getValue: (car, imperial) =>
       car.specifications?.engine
-        ? car.specifications.engine.map(e => e).join(", ")
+        ? car.specifications.engine.join(", ")
         : null,
     isArray: true,
   },
