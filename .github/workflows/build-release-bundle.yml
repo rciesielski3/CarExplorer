@@ -28,6 +28,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Determine version tag and artifact name
         id: version
         run: |
@@ -51,40 +60,28 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Decode keystore
-        run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/release.keystore
-          echo "KEYSTORE_PATH=/tmp/release.keystore" >> $GITHUB_ENV
+      - name: Build AAB
+        id: build
+        uses: ./.github/actions/build-android-aab
+        with:
+          java-home: ${{ env.JAVA_HOME }}
+          android-home: ${{ env.ANDROID_HOME }}
+          keystore-base64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          keystore-password: ${{ secrets.KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-password: ${{ secrets.KEY_PASSWORD }}
+          admob-app-id: ${{ secrets.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID }}
 
-      - name: Build release bundle (AAB)
-        env:
-          CAREXPLORER_UPLOAD_STORE_FILE: ${{ env.KEYSTORE_PATH }}
-          CAREXPLORER_UPLOAD_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          CAREXPLORER_UPLOAD_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          CAREXPLORER_UPLOAD_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          EXPO_PUBLIC_ADMOB_ANDROID_APP_ID: ${{ secrets.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID }}
-        run: |
-          cd android
-          ./gradlew bundleRelease
-
-      - name: Build release APK (optional)
-        if: ${{ github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both' }}
-        env:
-          CAREXPLORER_UPLOAD_STORE_FILE: ${{ env.KEYSTORE_PATH }}
-          CAREXPLORER_UPLOAD_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          CAREXPLORER_UPLOAD_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          CAREXPLORER_UPLOAD_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          EXPO_PUBLIC_ADMOB_ANDROID_APP_ID: ${{ secrets.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID }}
-        run: |
-          cd android
-          ./gradlew assembleRelease
+      - name: Verify AAB Signing
+        uses: ./.github/actions/verify-aab-signing
+        with:
+          aab-path: ${{ steps.build.outputs.aab-path }}
+          expected-sha1: 'AC:F5:2A:DD:61:C8:8B:AA:B7:54:74:F9:B2:D5:6E:7E:9F:00:A4:E3'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.version.outputs.artifact-name }}
-          path: |
-            android/app/build/outputs/bundle/release/*.aab
-            android/app/build/outputs/apk/release/*.apk
+          path: ${{ steps.build.outputs.aab-path }}
           retention-days: 30
           if-no-files-found: error
