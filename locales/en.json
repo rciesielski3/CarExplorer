@@ -37,6 +37,7 @@
   "aiAnswerHybridVsEv": "Choose an EV if you can charge regularly and most trips fit its real-world range. A hybrid is easier when you drive long distances often, lack home charging, or want lower fuel use without changing habits.",
   "aiAnswerTurbo": "A turbo uses exhaust energy to push more air into the engine, helping it make more power from a smaller displacement. It can improve performance and efficiency, but maintenance and oil quality matter.",
   "aiAnswerMaintenance": "Oil changes, tires, brakes, fluids, battery health, and service records tell you more than a clean exterior. Before buying used, check for overdue maintenance and repeated warning lights.",
+  "aiThinking": "Thinking...",
   "aiNoMatch": "Try asking about engines, EVs, VINs, buying tips, or drivetrain differences.",
   "quickVinSubtitle": "Decode core vehicle details before a call or purchase.",
   "quickExploreSubtitle": "Browse makes, model years, and vehicle types.",

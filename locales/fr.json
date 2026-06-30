@@ -37,6 +37,7 @@
   "aiAnswerHybridVsEv": "Choisissez un EV si vous pouvez recharger régulièrement et si vos trajets tiennent dans l’autonomie réelle. Une hybride est plus simple pour les longs trajets fréquents, sans recharge à domicile ou pour réduire la consommation sans changer d’habitudes.",
   "aiAnswerTurbo": "Un turbo utilise l’énergie des gaz d’échappement pour envoyer plus d’air dans le moteur et produire plus de puissance avec une cylindrée plus faible. Il améliore les performances, mais demande une huile adaptée et un entretien régulier.",
   "aiAnswerMaintenance": "Vidanges, pneus, freins, fluides, batterie et historique d’entretien comptent plus qu’une carrosserie propre. Avant un achat d’occasion, cherchez l’entretien en retard et les voyants récurrents.",
+  "aiThinking": "Réflexion...",
   "aiNoMatch": "Essayez une question sur les moteurs, les EV, les VIN, l’achat ou les différences de transmission.",
   "quickVinSubtitle": "Lisez les données clés du véhicule avant un appel ou un achat.",
   "quickExploreSubtitle": "Parcourez les marques, années modèle et types de véhicules.",

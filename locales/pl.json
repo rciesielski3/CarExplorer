@@ -37,6 +37,7 @@
   "aiAnswerHybridVsEv": "Wybierz EV, jeśli możesz regularnie ładować auto i większość tras mieści się w realnym zasięgu. Hybryda jest wygodniejsza przy częstych długich trasach, braku ładowania w domu albo gdy chcesz oszczędzać paliwo bez zmiany nawyków.",
   "aiAnswerTurbo": "Turbo wykorzystuje energię spalin, żeby wtłoczyć więcej powietrza do silnika i uzyskać większą moc z mniejszej pojemności. Poprawia osiągi, ale wymaga dobrego oleju i regularnego serwisu.",
   "aiAnswerMaintenance": "Najwięcej mówią wymiany oleju, opony, hamulce, płyny, akumulator i historia serwisowa. Przed zakupem używanego auta sprawdź zaległy serwis i powtarzające się kontrolki.",
+  "aiThinking": "Myślę...",
   "aiNoMatch": "Spróbuj zapytać o silniki, EV, VIN, zakup auta albo różnice w napędzie.",
   "quickVinSubtitle": "Odczytaj podstawowe dane pojazdu przed rozmową lub zakupem.",
   "quickExploreSubtitle": "Przeglądaj marki, roczniki i typy pojazdów.",
