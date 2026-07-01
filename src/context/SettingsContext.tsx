@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type Settings = {
@@ -43,7 +43,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     hydrateSettings();
   }, []);
 
-  const setPreferredUnitSystem = async (system: 'metric' | 'imperial') => {
+  const setPreferredUnitSystem = useCallback(async (system: 'metric' | 'imperial') => {
     try {
       const updatedSettings = { ...settings, preferredUnitSystem: system };
       await AsyncStorage.setItem("carexplorer_settings", JSON.stringify(updatedSettings));
@@ -51,7 +51,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     } catch (error) {
       console.error("Failed to save settings:", error);
     }
-  };
+  }, [settings]);
 
   return (
     <SettingsContext.Provider value={{ settings, setPreferredUnitSystem, isHydrated }}>
