@@ -37,17 +37,17 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       height: 150,
     },
     title: {
-      fontSize: 34,
+      fontSize: 24,
       fontWeight: "800",
-      marginTop: 10,
-      marginBottom: 10,
+      marginTop: 0,
+      marginBottom: 16,
       textAlign: "left",
       color: Colors[theme].text,
       fontFamily: "PoetsenOne",
       letterSpacing: 0,
     },
     subtitle: {
-      fontSize: 23,
+      fontSize: 20,
       fontWeight: "600",
       marginTop: 10,
       marginBottom: 10,
@@ -425,7 +425,7 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
     },
     makesContainer: {
       flexGrow: 1,
-      paddingBottom: 24,
+      paddingBottom: 120,
       justifyContent: "flex-start",
     },
     makeButton: {
