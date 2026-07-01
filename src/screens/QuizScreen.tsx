@@ -213,7 +213,7 @@ const quizStyles = StyleSheet.create({
   },
   answersScroll: {
     flexShrink: 1,
-    maxHeight: "85vh",
+    maxHeight: "85%",
   },
   answersScrollContent: {
     paddingBottom: 8,

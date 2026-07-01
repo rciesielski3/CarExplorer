@@ -1,10 +1,4 @@
 import axios from "axios";
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import en from "../../locales/en.json";
-import fr from "../../locales/fr.json";
-import de from "../../locales/de.json";
-import pl from "../../locales/pl.json";
 
 import { GOOGLE_TRANSLATE_API } from "../config/apiConfig";
 
@@ -14,21 +8,11 @@ interface QuizQuestion {
   answer: string;
 }
 
-i18n.use(initReactI18next).init({
-  resources: {
-    en: { translation: en },
-    fr: { translation: fr },
-    de: { translation: de },
-    pl: { translation: pl },
-  },
-  lng: "en",
-  fallbackLng: "en",
-  interpolation: {
-    escapeValue: false,
-  },
-});
-
-export default i18n;
+// Note: i18next is initialized once, app-wide, in `i18n.ts` (imported from
+// App.tsx). This module only calls the Google Translate API directly and
+// does not use i18next, so it must not re-initialize the shared i18next
+// singleton — doing so previously crashed whenever react-i18next was mocked
+// (e.g. in tests) because `initReactI18next` would resolve to undefined.
 
 /**
  * Translate text using Google Translate API.

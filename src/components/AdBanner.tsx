@@ -40,8 +40,11 @@ const AdBanner = () => {
         unitId={unitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
+          // Note: maxAdContentRating is no longer part of per-request
+          // RequestOptions in this SDK version. Content rating is now set
+          // globally via mobileAds().setRequestConfiguration({
+          // maxAdContentRating: MaxAdContentRating.G }) at app startup.
           requestNonPersonalizedAdsOnly: true,
-          maxAdContentRating: "G",
         }}
         onAdFailedToLoad={() => setAdFailed(true)}
       />

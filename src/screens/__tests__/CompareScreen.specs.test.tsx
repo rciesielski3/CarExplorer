@@ -1,18 +1,26 @@
 jest.mock('../../components/AdBanner', () => ({
-  AdBanner: () => null,
+  __esModule: true,
+  default: () => null,
+}));
+
+jest.mock('@expo/vector-icons', () => ({
+  Ionicons: () => null,
 }));
 
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
+import { NavigationContainer } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CompareScreen from '../CompareScreen';
-import { CompareProvider } from '../../context/CompareContext';
+import { CompareProvider, CompareCar } from '../../context/CompareContext';
 import { SettingsProvider } from '../../context/SettingsContext';
 import { ThemeProvider } from '../../context/ThemeContext';
 import { useCompare } from '../../context/CompareContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useTheme } from '../../context/ThemeContext';
+
+type MockCar = CompareCar & { id: string; wikidata: string };
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
@@ -37,7 +45,7 @@ describe('CompareScreen - Specifications', () => {
       settingsContext = useSettings();
 
       // Mock car with specifications
-      const mockCar = {
+      const mockCar: MockCar = {
         id: '1',
         make: 'Toyota',
         model: 'Camry',
@@ -69,6 +77,7 @@ describe('CompareScreen - Specifications', () => {
 
     await act(async () => {
       renderer = TestRenderer.create(
+        <NavigationContainer>
         <ThemeProvider>
           <CompareProvider>
             <SettingsProvider>
@@ -76,6 +85,7 @@ describe('CompareScreen - Specifications', () => {
             </SettingsProvider>
           </CompareProvider>
         </ThemeProvider>
+        </NavigationContainer>
       );
     });
 
@@ -89,7 +99,7 @@ describe('CompareScreen - Specifications', () => {
       settingsContext = useSettings();
 
       // Mock car without specifications
-      const mockCar = {
+      const mockCar: MockCar = {
         id: '2',
         make: 'Tesla',
         model: 'Model 3',
@@ -109,6 +119,7 @@ describe('CompareScreen - Specifications', () => {
 
     await act(async () => {
       renderer = TestRenderer.create(
+        <NavigationContainer>
         <ThemeProvider>
           <CompareProvider>
             <SettingsProvider>
@@ -116,6 +127,7 @@ describe('CompareScreen - Specifications', () => {
             </SettingsProvider>
           </CompareProvider>
         </ThemeProvider>
+        </NavigationContainer>
       );
     });
 
@@ -130,7 +142,7 @@ describe('CompareScreen - Specifications', () => {
       settingsContext = useSettings();
 
       // Mock car with specifications
-      const mockCar = {
+      const mockCar: MockCar = {
         id: '3',
         make: 'BMW',
         model: 'M440i',
@@ -167,6 +179,7 @@ describe('CompareScreen - Specifications', () => {
 
     await act(async () => {
       renderer = TestRenderer.create(
+        <NavigationContainer>
         <ThemeProvider>
           <CompareProvider>
             <SettingsProvider>
@@ -174,6 +187,7 @@ describe('CompareScreen - Specifications', () => {
             </SettingsProvider>
           </CompareProvider>
         </ThemeProvider>
+        </NavigationContainer>
       );
     });
 
@@ -188,7 +202,7 @@ describe('CompareScreen - Specifications', () => {
       settingsContext = useSettings();
 
       // Mock car with multiple engine values that should show as range
-      const mockCar = {
+      const mockCar: MockCar = {
         id: '4',
         make: 'Honda',
         model: 'Accord',
@@ -229,6 +243,7 @@ describe('CompareScreen - Specifications', () => {
 
     await act(async () => {
       renderer = TestRenderer.create(
+        <NavigationContainer>
         <ThemeProvider>
           <CompareProvider>
             <SettingsProvider>
@@ -236,6 +251,7 @@ describe('CompareScreen - Specifications', () => {
             </SettingsProvider>
           </CompareProvider>
         </ThemeProvider>
+        </NavigationContainer>
       );
     });
 

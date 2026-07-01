@@ -17,6 +17,21 @@ jest.mock("@expo/vector-icons", () => ({
   Ionicons: () => null,
 }));
 
+// Avoid pulling in the real component barrel, which re-exports AdBanner and
+// transitively requires the react-native-google-mobile-ads native module
+// (unavailable under jest, causing a TurboModuleRegistry crash on import).
+jest.mock("../../components", () => {
+  const { View } = require("react-native");
+  return {
+    CustomButton: () => null,
+    ErrorMessage: () => null,
+    LoadingIndicator: () => null,
+    ScreenContainer: ({ children }: { children: React.ReactNode }) => (
+      <View>{children}</View>
+    ),
+  };
+});
+
 describe("QuizScreen Mobile Layout", () => {
   it("modal maxHeight is constrained to 90% on mobile", () => {
     const quizScreenPath = join(__dirname, "..", "QuizScreen.tsx");
@@ -26,12 +41,14 @@ describe("QuizScreen Mobile Layout", () => {
     expect(content).toContain('maxHeight: "90%"');
   });
 
-  it("answer scroll area has maxHeight constraint of 85vh", () => {
+  it("answer scroll area has maxHeight constraint of 85%", () => {
     const quizScreenPath = join(__dirname, "..", "QuizScreen.tsx");
     const content = readFileSync(quizScreenPath, "utf-8");
 
-    // Verify that answersScroll has maxHeight: "85vh"
-    expect(content).toContain('maxHeight: "85vh"');
+    // Verify that answersScroll has a valid RN percentage dimension, not the
+    // unsupported CSS "vh" unit which crashes at runtime.
+    expect(content).toContain('maxHeight: "85%"');
+    expect(content).not.toContain("vh\"");
   });
 
   it("score display has padding for mobile visibility", () => {
