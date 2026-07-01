@@ -279,7 +279,9 @@ export const getCarSpecificationsFromWikidata = async (
         }
       });
 
-      // Sort values (numerically where applicable)
+      // Sort values (numerically where applicable).
+      // NOTE: Assumes single unit per property (all metric after normalization).
+      // If mixed units are added to the same property, this comparator will silently invert order.
       specs[specKey as keyof CarSpecification] = Array.from(values).sort((a, b) => {
         const aNum = parseFloat(a);
         const bNum = parseFloat(b);

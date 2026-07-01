@@ -22,7 +22,7 @@ import {
 type SpecRow = {
   labelKey: string;
   fallback: string;
-  getValue: (car: CompareCar, isImperial?: boolean) => string | null | undefined;
+  getValue: (car: CompareCar, isImperial?: boolean) => string | string[] | null | undefined;
   isArray?: boolean;
 };
 
@@ -51,9 +51,7 @@ const SPEC_ROWS: SpecRow[] = [
     labelKey: "compareEngine",
     fallback: "Engine",
     getValue: (car, imperial) =>
-      car.specifications?.engine
-        ? car.specifications.engine.join(", ")
-        : null,
+      car.specifications?.engine?.length ? car.specifications.engine : null,
     isArray: true,
   },
   {
@@ -72,7 +70,7 @@ const SPEC_ROWS: SpecRow[] = [
           }
           return p;
         })
-        .join(", ");
+      );
     },
     isArray: true,
   },
@@ -80,8 +78,8 @@ const SPEC_ROWS: SpecRow[] = [
     labelKey: "compareTorque",
     fallback: "Torque",
     getValue: (car) =>
-      car.specifications?.torque
-        ? car.specifications.torque.join(", ")
+      car.specifications?.torque?.length
+        ? car.specifications.torque
         : null,
     isArray: true,
   },
@@ -89,8 +87,8 @@ const SPEC_ROWS: SpecRow[] = [
     labelKey: "compareAcceleration",
     fallback: "Acceleration (0-100)",
     getValue: (car) =>
-      car.specifications?.acceleration
-        ? car.specifications.acceleration.join(", ")
+      car.specifications?.acceleration?.length
+        ? car.specifications.acceleration
         : null,
     isArray: true,
   },
@@ -109,8 +107,7 @@ const SPEC_ROWS: SpecRow[] = [
             return convertWeight(kg, imperial || false);
           }
           return w;
-        })
-        .join(", ");
+        });
     },
     isArray: true,
   },
@@ -118,8 +115,8 @@ const SPEC_ROWS: SpecRow[] = [
     labelKey: "compareDimensions",
     fallback: "Dimensions",
     getValue: (car) =>
-      car.specifications?.dimensions
-        ? car.specifications.dimensions.join(", ")
+      car.specifications?.dimensions?.length
+        ? car.specifications.dimensions
         : null,
     isArray: true,
   },
@@ -127,8 +124,8 @@ const SPEC_ROWS: SpecRow[] = [
     labelKey: "compareFuelType",
     fallback: "Fuel Type",
     getValue: (car) =>
-      car.specifications?.fuelType
-        ? car.specifications.fuelType.join(", ")
+      car.specifications?.fuelType?.length
+        ? car.specifications.fuelType
         : null,
     isArray: true,
   },
@@ -136,8 +133,8 @@ const SPEC_ROWS: SpecRow[] = [
     labelKey: "compareTransmission",
     fallback: "Transmission",
     getValue: (car) =>
-      car.specifications?.transmission
-        ? car.specifications.transmission.join(", ")
+      car.specifications?.transmission?.length
+        ? car.specifications.transmission
         : null,
     isArray: true,
   },
@@ -156,8 +153,7 @@ const SPEC_ROWS: SpecRow[] = [
             return convertSpeed(kmh, imperial || false);
           }
           return s;
-        })
-        .join(", ");
+        });
     },
     isArray: true,
   },
@@ -256,9 +252,9 @@ const CompareScreen = () => {
                         key={`${row.labelKey}-${car.make}-${car.model}`}
                         style={styles.compareValueCell}
                       >
-                        {row.isArray && value ? (
+                        {Array.isArray(value) ? (
                           <SpecRange
-                            values={value.split(", ").filter(v => v)}
+                            values={value}
                             fallback="—"
                           />
                         ) : (
