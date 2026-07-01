@@ -1,7 +1,8 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
-import { getCarDetailsFromWikidata } from "./wikidataApi";
+import { getCarSpecificationsFromWikidata, getWikidataDescription, searchWikidataForCar } from "./wikidataApi";
+import { CarSpecification } from "../types/CarSpecification";
 
-export type CarDetailsResult = string | null;
+export type CarDetailsResult = { description: string; specifications?: CarSpecification } | null;
 
 const detailsCache = new Map<string, CarDetailsResult>();
 
@@ -263,8 +264,9 @@ export const getCarDetails = async (
 
     if (exactDetails) {
       console.log('[DETAILS_FROM_CANDIDATES]', activeLanguage);
-      detailsCache.set(cacheKey, exactDetails);
-      return exactDetails;
+      const result: CarDetailsResult = { description: exactDetails };
+      detailsCache.set(cacheKey, result);
+      return result;
     }
 
     try {
@@ -281,8 +283,9 @@ export const getCarDetails = async (
 
         if (searchDetails) {
           console.log('[DETAILS_FROM_SEARCH]', searchTitle, 'for', activeLanguage);
-          detailsCache.set(cacheKey, searchDetails);
-          return searchDetails;
+          const result: CarDetailsResult = { description: searchDetails };
+          detailsCache.set(cacheKey, result);
+          return result;
         }
       }
     } catch (error) {
@@ -301,19 +304,30 @@ export const getCarDetails = async (
 
     if (makeDetails) {
       console.log('[DETAILS_FROM_MAKE]', activeLanguage);
-      detailsCache.set(cacheKey, makeDetails);
-      return makeDetails;
+      const result: CarDetailsResult = { description: makeDetails };
+      detailsCache.set(cacheKey, result);
+      return result;
     }
   }
 
   // Fallback to Wikidata when Wikipedia fails
   console.log('[WIKIPEDIA_FAILED_TRYING_WIKIDATA]', make, model);
   try {
-    const basicDetails = await getCarDetailsFromWikidata(make, model, language);
-    if (basicDetails) {
-      console.log('[DETAILS_FROM_WIKIDATA]', make, model);
-      detailsCache.set(cacheKey, basicDetails);
-      return basicDetails;
+    const wikidataId = await searchWikidataForCar(make, model, language);
+    if (wikidataId) {
+      const [basicDetails, specifications] = await Promise.all([
+        getWikidataDescription(wikidataId, language),
+        getCarSpecificationsFromWikidata(wikidataId, language),
+      ]);
+      if (basicDetails) {
+        console.log('[DETAILS_FROM_WIKIDATA]', make, model);
+        const result: CarDetailsResult = {
+          description: basicDetails,
+          ...(specifications ? { specifications } : {}),
+        };
+        detailsCache.set(cacheKey, result);
+        return result;
+      }
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

@@ -82,13 +82,27 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
               },
             }),
         })
+      )
+      // Wikidata specs fetch (called in parallel with description) - no claims data
+      .mockResolvedValueOnce(
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              entities: {
+                Q123456: {
+                  claims: {},
+                },
+              },
+            }),
+        })
       );
 
     const result = await getCarDetails("Honda", "Civic");
 
-    expect(result).toBe("A popular compact car");
-    // 4 Wikipedia attempts + 2 Wikidata attempts = 6 calls
-    expect(mockFetch).toHaveBeenCalledTimes(6);
+    expect(result).toEqual({ description: "A popular compact car" });
+    // 4 Wikipedia attempts + 1 Wikidata search + 1 description + 1 specs = 7 calls
+    expect(mockFetch).toHaveBeenCalledTimes(7);
   });
 
   it("uses Wikipedia result when available (Wikidata not called)", async () => {
@@ -111,7 +125,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
 
     const result = await getCarDetails("Honda", "Civic");
 
-    expect(result).toBe("The Honda Civic is a compact car.");
+    expect(result).toEqual({ description: "The Honda Civic is a compact car." });
     // Only 1 Wikipedia call - Wikidata not invoked
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
@@ -224,14 +238,28 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
               },
             }),
         })
+      )
+      // Wikidata specs fetch (called in parallel with description)
+      .mockResolvedValueOnce(
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              entities: {
+                Q999999: {
+                  claims: {},
+                },
+              },
+            }),
+        })
       );
 
     const result1 = await getCarDetails("BMW", "X5");
     const result2 = await getCarDetails("BMW", "X5");
 
-    expect(result1).toBe("A test automobile");
-    expect(result2).toBe("A test automobile");
-    // First call makes 6 API calls, second uses cache (0 more calls)
-    expect(mockFetch).toHaveBeenCalledTimes(6);
+    expect(result1).toEqual({ description: "A test automobile" });
+    expect(result2).toEqual({ description: "A test automobile" });
+    // First call makes 7 API calls, second uses cache (0 more calls)
+    expect(mockFetch).toHaveBeenCalledTimes(7);
   });
 });

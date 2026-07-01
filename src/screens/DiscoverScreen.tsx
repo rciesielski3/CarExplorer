@@ -66,7 +66,7 @@ const DiscoverScreen = () => {
         make: searchQuery,
         model: "",
         image: imageUrl,
-        description: details || t("noDescriptionAvailable"),
+        description: details?.description || t("noDescriptionAvailable"),
         requestedLink,
       });
     } catch (err) {
