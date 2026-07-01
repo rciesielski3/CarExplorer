@@ -45,5 +45,6 @@ export const getUnitLabel = (propertyName: string, toImperial: boolean): string 
   };
 
   const label = labels[propertyName];
+  if (!label) return '';
   return toImperial ? label.imperial : label.metric;
 };
