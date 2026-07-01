@@ -69,8 +69,7 @@ const SPEC_ROWS: SpecRow[] = [
             return convertPower(kw, imperial || false);
           }
           return p;
-        })
-      );
+        });
     },
     isArray: true,
   },
