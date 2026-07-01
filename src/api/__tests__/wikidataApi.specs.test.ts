@@ -16,23 +16,37 @@ describe('Wikidata API - Specifications', () => {
   });
 
   it('deduplicates and sorts values in arrays', async () => {
-    // Mock test: values should be sorted
-    // This is verified by implementation, but the contract is important
-    const mockSpec = {
-      engine: ['3.0L', '2.0L', '3.0L', '2.5L'],
-      power: [],
-      torque: [],
-      acceleration: [],
-      weight: [],
-      dimensions: [],
-      fuelType: [],
-      transmission: [],
-      topSpeed: [],
-    };
+    const entityId = 'Q123';
+    const mockFetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          entities: {
+            [entityId]: {
+              claims: {
+                P4389: [
+                  { mainsnak: { datavalue: { value: '3.0L' } } },
+                  { mainsnak: { datavalue: { value: '2.0L' } } },
+                  { mainsnak: { datavalue: { value: '3.0L' } } }, // duplicate
+                  { mainsnak: { datavalue: { value: '2.5L' } } },
+                ],
+              },
+            },
+          },
+        }),
+    });
 
-    // After processing: should be deduped and sorted
-    // Engine should be: ['2.0L', '2.5L', '3.0L']
-    expect(mockSpec.engine).toEqual(['3.0L', '2.0L', '3.0L', '2.5L']);
+    const originalFetch = global.fetch;
+    global.fetch = mockFetch as jest.Mock;
+
+    try {
+      const spec = await getCarSpecificationsFromWikidata(entityId, 'en');
+      expect(spec).not.toBeNull();
+      // After dedup + sort: ['2.0L', '2.5L', '3.0L']
+      expect(spec!.engine).toEqual(['2.0L', '2.5L', '3.0L']);
+    } finally {
+      global.fetch = originalFetch;
+    }
   });
 
   it('handles missing properties gracefully', async () => {
