@@ -139,6 +139,11 @@
   "comparePower": "Leistung",
   "compareSelectedCount": "{{count}} ausgewählt",
   "compareTorque": "Drehmoment",
-  "compareAcceleration": "Beschleunigung",
-  "compareWeight": "Gewicht"
+  "compareAcceleration": "Beschleunigung (0-100 km/h)",
+  "compareWeight": "Gewicht",
+  "compareDimensions": "Abmessungen",
+  "compareFuelType": "Kraftstofftyp",
+  "compareTransmission": "Getriebe",
+  "compareTopSpeed": "Höchstgeschwindigkeit",
+  "unitSystem": "Einheitensystem"
 }

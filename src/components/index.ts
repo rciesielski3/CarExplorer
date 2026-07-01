@@ -7,6 +7,7 @@ import AboutModal from "./AboutModal";
 import CompareFloatingBar from "./CompareFloatingBar";
 import ConfirmModal from "./ConfirmModal";
 import ScreenContainer from "./ScreenContainer";
+import { SpecRange } from "./SpecRange";
 
 export {
   AdBanner,
@@ -18,4 +19,5 @@ export {
   CustomInput,
   LoadingIndicator,
   ScreenContainer,
+  SpecRange,
 };

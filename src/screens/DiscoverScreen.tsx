@@ -53,10 +53,10 @@ const DiscoverScreen = () => {
     setResult(null);
 
     try {
-const query = `${searchQuery}`.replace(/\s+/g, "_");
+      const query = `${searchQuery}`.replace(/\s+/g, "_");
       const imageUrl = await getCarImageUrl(searchQuery, "");
       const details = await getCarDetails(searchQuery, "", language);
-const requestedLink = generateRequestedLink(query, language);
+      const requestedLink = generateRequestedLink(query, language);
 
       if (!details) {
         return setError(t("noResultsFound"));
@@ -66,8 +66,8 @@ const requestedLink = generateRequestedLink(query, language);
         make: searchQuery,
         model: "",
         image: imageUrl,
-        description: details || t("noDescriptionAvailable"),
-requestedLink,
+        description: details?.description || t("noDescriptionAvailable"),
+        requestedLink,
       });
     } catch (err) {
       setError(t("errorFetchingData"));
