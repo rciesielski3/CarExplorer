@@ -7,7 +7,7 @@ import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { useTheme } from "../context/ThemeContext";
 import { ANIMATIONS } from "../constants/Assets";
 
-type LoaderType = "LOADING" | "CAR" | "CARCHECK" | "EXPLORE" | "QUIZLOADING";
+type LoaderType = "LOADING" | "CAR" | "CARCHECK" | "EXPLORE" | "QUIZLOADING" | "THINKING";
 
 interface LoadingIndicatorProps {
   type?: LoaderType;

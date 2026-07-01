@@ -11,7 +11,7 @@ import {
 import { fetchNews } from "../api/newsApi";
 import { useTheme } from "../context/ThemeContext";
 import { useAppLanguage } from "../context/LanguageContext";
-import { ErrorMessage, LoadingIndicator, ScreenContainer } from "../components";
+import { AdBanner, ErrorMessage, LoadingIndicator, ScreenContainer } from "../components";
 import NewsCard from "../components/NewsCard";
 import { NEWS_API } from "../config/apiConfig";
 
@@ -51,8 +51,7 @@ const NewsScreen = () => {
         <View style={homeStyles.container}>
           <LoadingIndicator />
         </View>
-            <AdBanner />
-    </ScreenContainer>
+      </ScreenContainer>
     );
   }
 
@@ -75,7 +74,7 @@ const NewsScreen = () => {
           />
         )}
       </View>
-          <AdBanner />
+      <AdBanner />
     </ScreenContainer>
   );
 };

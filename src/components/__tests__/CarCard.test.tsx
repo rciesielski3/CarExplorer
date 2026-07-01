@@ -7,7 +7,7 @@ import { CompareProvider } from "../../context/CompareContext";
 import { FavoritesProvider } from "../../context/FavoritesContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ThemeProvider } from "../../context/ThemeContext";
-import { fetchWikipediaCarImage, getCarDetails } from "../../api/wikipediaApi";
+import { fetchWikipediaCarImage, getCarDetails, CarDetailsResult } from "../../api/wikipediaApi";
 import { getCarImagesFallbackUrl } from "../../api/carImagesApi";
 
 jest.mock("../../api/wikipediaApi", () => ({
@@ -91,11 +91,11 @@ describe("CarCard", () => {
     jest.clearAllMocks();
     mockedFetchWikipediaCarImage.mockResolvedValue(null);
     mockedGetCarImagesFallbackUrl.mockResolvedValue(null);
-    mockedGetCarDetails.mockResolvedValue("Toyota Supra details");
+    mockedGetCarDetails.mockResolvedValue({ description: "Toyota Supra details" });
   });
 
   it("opens the details modal immediately and shows loading details", async () => {
-    const details = createDeferred<string | null>();
+    const details = createDeferred<CarDetailsResult | null>();
     mockedGetCarDetails.mockReturnValue(details.promise);
     const renderer = await renderCarCard();
     const [cardPressable] = renderer.root.findAllByProps({
@@ -117,7 +117,7 @@ describe("CarCard", () => {
     ).toBeGreaterThan(0);
 
     await act(async () => {
-      details.resolve("Toyota Supra details");
+      details.resolve({ description: "Toyota Supra details" });
       await details.promise;
     });
   });

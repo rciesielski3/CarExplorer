@@ -38,6 +38,7 @@
   "aiAnswerHybridVsEv": "Wählen Sie ein EV, wenn Sie regelmäßig laden können und Ihre Fahrten zur realen Reichweite passen. Ein Hybrid ist einfacher bei langen Strecken, fehlender Heimladung oder wenn Sie nur den Verbrauch senken möchten.",
   "aiAnswerTurbo": "Ein Turbo nutzt Abgasenergie, um mehr Luft in den Motor zu drücken und aus kleinerem Hubraum mehr Leistung zu holen. Er kann Leistung und Effizienz verbessern, braucht aber gutes Öl und regelmäßige Wartung.",
   "aiAnswerMaintenance": "Ölwechsel, Reifen, Bremsen, Flüssigkeiten, Batteriezustand und Servicebelege sagen mehr aus als eine glänzende Karosserie. Prüfen Sie vor dem Kauf überfällige Wartung und wiederkehrende Warnleuchten.",
+  "aiThinking": "Denke nach...",
   "aiNoMatch": "Fragen Sie zum Beispiel nach Motoren, EVs, VINs, Kauftipps oder Antriebsunterschieden.",
   "quickVinSubtitle": "Lesen Sie wichtige Fahrzeugdaten vor Gespräch oder Kauf aus.",
   "quickExploreSubtitle": "Durchsuchen Sie Marken, Modelljahre und Fahrzeugtypen.",
@@ -139,6 +140,11 @@
   "comparePower": "Leistung",
   "compareSelectedCount": "{{count}} ausgewählt",
   "compareTorque": "Drehmoment",
-  "compareAcceleration": "Beschleunigung",
-  "compareWeight": "Gewicht"
+  "compareAcceleration": "Beschleunigung (0-100 km/h)",
+  "compareWeight": "Gewicht",
+  "compareDimensions": "Abmessungen",
+  "compareFuelType": "Kraftstofftyp",
+  "compareTransmission": "Getriebe",
+  "compareTopSpeed": "Höchstgeschwindigkeit",
+  "unitSystem": "Einheitensystem"
 }

@@ -37,10 +37,8 @@ runs:
   steps:
     - name: Decode keystore
       shell: bash
-      env:
-        KEYSTORE_BASE64: ${{ inputs.keystore-base64 }}
       run: |
-        echo "$KEYSTORE_BASE64" | base64 -d > /tmp/release.keystore
+        echo "${{ inputs.keystore-base64 }}" | base64 -d > /tmp/release.keystore
         echo "Keystore decoded to /tmp/release.keystore"
 
     - name: Make gradlew executable
@@ -72,8 +70,3 @@ runs:
         fi
         echo "AAB verified at: $AAB_PATH"
         echo "aab-path=${AAB_PATH}" >> "$GITHUB_OUTPUT"
-
-    - name: Clean up keystore
-      if: always()
-      shell: bash
-      run: rm -f /tmp/release.keystore

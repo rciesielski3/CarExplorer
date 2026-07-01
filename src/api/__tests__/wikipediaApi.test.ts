@@ -100,9 +100,9 @@ describe("wikipediaApi", () => {
         })
       );
 
-    await expect(getCarDetails("Renault", "Zoe", "en")).resolves.toBe(
-      "The Renault Zoe is a battery electric car."
-    );
+    await expect(getCarDetails("Renault", "Zoe", "en")).resolves.toEqual({
+      description: "The Renault Zoe is a battery electric car.",
+    });
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
@@ -125,9 +125,9 @@ describe("wikipediaApi", () => {
       return wikipediaDetailsResponse({ extract: "" });
     });
 
-    await expect(getCarDetails("Mazda", "Miata", "en")).resolves.toBe(
-      "The Mazda MX-5 is a two-seat roadster."
-    );
+    await expect(getCarDetails("Mazda", "Miata", "en")).resolves.toEqual({
+      description: "The Mazda MX-5 is a two-seat roadster.",
+    });
   });
 
   it("uses make-level details fallback after exact and search fallbacks fail", async () => {
@@ -149,9 +149,9 @@ describe("wikipediaApi", () => {
       return wikipediaDetailsResponse({ missing: true });
     });
 
-    await expect(getCarDetails("Saab", "Imaginary 9000", "en")).resolves.toBe(
-      "Saab Automobile AB was a car manufacturer."
-    );
+    await expect(getCarDetails("Saab", "Imaginary 9000", "en")).resolves.toEqual({
+      description: "Saab Automobile AB was a car manufacturer.",
+    });
   });
 
   it("falls back to Wikipedia summary extract when query details are empty", async () => {
@@ -163,9 +163,9 @@ describe("wikipediaApi", () => {
         })
       );
 
-    await expect(getCarDetails("Ford", "Crown Victoria", "en")).resolves.toBe(
-      "The Ford Crown Victoria is a full-size sedan."
-    );
+    await expect(getCarDetails("Ford", "Crown Victoria", "en")).resolves.toEqual({
+      description: "The Ford Crown Victoria is a full-size sedan.",
+    });
   });
 
   it("uses English details fallback when selected language has no details", async () => {
@@ -195,9 +195,9 @@ describe("wikipediaApi", () => {
       return wikipediaDetailsResponse({ extract: "" });
     });
 
-    await expect(getCarDetails("Toyota", "Corolla", "pl")).resolves.toBe(
-      "The Toyota Corolla is a compact car."
-    );
+    await expect(getCarDetails("Toyota", "Corolla", "pl")).resolves.toEqual({
+      description: "The Toyota Corolla is a compact car.",
+    });
   });
 
   it("uses pageimages from a searched title before make-level images", async () => {
@@ -248,12 +248,12 @@ describe("wikipediaApi", () => {
         })
       );
 
-    await expect(getCarDetails("Volvo", "240", "en")).resolves.toBe(
-      "The Volvo 240 is a compact executive car."
-    );
-    await expect(getCarDetails("Volvo", "240", "en")).resolves.toBe(
-      "The Volvo 240 is a compact executive car."
-    );
+    await expect(getCarDetails("Volvo", "240", "en")).resolves.toEqual({
+      description: "The Volvo 240 is a compact executive car.",
+    });
+    await expect(getCarDetails("Volvo", "240", "en")).resolves.toEqual({
+      description: "The Volvo 240 is a compact executive car.",
+    });
     await expect(fetchWikipediaCarImage("Volvo", "240")).resolves.toBe(
       "https://example.com/volvo-240.jpg"
     );

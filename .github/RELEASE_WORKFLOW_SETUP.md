@@ -19,7 +19,7 @@ Configure these under **Settings → Secrets and variables → Actions**:
 
 | Secret | Description |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | Base64-encoded release keystore (`@adateo__car-explorer.jks`). Generate with: `base64 < /path/to/@adateo__car-explorer.jks` |
+| `ANDROID_KEYSTORE_BASE64` | Base64-encoded release keystore (`@adateo__car-explorer.jks`). Generate with: `base64 -i /path/to/@adateo__car-explorer.jks` |
 | `KEYSTORE_PASSWORD` | Keystore password from `.env.release.local` |
 | `KEY_ALIAS` | Key alias from `.env.release.local` |
 | `KEY_PASSWORD` | Key password from `.env.release.local` |

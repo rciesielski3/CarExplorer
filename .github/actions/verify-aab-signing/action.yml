@@ -10,7 +10,8 @@ inputs:
     required: true
   expected-sha1:
     description: Expected certificate SHA1 fingerprint (colon-separated uppercase hex)
-    required: true
+    required: false
+    default: 'AC:F5:2A:DD:61:C8:8B:AA:B7:54:74:F9:B2:D5:6E:7E:9F:00:A4:E3'
 
 runs:
   using: composite
@@ -23,10 +24,10 @@ runs:
 
     - name: Extract AAB and verify signing certificate
       shell: bash
-      env:
-        AAB_PATH: ${{ inputs.aab-path }}
-        EXPECTED_SHA1: ${{ inputs.expected-sha1 }}
       run: |
+        AAB_PATH="${{ inputs.aab-path }}"
+        EXPECTED_SHA1="${{ inputs.expected-sha1 }}"
+
         echo "Verifying signing certificate for: $AAB_PATH"
 
         if [ ! -f "$AAB_PATH" ]; then
@@ -70,7 +71,7 @@ runs:
         CERT_INFO=$(keytool -printcert -file "$CERT_FILE" 2>&1)
         echo "$CERT_INFO"
 
-        ACTUAL_SHA1=$(echo "$CERT_INFO" | grep -i "SHA1:" | head -n 1 | sed 's/.*SHA1:[[:space:]]*//' | tr -d '\r' | xargs)
+        ACTUAL_SHA1=$(echo "$CERT_INFO" | grep -i "SHA1:" | sed 's/.*SHA1:[[:space:]]*//')
 
         if [ -z "$ACTUAL_SHA1" ]; then
           echo "ERROR: Could not extract SHA1 fingerprint from keytool output."
@@ -91,8 +92,3 @@ runs:
           echo "The AAB was NOT signed with the expected production certificate. Aborting upload."
           exit 1
         fi
-
-    - name: Clean up temporary files
-      if: always()
-      shell: bash
-      run: rm -rf /tmp/aab_extract

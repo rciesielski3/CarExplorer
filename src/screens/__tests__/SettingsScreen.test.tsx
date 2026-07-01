@@ -9,6 +9,7 @@ import { ThemeProvider } from "../../context/ThemeContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { FavoritesProvider, useFavorites } from "../../context/FavoritesContext";
 import { CompareProvider, useCompare } from "../../context/CompareContext";
+import { SettingsProvider } from "../../context/SettingsContext";
 import { FAVORITES_STORAGE_KEY } from "../../services/favoritesStorage";
 
 jest.mock(
@@ -98,6 +99,7 @@ const renderSettingsScreen = async () => {
     renderer = TestRenderer.create(
       <ThemeProvider>
         <LanguageProvider>
+          <SettingsProvider>
           <PremiumProvider>
             <FavoritesProvider>
               <CompareProvider>
@@ -105,6 +107,7 @@ const renderSettingsScreen = async () => {
               </CompareProvider>
             </FavoritesProvider>
           </PremiumProvider>
+          </SettingsProvider>
         </LanguageProvider>
       </ThemeProvider>
     );
@@ -136,12 +139,13 @@ describe("SettingsScreen", () => {
       return <SettingsScreen />;
     };
 
-    let renderer: TestRenderer.ReactTestRenderer;
+    let renderer!: TestRenderer.ReactTestRenderer;
 
     await act(async () => {
       renderer = TestRenderer.create(
         <ThemeProvider>
           <LanguageProvider>
+          <SettingsProvider>
             <PremiumProvider>
               <FavoritesProvider>
                 <CompareProvider>
@@ -149,7 +153,8 @@ describe("SettingsScreen", () => {
                 </CompareProvider>
               </FavoritesProvider>
             </PremiumProvider>
-          </LanguageProvider>
+            </SettingsProvider>
+        </LanguageProvider>
         </ThemeProvider>
       );
     });
@@ -182,12 +187,13 @@ describe("SettingsScreen", () => {
       return <SettingsScreen />;
     };
 
-    let renderer: TestRenderer.ReactTestRenderer;
+    let renderer!: TestRenderer.ReactTestRenderer;
 
     await act(async () => {
       renderer = TestRenderer.create(
         <ThemeProvider>
           <LanguageProvider>
+          <SettingsProvider>
             <PremiumProvider>
               <FavoritesProvider>
                 <CompareProvider>
@@ -195,7 +201,8 @@ describe("SettingsScreen", () => {
                 </CompareProvider>
               </FavoritesProvider>
             </PremiumProvider>
-          </LanguageProvider>
+            </SettingsProvider>
+        </LanguageProvider>
         </ThemeProvider>
       );
     });
@@ -224,7 +231,11 @@ describe("SettingsScreen", () => {
 
   it("clear favorites modal shows confirmation", async () => {
     const renderer = await renderSettingsScreen();
-    const buttons = renderer.root.findAllByType(TouchableOpacity);
+    // Filter to the action buttons (reset / clear favorites / about), which
+    // are the only TouchableOpacity elements with accessibilityRole="button".
+    const buttons = renderer.root
+      .findAllByType(TouchableOpacity)
+      .filter((button) => button.props.accessibilityRole === "button");
 
     // Find the clear favorites button (second button after reset data)
     const clearFavoritesButton = buttons[1];
@@ -252,12 +263,13 @@ describe("SettingsScreen", () => {
       return <SettingsScreen />;
     };
 
-    let renderer: TestRenderer.ReactTestRenderer;
+    let renderer!: TestRenderer.ReactTestRenderer;
 
     await act(async () => {
       renderer = TestRenderer.create(
         <ThemeProvider>
           <LanguageProvider>
+          <SettingsProvider>
             <PremiumProvider>
               <FavoritesProvider>
                 <CompareProvider>
@@ -265,12 +277,19 @@ describe("SettingsScreen", () => {
                 </CompareProvider>
               </FavoritesProvider>
             </PremiumProvider>
-          </LanguageProvider>
+            </SettingsProvider>
+        </LanguageProvider>
         </ThemeProvider>
       );
     });
 
-    const buttons = renderer.root.findAllByType(TouchableOpacity);
+    // Filter to the action buttons (reset / clear favorites / about), which
+    // are the only TouchableOpacity elements with accessibilityRole="button".
+    // This avoids relying on a raw index, which breaks whenever unrelated
+    // buttons (e.g. the unit system toggle) are added earlier in the tree.
+    const buttons = renderer.root
+      .findAllByType(TouchableOpacity)
+      .filter((button) => button.props.accessibilityRole === "button");
     const clearFavoritesButton = buttons[1];
 
     // Open the modal
@@ -308,7 +327,7 @@ describe("SettingsScreen", () => {
       return <SettingsScreen />;
     };
 
-    let renderer: TestRenderer.ReactTestRenderer;
+    let renderer!: TestRenderer.ReactTestRenderer;
 
     jest.useFakeTimers();
 
@@ -316,6 +335,7 @@ describe("SettingsScreen", () => {
       renderer = TestRenderer.create(
         <ThemeProvider>
           <LanguageProvider>
+          <SettingsProvider>
             <PremiumProvider>
               <FavoritesProvider>
                 <CompareProvider>
@@ -323,12 +343,19 @@ describe("SettingsScreen", () => {
                 </CompareProvider>
               </FavoritesProvider>
             </PremiumProvider>
-          </LanguageProvider>
+            </SettingsProvider>
+        </LanguageProvider>
         </ThemeProvider>
       );
     });
 
-    const buttons = renderer.root.findAllByType(TouchableOpacity);
+    // Filter to the action buttons (reset / clear favorites / about), which
+    // are the only TouchableOpacity elements with accessibilityRole="button".
+    // This avoids relying on a raw index, which breaks whenever unrelated
+    // buttons (e.g. the unit system toggle) are added earlier in the tree.
+    const buttons = renderer.root
+      .findAllByType(TouchableOpacity)
+      .filter((button) => button.props.accessibilityRole === "button");
     const clearFavoritesButton = buttons[1];
 
     // Open the modal

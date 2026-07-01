@@ -9,4 +9,5 @@ export const ANIMATIONS = {
   CARCHECK: require("../../assets/animations/carCheck.json"),
   EXPLORE: require("../../assets/animations/explore.json"),
   QUIZLOADING: require("../../assets/animations/quizLoading.json"),
+  THINKING: require("../../assets/animations/loading.json"),
 };

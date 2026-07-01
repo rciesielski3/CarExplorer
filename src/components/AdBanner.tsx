@@ -14,11 +14,13 @@ import { usePremium } from "../context/PremiumContext";
 
 const AdBanner = () => {
   const { theme } = useTheme();
-  const { isPremium } = usePremium();
+  const { isPremium, isHydrated } = usePremium();
   const styles = createGlobalStyles(theme);
   const [adFailed, setAdFailed] = React.useState(false);
 
+  // Don't show ads if premium or ads not enabled
   if (
+    !isHydrated ||
     isPremium ||
     Platform.OS !== "android" ||
     !monetizationConfig.adsEnabled ||
@@ -38,8 +40,11 @@ const AdBanner = () => {
         unitId={unitId}
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         requestOptions={{
+          // Note: maxAdContentRating is no longer part of per-request
+          // RequestOptions in this SDK version. Content rating is now set
+          // globally via mobileAds().setRequestConfiguration({
+          // maxAdContentRating: MaxAdContentRating.G }) at app startup.
           requestNonPersonalizedAdsOnly: true,
-          maxAdContentRating: "G",
         }}
         onAdFailedToLoad={() => setAdFailed(true)}
       />

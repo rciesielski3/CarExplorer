@@ -242,7 +242,7 @@ The project uses two automated workflows for building and releasing to Google Pl
 ### Workflow 1: Build Release Bundle
 
 **Triggers:**
-- **Automatic:** Push a Git tag matching `v*.*.*` (e.g., `git tag v2.0.8 && git push origin v2.0.8`)
+- **Automatic:** Push a Git tag matching `v*.*.*.` (e.g., `git tag v2.0.8 && git push origin v2.0.8`)
 - **Manual:** Go to **Actions → Build Release Bundle → Run workflow**
 
 **Manual dispatch options:**

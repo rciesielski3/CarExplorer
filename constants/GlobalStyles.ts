@@ -395,6 +395,25 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       fontFamily: "DMSans_600SemiBold",
       fontSize: 15,
     },
+    unitButton: {
+      minHeight: 36,
+      paddingHorizontal: 14,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: Colors[theme].border,
+      backgroundColor: Colors[theme].surface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    unitButtonActive: {
+      backgroundColor: Colors[theme].accent,
+      borderColor: Colors[theme].accent,
+    },
+    unitButtonText: {
+      color: Colors[theme].text,
+      fontFamily: "DMSans_600SemiBold",
+      fontSize: 13,
+    },
     picker: {
       height: 60,
       width: 150,

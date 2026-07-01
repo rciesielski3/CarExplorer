@@ -1,8 +1,9 @@
 buildscript {
     ext.kotlin_version = '1.9.25'
 }
-dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+plugins {
+    id "org.jetbrains.kotlin.android" version "1.9.25" apply false
 }
 
 tasks.withType(JavaCompile) {

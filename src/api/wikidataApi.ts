@@ -1,3 +1,5 @@
+import { CarSpecification } from '../types/CarSpecification';
+
 const wikidataCache = new Map<string, string | null>();
 
 const WIKIDATA_FETCH_OPTIONS = {
@@ -209,4 +211,149 @@ export const getCarDetailsFromWikidata = async (
     wikidataCache.set(cacheKey, null);
     return null;
   }
+};
+
+const WIKIDATA_PROPERTY_MAPPING = {
+  engine: ['P4389'], // engine displacement
+  power: ['P2095'], // maximum power output
+  torque: ['P2896'], // maximum torque
+  acceleration: ['P2964'], // 0-100 km/h acceleration
+  weight: ['P2067'], // mass
+  dimensions: ['P2386'], // length/width/height
+  fuelType: ['P4572'], // fuel type
+  transmission: ['P2408'], // transmission
+  topSpeed: ['P2052'], // maximum speed
+};
+
+export const getCarSpecificationsFromWikidata = async (
+  wikidataId: string,
+  language: string = 'en'
+): Promise<CarSpecification | null> => {
+  try {
+    const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${encodeURIComponent(
+      wikidataId
+    )}&props=claims&format=json&origin=*`;
+
+    const { data, response } = await fetchWikidataJson(url);
+
+    if (isFailedResponse(response) || !data?.entities?.[wikidataId]) {
+      console.warn('[WIKIDATA_SPECS_FAILED]', { wikidataId });
+      return null;
+    }
+
+    const entity = data.entities[wikidataId];
+    if (entity.missing !== undefined) {
+      console.warn('[WIKIDATA_SPECS_FAILED]', { wikidataId, reason: 'entity missing' });
+      return null;
+    }
+    const specs: CarSpecification = {
+      engine: [],
+      power: [],
+      torque: [],
+      acceleration: [],
+      weight: [],
+      dimensions: [],
+      fuelType: [],
+      transmission: [],
+      topSpeed: [],
+    };
+
+    // Extract values for each property
+    // Simplified: extract mainsnaks and deduplicate
+    Object.entries(WIKIDATA_PROPERTY_MAPPING).forEach(([specKey, properties]) => {
+      const values = new Set<string>();
+
+      properties.forEach(prop => {
+        const claims = entity.claims?.[prop];
+        if (Array.isArray(claims)) {
+          claims.forEach((claim: any) => {
+            const value = claim?.mainsnak?.datavalue?.value;
+            if (value) {
+              // Format value based on property type
+              const formattedValue = formatWikidataValue(value, specKey);
+              if (formattedValue) {
+                values.add(formattedValue);
+              }
+            }
+          });
+        }
+      });
+
+      // Sort values (numerically where applicable).
+      // NOTE: Assumes single unit per property (all metric after normalization).
+      // If mixed units are added to the same property, this comparator will silently invert order.
+      specs[specKey as keyof CarSpecification] = Array.from(values).sort((a, b) => {
+        const aNum = parseFloat(a);
+        const bNum = parseFloat(b);
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return aNum - bNum;
+        }
+        return a.localeCompare(b);
+      });
+    });
+
+    return Object.values(specs).some(arr => arr.length > 0) ? specs : null;
+  } catch (error) {
+    console.warn('[WIKIDATA_SPECS_ERROR]', {
+      wikidataId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+};
+
+const formatWikidataValue = (value: any, specKey: string): string | null => {
+  // Handle plain strings (e.g. dimensions, engine description)
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  // Handle Wikidata quantity datavalue: { amount: "+150", unit: "http://..." }
+  if (typeof value === 'object' && value !== null && 'amount' in value) {
+    const raw = String(value.amount).replace(/^\+/, '');
+    const num = parseFloat(raw);
+    if (isNaN(num)) {
+      return null;
+    }
+    switch (specKey) {
+      case 'power':
+        return `${num} kW`;
+      case 'weight':
+        return `${num} kg`;
+      case 'topSpeed':
+        return `${num} km/h`;
+      case 'acceleration':
+        return `${num.toFixed(1)} s`;
+      case 'torque':
+        return `${num} Nm`;
+      default:
+        return `${num}`;
+    }
+  }
+
+  // Handle Wikidata item/entity datavalue: { "entity-type": "item", id: "Q..." }
+  // Labels require a separate API call; return null here so callers can skip
+  if (typeof value === 'object' && value !== null && 'entity-type' in value) {
+    return null;
+  }
+
+  // Fallback for unexpected number primitives
+  if (typeof value === 'number') {
+    switch (specKey) {
+      case 'power':
+        return `${value} kW`;
+      case 'weight':
+        return `${value} kg`;
+      case 'topSpeed':
+        return `${value} km/h`;
+      case 'acceleration':
+        return `${value.toFixed(1)} s`;
+      case 'torque':
+        return `${value} Nm`;
+      default:
+        return `${value}`;
+    }
+  }
+
+  return null;
 };
