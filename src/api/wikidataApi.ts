@@ -301,12 +301,42 @@ export const getCarSpecificationsFromWikidata = async (
 };
 
 const formatWikidataValue = (value: any, specKey: string): string | null => {
-  // Simple formatter - can be extended based on actual Wikidata structure
+  // Handle plain strings (e.g. dimensions, engine description)
   if (typeof value === 'string') {
     return value;
   }
+
+  // Handle Wikidata quantity datavalue: { amount: "+150", unit: "http://..." }
+  if (typeof value === 'object' && value !== null && 'amount' in value) {
+    const raw = String(value.amount).replace(/^\+/, '');
+    const num = parseFloat(raw);
+    if (isNaN(num)) {
+      return null;
+    }
+    switch (specKey) {
+      case 'power':
+        return `${num} kW`;
+      case 'weight':
+        return `${num} kg`;
+      case 'topSpeed':
+        return `${num} km/h`;
+      case 'acceleration':
+        return `${num.toFixed(1)} s`;
+      case 'torque':
+        return `${num} Nm`;
+      default:
+        return `${num}`;
+    }
+  }
+
+  // Handle Wikidata item/entity datavalue: { "entity-type": "item", id: "Q..." }
+  // Labels require a separate API call; return null here so callers can skip
+  if (typeof value === 'object' && value !== null && 'entity-type' in value) {
+    return null;
+  }
+
+  // Fallback for unexpected number primitives
   if (typeof value === 'number') {
-    // Format based on spec type
     switch (specKey) {
       case 'power':
         return `${value} kW`;
@@ -316,9 +346,12 @@ const formatWikidataValue = (value: any, specKey: string): string | null => {
         return `${value} km/h`;
       case 'acceleration':
         return `${value.toFixed(1)} s`;
+      case 'torque':
+        return `${value} Nm`;
       default:
         return `${value}`;
     }
   }
+
   return null;
 };
