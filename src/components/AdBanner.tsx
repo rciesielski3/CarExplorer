@@ -14,12 +14,13 @@ import { usePremium } from "../context/PremiumContext";
 
 const AdBanner = () => {
   const { theme } = useTheme();
-  const { isPremium } = usePremium();
+  const { isPremium, isHydrated } = usePremium();
   const styles = createGlobalStyles(theme);
   const [adFailed, setAdFailed] = React.useState(false);
 
   // Don't show ads if premium or ads not enabled
   if (
+    !isHydrated ||
     isPremium ||
     Platform.OS !== "android" ||
     !monetizationConfig.adsEnabled ||
