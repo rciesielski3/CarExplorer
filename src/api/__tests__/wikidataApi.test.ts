@@ -3,39 +3,15 @@ import {
   getWikidataDescription,
   getCarDetailsFromWikidata,
 } from "../wikidataApi";
+import {
+  wikidataSearchResponse,
+  wikidataEntityResponse,
+  errorScenarios,
+} from "./mocks";
 
 const mockFetch = jest.fn();
 
 global.fetch = mockFetch as jest.Mock;
-
-const wikidataSearchResponse = (results?: any[]) =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    json: () =>
-      Promise.resolve({
-        search: results || [],
-      }),
-  });
-
-const wikidataEntityResponse = (entityId: string, descriptions?: any) =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    json: () =>
-      Promise.resolve({
-        entities: {
-          [entityId]: {
-            descriptions: descriptions || {
-              en: { value: "A type of car" },
-            },
-            labels: {
-              en: { value: "Some Car" },
-            },
-          },
-        },
-      }),
-  });
 
 describe("wikidataApi", () => {
   beforeEach(() => {
@@ -207,5 +183,27 @@ describe("wikidataApi", () => {
     expect(result1).toBe("Premium sedan");
     expect(result2).toBe("Premium sedan");
     expect(mockFetch).toHaveBeenCalledTimes(2); // Only initial fetch, cached after
+  });
+
+  it("handles server errors in entity lookups", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
+
+    const result = await getCarDetailsFromWikidata("Q123456", "en");
+    expect(result).toBeNull();
+  });
+
+  it("handles rate limiting in search", async () => {
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.rateLimited429({}))
+      .mockResolvedValueOnce(wikidataSearchResponse([
+        {
+          id: "Q654321",
+          label: "Fallback Car",
+          description: "automobile",
+        },
+      ]));
+
+    const result = await searchWikidataForCar("Toyota", "Corolla");
+    expect(result).toBeDefined();
   });
 });
