@@ -80,8 +80,8 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
     const result = await getCarDetails("Honda", "Civic");
 
     expect(result).toEqual({ description: "A popular compact car" });
-    // 4 candidates × 2 calls + 1 search + 3 make candidates × 2 + 1 wikidata search + 1 description + 1 specs = 20 calls
-    expect(mockFetch).toHaveBeenCalledTimes(20);
+    // 4 candidates × 2 calls + 1 search + 3 make candidates × 2 + 1 wikidata search + 1 description + 1 specs = 18 calls
+    expect(mockFetch).toHaveBeenCalledTimes(18);
   });
 
   it("uses Wikipedia result when available (Wikidata not called)", async () => {
