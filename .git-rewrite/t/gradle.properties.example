@@ -1,9 +1,0 @@
-# Local gradle properties for release signing
-# Copy this file to android/gradle.properties and fill in your actual values
-# DO NOT commit gradle.properties to version control
-
-# Release signing configuration
-CAREXPLORER_UPLOAD_STORE_FILE=/path/to/your/keystore.jks
-CAREXPLORER_UPLOAD_STORE_PASSWORD=your_keystore_password
-CAREXPLORER_UPLOAD_KEY_ALIAS=your_key_alias
-CAREXPLORER_UPLOAD_KEY_PASSWORD=your_key_password

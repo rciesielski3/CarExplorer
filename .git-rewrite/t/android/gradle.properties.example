@@ -1,8 +1,0 @@
-# Release signing configuration (LOCAL ONLY - DO NOT COMMIT)
-# Copy this file to ~/.gradle/gradle.properties and fill in your values
-# Do NOT copy it to the repo - gradle.properties is in .gitignore
-
-CAREXPLORER_UPLOAD_STORE_FILE=/path/to/@adateo__car-explorer.jks
-CAREXPLORER_UPLOAD_STORE_PASSWORD=your_keystore_password_here
-CAREXPLORER_UPLOAD_KEY_ALIAS=your_key_alias_here
-CAREXPLORER_UPLOAD_KEY_PASSWORD=your_key_password_here
