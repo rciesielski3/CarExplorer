@@ -113,14 +113,6 @@ jobs:
 
       # --- Upload to Play Store ---
 
-      - name: Debug AAB path
-        run: |
-          echo "AAB_PATH=${AAB_PATH}"
-          echo "File exists check:"
-          ls -lah "${AAB_PATH}" 2>&1 || echo "File not found"
-          echo "Downloaded artifact directory:"
-          ls -lah downloaded-artifact/ 2>&1 || echo "Directory not found"
-
       - name: Upload AAB to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
