@@ -16,6 +16,10 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "<rootDir>/.claude/"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.+(test|spec).ts?(x)",
+      "**/?(*.)+(spec|test).ts?(x)"
     ]
   },
   "dependencies": {
