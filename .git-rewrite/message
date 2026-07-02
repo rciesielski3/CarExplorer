@@ -1,0 +1,10 @@
+fix: resolve test failures and TypeScript errors blocking release
+
+- Replace invalid CSS unit '85vh' with '85%' in QuizScreen
+- Add missing unitButton styles to GlobalStyles
+- Fix SettingsScreen.test.tsx renderer initialization and SettingsProvider wrapper
+- Fix CompareScreen.specs.test.tsx type mocks and missing wrappers (NavigationContainer, AdBanner mock, vector-icons mock)
+- Remove deprecated maxAdContentRating from per-request AdBanner options (now global config)
+- Remove duplicate i18next initialization in translateService.ts
+- Exclude worktree duplicate tests via Jest testPathIgnorePatterns
+- Results: TypeScript 0 errors (was 17), Jest 110/119 tests passing (was 98/119)

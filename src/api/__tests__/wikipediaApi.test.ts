@@ -10,21 +10,28 @@ const wikipediaSummaryResponse = (
 ) =>
   Promise.resolve({
     ok,
+    status: ok ? 200 : 404,
     json: () => Promise.resolve(data),
   });
 
 const wikipediaDetailsResponse = (page: Record<string, unknown>) =>
   Promise.resolve({
+    ok: true,
+    status: 200,
     json: () => Promise.resolve({ query: { pages: { "123": page } } }),
   });
 
 const wikipediaNoPagesResponse = () =>
   Promise.resolve({
+    ok: false,
+    status: 404,
     json: () => Promise.resolve({ query: {} }),
   });
 
 const wikipediaSearchResponse = (title?: string) =>
   Promise.resolve({
+    ok: true,
+    status: 200,
     json: () =>
       Promise.resolve({
         query: {
@@ -84,6 +91,7 @@ describe("wikipediaApi", () => {
     mockFetch.mockResolvedValue(
       Promise.resolve({
         ok: false,
+        status: 404,
         json: () => Promise.resolve({ query: {} }),
       })
     );

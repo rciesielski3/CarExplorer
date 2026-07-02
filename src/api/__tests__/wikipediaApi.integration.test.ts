@@ -21,12 +21,14 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       .mockResolvedValueOnce(
         Promise.resolve({
           ok: false,
+          status: 404,
           json: () => Promise.resolve({}),
         })
       )
       .mockResolvedValueOnce(
         Promise.resolve({
           ok: false,
+          status: 404,
           json: () => Promise.resolve({}),
         })
       )
@@ -34,6 +36,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       .mockResolvedValueOnce(
         Promise.resolve({
           ok: true,
+          status: 200,
           json: () =>
             Promise.resolve({
               query: {
@@ -46,6 +49,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       .mockResolvedValueOnce(
         Promise.resolve({
           ok: false,
+          status: 404,
           json: () => Promise.resolve({}),
         })
       )
@@ -53,6 +57,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       .mockResolvedValueOnce(
         Promise.resolve({
           ok: true,
+          status: 200,
           json: () =>
             Promise.resolve({
               search: [
@@ -69,6 +74,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       .mockResolvedValueOnce(
         Promise.resolve({
           ok: true,
+          status: 200,
           json: () =>
             Promise.resolve({
               entities: {

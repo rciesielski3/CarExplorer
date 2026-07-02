@@ -11,6 +11,7 @@ global.fetch = mockFetch as jest.Mock;
 const wikidataSearchResponse = (results?: any[]) =>
   Promise.resolve({
     ok: true,
+    status: 200,
     json: () =>
       Promise.resolve({
         search: results || [],
@@ -20,6 +21,7 @@ const wikidataSearchResponse = (results?: any[]) =>
 const wikidataEntityResponse = (entityId: string, descriptions?: any) =>
   Promise.resolve({
     ok: true,
+    status: 200,
     json: () =>
       Promise.resolve({
         entities: {

@@ -19,6 +19,7 @@ describe('Wikidata API - Specifications', () => {
     const entityId = 'Q123';
     const mockFetch = jest.fn().mockResolvedValueOnce({
       ok: true,
+      status: 200,
       json: () =>
         Promise.resolve({
           entities: {
