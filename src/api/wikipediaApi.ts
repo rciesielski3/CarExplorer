@@ -5,6 +5,7 @@ import { CarSpecification } from "../types/CarSpecification";
 export type CarDetailsResult = { description: string; specifications?: CarSpecification } | null;
 
 const detailsCache = new Map<string, CarDetailsResult>();
+const imageCache = new Map<string, string | null>();
 
 const WIKIPEDIA_FETCH_OPTIONS = {
   headers: {
@@ -60,12 +61,12 @@ const uniqueNonEmpty = (values: string[]) =>
   );
 
 const buildWikipediaCandidates = (make: string, model: string): string[] => {
-  const fullName = `${make} ${model}`.trim();
+  const { fullName, modelWithoutMake } = normalizeCarNames(make, model);
   return [
     `${fullName}`,
     `${fullName} automobile`,
     `${fullName} car`,
-    `${make} ${model.replace(make, "").trim()} automobile`,
+    `${make} ${modelWithoutMake} automobile`,
   ].filter(Boolean);
 };
 
@@ -211,6 +212,12 @@ export async function fetchWikipediaCarImage(
   make: string,
   model: string
 ): Promise<string | null> {
+  const cacheKey = `${make}:${model}`.toLowerCase();
+  if (imageCache.has(cacheKey)) {
+    console.log('[IMAGE_CACHE_HIT]', cacheKey);
+    return imageCache.get(cacheKey) || null;
+  }
+
   const candidates = buildWikipediaCandidates(make, model);
   console.log('[IMAGE_CANDIDATES]', candidates);
 
@@ -230,7 +237,10 @@ export async function fetchWikipediaCarImage(
         data?.thumbnail?.source || data?.originalimage?.source || null;
       console.log('[IMAGE_FOUND]', title, ':', imageUrl);
 
-      if (imageUrl) return imageUrl;
+      if (imageUrl) {
+        imageCache.set(cacheKey, imageUrl);
+        return imageUrl;
+      }
     } catch (error) {
       console.error('[IMAGE_ERROR]', title, error);
       continue;
@@ -238,6 +248,7 @@ export async function fetchWikipediaCarImage(
   }
 
   console.log('[NO_IMAGE]', make, model);
+  imageCache.set(cacheKey, null);
   return null;
 }
 
@@ -350,4 +361,10 @@ export const generateRequestedLink = (
   return `https://${language}.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles=${encodeURIComponent(
     query.replace(/\s+/g, "_")
   )}`;
+};
+
+// For testing: clear caches
+export const __clearCaches = () => {
+  detailsCache.clear();
+  imageCache.clear();
 };

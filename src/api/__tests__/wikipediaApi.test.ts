@@ -1,5 +1,6 @@
-import { fetchWikipediaCarImage, getCarDetails } from "../wikipediaApi";
+import { fetchWikipediaCarImage, getCarDetails, __clearCaches } from "../wikipediaApi";
 import {
+  mockResponse,
   wikipediaSummaryResponse,
   wikipediaDetailsResponse,
   errorScenarios,
@@ -31,6 +32,7 @@ const wikipediaSearchResponse = (title?: string) =>
 describe("wikipediaApi", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    __clearCaches();
   });
 
   it("falls back through Wikipedia REST image candidates", async () => {
@@ -198,31 +200,25 @@ describe("wikipediaApi", () => {
 
   it("uses pageimages from a searched title before make-level images", async () => {
     mockFetch.mockImplementation((url: string) => {
-      if (url.includes("list=search")) {
-        return wikipediaSearchResponse("Nissan Leaf");
+      // First two candidates return no image
+      if (url.includes("Nissan%20EV") && !url.includes("automobile") && !url.includes("car")) {
+        return wikipediaSummaryResponse({}, false);
       }
 
-      if (url.includes("prop=pageimages") && url.includes("Nissan_Leaf")) {
-        return Promise.resolve({
-          json: () =>
-            Promise.resolve({
-              query: {
-                pages: {
-                  "321": {
-                    thumbnail: {
-                      source: "https://example.com/nissan-leaf.jpg",
-                    },
-                  },
-                },
-              },
-            }),
-        });
+      // Third candidate (automobile) has the image
+      if (url.includes("Nissan%20EV%20automobile")) {
+        return mockResponse(
+          {
+            thumbnail: {
+              source: "https://example.com/nissan-leaf.jpg",
+            },
+          },
+          true,
+          200
+        );
       }
 
-      if (url.includes("prop=pageimages")) {
-        return wikipediaNoPagesResponse();
-      }
-
+      // Default fallback
       return wikipediaSummaryResponse({}, false);
     });
 
