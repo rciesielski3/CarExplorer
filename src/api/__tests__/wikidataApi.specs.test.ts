@@ -1,4 +1,5 @@
 import { getCarSpecificationsFromWikidata } from '../wikidataApi';
+import { mockResponse } from "./mocks";
 
 describe('Wikidata API - Specifications', () => {
   it('fetches car specifications from Wikidata entity', async () => {
@@ -17,11 +18,9 @@ describe('Wikidata API - Specifications', () => {
 
   it('deduplicates and sorts values in arrays', async () => {
     const entityId = 'Q123';
-    const mockFetch = jest.fn().mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: () =>
-        Promise.resolve({
+    const mockFetch = jest.fn().mockResolvedValueOnce(
+      mockResponse(
+        {
           entities: {
             [entityId]: {
               claims: {
@@ -34,8 +33,11 @@ describe('Wikidata API - Specifications', () => {
               },
             },
           },
-        }),
-    });
+        },
+        true,
+        200
+      )
+    );
 
     const originalFetch = global.fetch;
     global.fetch = mockFetch as jest.Mock;
