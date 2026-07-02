@@ -3,7 +3,7 @@
  * These tests demonstrate the complete flow when Wikipedia fails
  * and Wikidata provides a fallback
  */
-import { getCarDetails } from "../wikipediaApi";
+import { getCarDetails, __clearCaches } from "../wikipediaApi";
 import { getCarDetailsFromWikidata } from "../wikidataApi";
 import {
   wikipediaSummaryResponse,
@@ -19,11 +19,12 @@ global.fetch = mockFetch as jest.Mock;
 describe("Wikipedia API with Wikidata Fallback Integration", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    __clearCaches();
   });
 
   it("falls back to Wikidata when Wikipedia fails for a car", async () => {
     // Wikipedia returns no results for all attempts
-    // The code tries multiple candidates with both details extract and summary
+    // The code tries all candidates including duplicates with both details extract and summary
     mockFetch
       // Candidate 1: "Honda Civic" - details extract
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
@@ -79,8 +80,8 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
     const result = await getCarDetails("Honda", "Civic");
 
     expect(result).toEqual({ description: "A popular compact car" });
-    // 8 candidates × 2 calls + 1 search + 3 make candidates × 2 + 1 wikidata search + 1 description + 1 specs = 22 calls
-    expect(mockFetch).toHaveBeenCalledTimes(22);
+    // 4 candidates × 2 calls + 1 search + 3 make candidates × 2 + 1 wikidata search + 1 description + 1 specs = 20 calls
+    expect(mockFetch).toHaveBeenCalledTimes(20);
   });
 
   it("uses Wikipedia result when available (Wikidata not called)", async () => {
@@ -112,10 +113,6 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       // Candidate 3: "UnknownBrand UnknownModel car" - details extract
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Candidate 3: "UnknownBrand UnknownModel car" - summary
-      .mockResolvedValueOnce(errorScenarios.notFound404({}))
-      // Candidate 4: "UnknownBrand UnknownModel automobile" (duplicate) - details extract
-      .mockResolvedValueOnce(errorScenarios.notFound404({}))
-      // Candidate 4: "UnknownBrand UnknownModel automobile" (duplicate) - summary
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Search title for "UnknownBrand UnknownModel"
       .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
@@ -198,7 +195,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
 
     expect(result1).toEqual({ description: "A test automobile" });
     expect(result2).toEqual({ description: "A test automobile" });
-    // First call makes 22 API calls, second uses cache (0 more calls)
-    expect(mockFetch).toHaveBeenCalledTimes(22);
+    // First call makes 18 API calls, second uses cache (0 more calls)
+    expect(mockFetch).toHaveBeenCalledTimes(18);
   });
 });
