@@ -5,6 +5,13 @@
  */
 import { getCarDetails } from "../wikipediaApi";
 import { getCarDetailsFromWikidata } from "../wikidataApi";
+import {
+  wikipediaSummaryResponse,
+  wikipediaDetailsResponse,
+  wikidataSearchResponse,
+  wikidataEntityResponse,
+  errorScenarios,
+} from "./mocks";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch as jest.Mock;
@@ -18,91 +25,32 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
     // Wikipedia returns no results for all attempts
     mockFetch
       // Wikipedia query candidates - all fail
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          status: 404,
-          json: () => Promise.resolve({}),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          status: 404,
-          json: () => Promise.resolve({}),
-        })
-      )
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Wikipedia search - no results
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () =>
-            Promise.resolve({
-              query: {
-                search: [],
-              },
-            }),
-        })
-      )
+      .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
       // Wikipedia make-level query - fails
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          status: 404,
-          json: () => Promise.resolve({}),
-        })
-      )
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Now Wikidata search succeeds
       .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () =>
-            Promise.resolve({
-              search: [
-                {
-                  id: "Q123456",
-                  label: "Some Car",
-                  description: "automobile",
-                },
-              ],
-            }),
-        })
+        wikidataSearchResponse([
+          {
+            id: "Q123456",
+            label: "Some Car",
+            description: "automobile",
+          },
+        ])
       )
       // Wikidata description fetch succeeds
       .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () =>
-            Promise.resolve({
-              entities: {
-                Q123456: {
-                  descriptions: {
-                    en: {
-                      value: "A popular compact car",
-                    },
-                  },
-                },
-              },
-            }),
+        wikidataEntityResponse("Q123456", {
+          en: {
+            value: "A popular compact car",
+          },
         })
       )
       // Wikidata specs fetch (called in parallel with description) - no claims data
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              entities: {
-                Q123456: {
-                  claims: {},
-                },
-              },
-            }),
-        })
-      );
+      .mockResolvedValueOnce(wikidataEntityResponse("Q123456"));
 
     const result = await getCarDetails("Honda", "Civic");
 
@@ -114,18 +62,8 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
   it("uses Wikipedia result when available (Wikidata not called)", async () => {
     // Wikipedia returns a result immediately
     mockFetch.mockResolvedValueOnce(
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            query: {
-              pages: {
-                "123": {
-                  extract: "The Honda Civic is a compact car.",
-                },
-              },
-            },
-          }),
+      wikipediaDetailsResponse({
+        extract: "The Honda Civic is a compact car.",
       })
     );
 
@@ -139,42 +77,12 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
   it("handles Wikidata search errors gracefully", async () => {
     // Wikipedia fails completely
     mockFetch
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              query: {
-                search: [],
-              },
-            }),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      )
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Wikidata search fails
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      );
+      .mockResolvedValueOnce(errorScenarios.notFound404({}));
 
     const result = await getCarDetails("UnknownBrand", "UnknownModel");
 
@@ -184,81 +92,28 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
   it("caches Wikidata results to avoid repeated API calls", async () => {
     mockFetch
       // First request: Wikipedia fails, Wikidata succeeds
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
       .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
+        wikidataSearchResponse([
+          {
+            id: "Q999999",
+            label: "Test Car",
+            description: "automobile",
+          },
+        ])
       )
       .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              query: {
-                search: [],
-              },
-            }),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              search: [
-                {
-                  id: "Q999999",
-                  label: "Test Car",
-                  description: "automobile",
-                },
-              ],
-            }),
-        })
-      )
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              entities: {
-                Q999999: {
-                  descriptions: {
-                    en: {
-                      value: "A test automobile",
-                    },
-                  },
-                },
-              },
-            }),
+        wikidataEntityResponse("Q999999", {
+          en: {
+            value: "A test automobile",
+          },
         })
       )
       // Wikidata specs fetch (called in parallel with description)
-      .mockResolvedValueOnce(
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              entities: {
-                Q999999: {
-                  claims: {},
-                },
-              },
-            }),
-        })
-      );
+      .mockResolvedValueOnce(wikidataEntityResponse("Q999999"));
 
     const result1 = await getCarDetails("BMW", "X5");
     const result2 = await getCarDetails("BMW", "X5");
