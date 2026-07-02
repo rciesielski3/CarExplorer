@@ -1,25 +1,13 @@
 import { fetchWikipediaCarImage, getCarDetails } from "../wikipediaApi";
+import {
+  wikipediaSummaryResponse,
+  wikipediaDetailsResponse,
+  errorScenarios,
+} from "./mocks";
 
 const mockFetch = jest.fn();
 
 global.fetch = mockFetch as jest.Mock;
-
-const wikipediaSummaryResponse = (
-  data: Record<string, unknown>,
-  ok: boolean = true
-) =>
-  Promise.resolve({
-    ok,
-    status: ok ? 200 : 404,
-    json: () => Promise.resolve(data),
-  });
-
-const wikipediaDetailsResponse = (page: Record<string, unknown>) =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    json: () => Promise.resolve({ query: { pages: { "123": page } } }),
-  });
 
 const wikipediaNoPagesResponse = () =>
   Promise.resolve({
@@ -267,6 +255,37 @@ describe("wikipediaApi", () => {
     );
     await expect(fetchWikipediaCarImage("Volvo", "240")).resolves.toBe(
       "https://example.com/volvo-240.jpg"
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("handles server errors gracefully", async () => {
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.server500({}))
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}))
+      .mockResolvedValueOnce(
+        wikipediaSummaryResponse({
+          thumbnail: { source: "https://example.com/fallback.jpg" },
+        })
+      );
+
+    await expect(fetchWikipediaCarImage("Toyota", "Corolla")).resolves.toBe(
+      "https://example.com/fallback.jpg"
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+  });
+
+  it("handles rate limiting (429) with fallback", async () => {
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.rateLimited429({}))
+      .mockResolvedValueOnce(
+        wikipediaSummaryResponse({
+          thumbnail: { source: "https://example.com/rate-limited.jpg" },
+        })
+      );
+
+    await expect(fetchWikipediaCarImage("BMW", "M340i")).resolves.toBe(
+      "https://example.com/rate-limited.jpg"
     );
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
