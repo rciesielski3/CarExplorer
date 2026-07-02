@@ -113,14 +113,23 @@ jobs:
 
       # --- Upload to Play Store ---
 
+      - name: Debug AAB path
+        run: |
+          echo "AAB_PATH=${AAB_PATH}"
+          echo "File exists check:"
+          ls -lah "${AAB_PATH}" 2>&1 || echo "File not found"
+          echo "Downloaded artifact directory:"
+          ls -lah downloaded-artifact/ 2>&1 || echo "Directory not found"
+
       - name: Upload AAB to Play Store
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
           packageName: 'com.adateo.carexplorer'
-          releaseFiles: ${{ env.AAB_PATH }}
-          track: ${{ github.event.inputs.track }}
+          releaseFiles: '${{ env.AAB_PATH }}'
+          tracks: '${{ github.event.inputs.track }}'
           status: ${{ github.event.inputs.status }}
+          skipCommitHash: true
 
       # --- GitHub Release (production track or explicit opt-in) ---
 
