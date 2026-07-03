@@ -10,16 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
 import { MainTabParamList, RootStackParamList } from "../navigation/types";
-import HomeScreen from "../screens/HomeScreen";
-import ExploreScreen from "../screens/ExploreScreen";
-import QuizScreen from "../screens/QuizScreen";
-import DiscoverScreen from "../screens/DiscoverScreen";
-import VinCheckerScreen from "../screens/VinCheckerScreen";
-import CompareScreen from "../screens/CompareScreen";
-import FavoritesScreen from "../screens/FavoritesScreen";
-import NewsScreen from "../screens/NewsScreen";
-import SettingsScreen from "../screens/SettingsScreen";
-import WebViewScreen from "../screens/WebViewScreen";
+import { LAZY_ROUTES } from "./lazyRoutes";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -70,7 +61,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={LAZY_ROUTES.HomeScreen}
         options={{
           tabBarLabel: t("home"),
           tabBarIcon: ({ color, size }) => (
@@ -80,7 +71,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Explore"
-        component={ExploreScreen}
+        component={LAZY_ROUTES.ExploreScreen}
         options={{
           tabBarLabel: t("explore"),
           tabBarIcon: ({ color, size }) => (
@@ -90,7 +81,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Quiz"
-        component={QuizScreen}
+        component={LAZY_ROUTES.QuizScreen}
         options={{
           tabBarLabel: t("quiz"),
           tabBarIcon: ({ color, size }) => (
@@ -100,7 +91,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Favorites"
-        component={FavoritesScreen}
+        component={LAZY_ROUTES.FavoritesScreen}
         options={{
           tabBarLabel: t("garage", "Garage"),
           tabBarIcon: ({ color, size }) => (
@@ -110,7 +101,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="News"
-        component={NewsScreen}
+        component={LAZY_ROUTES.NewsScreen}
         options={{
           tabBarLabel: t("news"),
           tabBarIcon: ({ color, size }) => (
@@ -139,21 +130,21 @@ const AppNavigator = () => {
         <Stack.Screen name="MainTabs" component={TabNavigator} />
         <Stack.Screen
           name="Compare"
-          component={CompareScreen}
+          component={LAZY_ROUTES.CompareScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="Vin"
-          component={VinCheckerScreen}
+          component={LAZY_ROUTES.VinCheckerScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="Settings"
-          component={SettingsScreen}
+          component={LAZY_ROUTES.SettingsScreen}
           options={{
             headerShown: true,
             title: t("settings"),
@@ -161,14 +152,14 @@ const AppNavigator = () => {
         />
         <Stack.Screen
           name="Discover"
-          component={DiscoverScreen}
+          component={LAZY_ROUTES.DiscoverScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="WebViewScreen"
-          component={WebViewScreen}
+          component={LAZY_ROUTES.WebViewScreen}
           options={{ headerShown: true, title: "Article" }}
         />
       </Stack.Navigator>
