@@ -61,12 +61,11 @@ const uniqueNonEmpty = (values: string[]) =>
   );
 
 const buildWikipediaCandidates = (make: string, model: string): string[] => {
-  const { fullName, modelWithoutMake } = normalizeCarNames(make, model);
+  const { fullName } = normalizeCarNames(make, model);
   return uniqueNonEmpty([
     `${fullName}`,
     `${fullName} automobile`,
     `${fullName} car`,
-    `${make} ${modelWithoutMake} automobile`,
   ]);
 };
 
