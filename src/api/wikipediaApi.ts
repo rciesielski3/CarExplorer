@@ -245,6 +245,61 @@ export async function fetchWikipediaCarImage(
     }
   }
 
+  // Try search as fallback for images
+  try {
+    const { fullName } = normalizeCarNames(make, model);
+    const searchTitle = await fetchWikipediaSearchTitle(fullName, "en");
+
+    if (searchTitle) {
+      console.log('[IMAGE_FROM_SEARCH]', searchTitle);
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+        searchTitle
+      )}`;
+      const { data, response } = await fetchWikipediaJson(url);
+
+      if (response.ok) {
+        const imageUrl =
+          data?.thumbnail?.source || data?.originalimage?.source || null;
+        if (imageUrl) {
+          console.log('[IMAGE_FOUND_FROM_SEARCH]', searchTitle, ':', imageUrl);
+          imageCache.set(cacheKey, imageUrl);
+          return imageUrl;
+        }
+      }
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn('[IMAGE_SEARCH_ERROR]', message);
+  }
+
+  // Try make-level candidates as final fallback
+  const makeCandidates = buildMakeCandidates(make);
+  for (const title of makeCandidates) {
+    try {
+      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+        title
+      )}`;
+      const { data, response } = await fetchWikipediaJson(url);
+
+      if (!response.ok) {
+        console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
+        continue;
+      }
+
+      const imageUrl =
+        data?.thumbnail?.source || data?.originalimage?.source || null;
+      console.log('[IMAGE_FOUND]', title, ':', imageUrl);
+
+      if (imageUrl) {
+        imageCache.set(cacheKey, imageUrl);
+        return imageUrl;
+      }
+    } catch (error) {
+      console.error('[IMAGE_ERROR]', title, error);
+      continue;
+    }
+  }
+
   console.log('[NO_IMAGE]', make, model);
   imageCache.set(cacheKey, null);
   return null;
