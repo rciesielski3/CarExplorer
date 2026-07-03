@@ -83,6 +83,16 @@ jobs:
         if: steps.locate-aab.outputs.found == 'false'
         uses: android-actions/setup-android@v3
 
+      - name: Set up Node.js (fallback build)
+        if: steps.locate-aab.outputs.found == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (fallback build)
+        if: steps.locate-aab.outputs.found == 'false'
+        run: npm install
+
       - name: Decode keystore (fallback build)
         if: steps.locate-aab.outputs.found == 'false'
         run: |
@@ -109,7 +119,26 @@ jobs:
 
       - name: Set AAB path (fallback fresh build)
         if: steps.locate-aab.outputs.found == 'false'
-        run: echo "AAB_PATH=android/app/build/outputs/bundle/release/app-release.aab" >> $GITHUB_ENV
+        run: |
+          # Search for AAB file in fallback build outputs
+          AAB_FILE=$(find android/app/build/outputs/bundle -name "*.aab" -type f 2>/dev/null | head -1)
+          if [ -z "$AAB_FILE" ]; then
+            echo "ERROR: AAB file not found in build outputs!"
+            echo "Searched in: android/app/build/outputs/bundle/"
+            find android/app/build -type f -name "*.aab" 2>/dev/null || echo "No AAB files found anywhere in build directory"
+            exit 1
+          fi
+          echo "Found AAB from fallback build: ${AAB_FILE}"
+          echo "AAB_PATH=${AAB_FILE}" >> $GITHUB_ENV
+
+      - name: Verify AAB file exists before upload
+        run: |
+          if [ ! -f "$AAB_PATH" ]; then
+            echo "ERROR: AAB file does not exist at: $AAB_PATH"
+            exit 1
+          fi
+          echo "✓ AAB file verified: $AAB_PATH"
+          ls -lh "$AAB_PATH"
 
       # --- Upload to Play Store ---
 
