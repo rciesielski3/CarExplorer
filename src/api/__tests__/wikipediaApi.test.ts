@@ -285,4 +285,51 @@ describe("wikipediaApi", () => {
     );
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
+
+  it("validates search and pageimages flow for car images", async () => {
+    mockFetch.mockImplementation((url: string) => {
+      // Call 4: Search query (list=search) - must check before other Honda Civic matches
+      if (url.includes("list=search") && url.includes("Honda%20Civic")) {
+        return wikipediaSearchResponse("Honda Civic Hybrid");
+      }
+
+      // Call 5: Pageimages from search result - check before generic Honda Civic match
+      if (url.includes("/page/summary/Honda%20Civic%20Hybrid")) {
+        return mockResponse(
+          {
+            thumbnail: {
+              source: "https://example.com/honda-civic-hybrid.jpg",
+            },
+          },
+          true,
+          200
+        );
+      }
+
+      // Calls 1-3: Exact candidates - no image
+      if (url.includes("/page/summary/Honda%20Civic%20automobile")) {
+        return wikipediaSummaryResponse({}, false);
+      }
+
+      if (url.includes("/page/summary/Honda%20Civic%20car")) {
+        return wikipediaSummaryResponse({}, false);
+      }
+
+      if (
+        url.includes("/page/summary/Honda%20Civic") &&
+        !url.includes("automobile") &&
+        !url.includes("car") &&
+        !url.includes("Hybrid")
+      ) {
+        return wikipediaSummaryResponse({}, false);
+      }
+
+      return wikipediaSummaryResponse({}, false);
+    });
+
+    await expect(fetchWikipediaCarImage("Honda", "Civic")).resolves.toBe(
+      "https://example.com/honda-civic-hybrid.jpg"
+    );
+    expect(mockFetch).toHaveBeenCalledTimes(5);
+  });
 });
