@@ -205,7 +205,7 @@ describe("wikipediaApi", () => {
         return wikipediaSummaryResponse({}, false);
       }
 
-      // Third candidate (automobile) has the image
+      // Second candidate (automobile) has the image
       if (url.includes("Nissan%20EV%20automobile")) {
         return mockResponse(
           {

@@ -213,7 +213,6 @@ export async function fetchWikipediaCarImage(
 ): Promise<string | null> {
   const cacheKey = `${make}:${model}`.toLowerCase();
   if (imageCache.has(cacheKey)) {
-    console.log('[IMAGE_CACHE_HIT]', cacheKey);
     return imageCache.get(cacheKey) || null;
   }
 
@@ -364,6 +363,8 @@ export const generateRequestedLink = (
 
 // For testing: clear caches
 export const __clearCaches = () => {
-  detailsCache.clear();
-  imageCache.clear();
+  if (process.env.NODE_ENV !== 'production') {
+    detailsCache.clear();
+    imageCache.clear();
+  }
 };
