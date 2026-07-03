@@ -1,11 +1,10 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import { StyleSheet, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { Colors } from "./constants/Colors";
 import { CompareProvider } from "./src/context/CompareContext";
 import { FavoritesProvider } from "./src/context/FavoritesContext";
-import { QuizProvider } from "./src/context/QuizContext";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LanguageProvider } from "./src/context/LanguageContext";
 import { PremiumProvider } from "./src/context/PremiumContext";
@@ -28,19 +27,9 @@ import "./i18n";
 SplashScreen.preventAutoHideAsync();
 
 const DeferredProviders = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    perfMonitor.startMeasure("deferred-providers-init");
-    return () => {
-      const duration = perfMonitor.endMeasure("deferred-providers-init");
-      console.log(
-        `[Performance] Deferred providers initialized in ${duration}ms`
-      );
-    };
-  }, []);
-
   return (
     <FavoritesProvider>
-      <QuizProvider>{children}</QuizProvider>
+      {children}
     </FavoritesProvider>
   );
 };
@@ -58,18 +47,16 @@ const AppContent = () => {
     DMSans_600SemiBold,
   });
 
-  // Track app startup performance
-  useEffect(() => {
+  // Track app startup performance on mount
+  React.useEffect(() => {
     perfMonitor.startMeasure("app-startup");
-    return () => {
-      const duration = perfMonitor.endMeasure("app-startup");
-      console.log(`[Performance] App startup completed in ${duration}ms`);
-    };
   }, []);
 
   React.useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
+      // Log metrics when fonts are loaded
+      perfMonitor.logMetrics();
     }
   }, [fontsLoaded]);
 
