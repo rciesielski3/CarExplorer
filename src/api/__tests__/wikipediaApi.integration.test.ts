@@ -24,7 +24,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
 
   it("falls back to Wikidata when Wikipedia fails for a car", async () => {
     // Wikipedia returns no results for all attempts
-    // The code tries all candidates including duplicates with both details extract and summary
+    // The code tries 3 unique model candidates (duplicates removed) with both details extract and summary
     mockFetch
       // Candidate 1: "Honda Civic" - details extract
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
@@ -37,10 +37,6 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       // Candidate 3: "Honda Civic car" - details extract
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Candidate 3: "Honda Civic car" - summary
-      .mockResolvedValueOnce(errorScenarios.notFound404({}))
-      // Candidate 4: "Honda Civic automobile" (duplicate) - details extract
-      .mockResolvedValueOnce(errorScenarios.notFound404({}))
-      // Candidate 4: "Honda Civic automobile" (duplicate) - summary
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Search title for "Honda Civic"
       .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
@@ -80,8 +76,8 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
     const result = await getCarDetails("Honda", "Civic");
 
     expect(result).toEqual({ description: "A popular compact car" });
-    // 4 candidates × 2 calls + 1 search + 3 make candidates × 2 + 1 wikidata search + 1 description + 1 specs = 18 calls
-    expect(mockFetch).toHaveBeenCalledTimes(18);
+    // 3 candidates × 2 calls + 1 search + 3 make candidates × 2 + 1 wikidata search + 1 description + 1 specs = 16 calls
+    expect(mockFetch).toHaveBeenCalledTimes(16);
   });
 
   it("uses Wikipedia result when available (Wikidata not called)", async () => {
@@ -151,10 +147,6 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Candidate 3: "BMW X5 car" - summary
       .mockResolvedValueOnce(errorScenarios.notFound404({}))
-      // Candidate 4: "BMW X5 automobile" (duplicate) - details extract
-      .mockResolvedValueOnce(errorScenarios.notFound404({}))
-      // Candidate 4: "BMW X5 automobile" (duplicate) - summary
-      .mockResolvedValueOnce(errorScenarios.notFound404({}))
       // Search title for "BMW X5"
       .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
       // Make candidates: "BMW" - details extract
@@ -195,7 +187,7 @@ describe("Wikipedia API with Wikidata Fallback Integration", () => {
 
     expect(result1).toEqual({ description: "A test automobile" });
     expect(result2).toEqual({ description: "A test automobile" });
-    // First call makes 18 API calls, second uses cache (0 more calls)
-    expect(mockFetch).toHaveBeenCalledTimes(18);
+    // First call makes 16 API calls (3 candidates × 2 + search + 3 make × 2 + 3 wikidata), second uses cache (0 more calls)
+    expect(mockFetch).toHaveBeenCalledTimes(16);
   });
 });
