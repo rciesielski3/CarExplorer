@@ -1,10 +1,11 @@
-import React from "react";
+import React, { Suspense, useEffect } from "react";
 import { StyleSheet, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { Colors } from "./constants/Colors";
 import { CompareProvider } from "./src/context/CompareContext";
 import { FavoritesProvider } from "./src/context/FavoritesContext";
+import { QuizProvider } from "./src/context/QuizContext";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LanguageProvider } from "./src/context/LanguageContext";
 import { PremiumProvider } from "./src/context/PremiumContext";
@@ -21,9 +22,28 @@ import {
   DMSans_600SemiBold,
 } from "@expo-google-fonts/dm-sans";
 import * as SplashScreen from "expo-splash-screen";
+import { perfMonitor } from "./src/utils/performanceMonitor";
 import "./i18n";
 
 SplashScreen.preventAutoHideAsync();
+
+const DeferredProviders = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    perfMonitor.startMeasure("deferred-providers-init");
+    return () => {
+      const duration = perfMonitor.endMeasure("deferred-providers-init");
+      console.log(
+        `[Performance] Deferred providers initialized in ${duration}ms`
+      );
+    };
+  }, []);
+
+  return (
+    <FavoritesProvider>
+      <QuizProvider>{children}</QuizProvider>
+    </FavoritesProvider>
+  );
+};
 
 const AppContent = () => {
   const { theme } = useTheme() || { theme: "light" };
@@ -37,6 +57,15 @@ const AppContent = () => {
     DMSans_500Medium,
     DMSans_600SemiBold,
   });
+
+  // Track app startup performance
+  useEffect(() => {
+    perfMonitor.startMeasure("app-startup");
+    return () => {
+      const duration = perfMonitor.endMeasure("app-startup");
+      console.log(`[Performance] App startup completed in ${duration}ms`);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (fontsLoaded) {
@@ -55,7 +84,9 @@ const AppContent = () => {
       end={{ x: 0.9, y: 1 }}
       style={styles.background}
     >
-      <AppNavigator />
+      <Suspense fallback={<ActivityIndicator size="large" color="#000" />}>
+        <AppNavigator />
+      </Suspense>
     </LinearGradient>
   );
 };
@@ -64,15 +95,15 @@ export default function App() {
   return (
     <LanguageProvider>
       <ThemeProvider>
-        <FavoritesProvider>
-          <CompareProvider>
-            <PremiumProvider>
-              <SettingsProvider>
+        <CompareProvider>
+          <PremiumProvider>
+            <SettingsProvider>
+              <DeferredProviders>
                 <AppContent />
-              </SettingsProvider>
-            </PremiumProvider>
-          </CompareProvider>
-        </FavoritesProvider>
+              </DeferredProviders>
+            </SettingsProvider>
+          </PremiumProvider>
+        </CompareProvider>
       </ThemeProvider>
     </LanguageProvider>
   );
