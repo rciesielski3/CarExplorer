@@ -56,6 +56,7 @@ const AppContent = () => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
       // Log metrics when fonts are loaded
+      perfMonitor.endMeasure("app-startup");
       perfMonitor.logMetrics();
     }
   }, [fontsLoaded]);
