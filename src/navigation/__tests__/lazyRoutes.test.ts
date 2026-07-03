@@ -4,11 +4,15 @@ describe('Lazy Routes', () => {
   it('defines all expected routes', () => {
     const expectedRoutes = [
       'HomeScreen',
-      'DetailScreen',
-      'FavoritesScreen',
-      'SettingsScreen',
+      'ExploreScreen',
       'QuizScreen',
-      'SpecificationsScreen',
+      'DiscoverScreen',
+      'VinCheckerScreen',
+      'CompareScreen',
+      'FavoritesScreen',
+      'NewsScreen',
+      'SettingsScreen',
+      'WebViewScreen',
     ];
 
     expectedRoutes.forEach((route) => {

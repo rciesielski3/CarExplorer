@@ -7,11 +7,15 @@ import { lazy } from 'react';
 
 export const LAZY_ROUTES = {
   HomeScreen: lazy(() => import('../screens/HomeScreen')),
-  DetailScreen: lazy(() => import('../screens/DetailScreen')),
-  FavoritesScreen: lazy(() => import('../screens/FavoritesScreen')),
-  SettingsScreen: lazy(() => import('../screens/SettingsScreen')),
+  ExploreScreen: lazy(() => import('../screens/ExploreScreen')),
   QuizScreen: lazy(() => import('../screens/QuizScreen')),
-  SpecificationsScreen: lazy(() => import('../screens/SpecificationsScreen')),
+  DiscoverScreen: lazy(() => import('../screens/DiscoverScreen')),
+  VinCheckerScreen: lazy(() => import('../screens/VinCheckerScreen')),
+  CompareScreen: lazy(() => import('../screens/CompareScreen')),
+  FavoritesScreen: lazy(() => import('../screens/FavoritesScreen')),
+  NewsScreen: lazy(() => import('../screens/NewsScreen')),
+  SettingsScreen: lazy(() => import('../screens/SettingsScreen')),
+  WebViewScreen: lazy(() => import('../screens/WebViewScreen')),
 } as const;
 
 export function getLazyComponent(
