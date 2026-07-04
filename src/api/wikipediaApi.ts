@@ -1,6 +1,8 @@
 import { WIKIPEDIA_API } from "../config/apiConfig";
 import { getCarSpecificationsFromWikidata, getWikidataDescription, searchWikidataForCar } from "./wikidataApi";
 import { CarSpecification } from "../types/CarSpecification";
+import { handleApiError } from "../utils/errorHandler";
+import { toastManager } from "../components/Toast";
 
 export type CarDetailsResult = { description: string; specifications?: CarSpecification } | null;
 
@@ -211,98 +213,108 @@ export async function fetchWikipediaCarImage(
   make: string,
   model: string
 ): Promise<string | null> {
-  const cacheKey = `${make}:${model}`.toLowerCase();
-  if (imageCache.has(cacheKey)) {
-    return imageCache.get(cacheKey) || null;
-  }
-
-  const candidates = buildWikipediaCandidates(make, model);
-  console.log('[IMAGE_CANDIDATES]', candidates);
-
-  for (const title of candidates) {
-    try {
-      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        title
-      )}`;
-      const { data, response } = await fetchWikipediaJson(url);
-
-      if (!response.ok) {
-        console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
-        continue;
-      }
-
-      const imageUrl =
-        data?.thumbnail?.source || data?.originalimage?.source || null;
-      console.log('[IMAGE_FOUND]', title, ':', imageUrl);
-
-      if (imageUrl) {
-        imageCache.set(cacheKey, imageUrl);
-        return imageUrl;
-      }
-    } catch (error) {
-      console.error('[IMAGE_ERROR]', title, error);
-      continue;
-    }
-  }
-
-  // Try search as fallback for images
   try {
-    const { fullName } = normalizeCarNames(make, model);
-    const searchTitle = await fetchWikipediaSearchTitle(fullName, "en");
+    const cacheKey = `${make}:${model}`.toLowerCase();
+    if (imageCache.has(cacheKey)) {
+      return imageCache.get(cacheKey) || null;
+    }
 
-    if (searchTitle) {
-      console.log('[IMAGE_FROM_SEARCH]', searchTitle);
-      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        searchTitle
-      )}`;
-      const { data, response } = await fetchWikipediaJson(url);
+    const candidates = buildWikipediaCandidates(make, model);
+    console.log('[IMAGE_CANDIDATES]', candidates);
 
-      if (response.ok) {
+    for (const title of candidates) {
+      try {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+          title
+        )}`;
+        const { data, response } = await fetchWikipediaJson(url);
+
+        if (!response.ok) {
+          console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
+          continue;
+        }
+
         const imageUrl =
           data?.thumbnail?.source || data?.originalimage?.source || null;
+        console.log('[IMAGE_FOUND]', title, ':', imageUrl);
+
         if (imageUrl) {
-          console.log('[IMAGE_FOUND_FROM_SEARCH]', searchTitle, ':', imageUrl);
           imageCache.set(cacheKey, imageUrl);
           return imageUrl;
         }
-      }
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn('[IMAGE_SEARCH_ERROR]', message);
-  }
-
-  // Try make-level candidates as final fallback
-  const makeCandidates = buildMakeCandidates(make);
-  for (const title of makeCandidates) {
-    try {
-      const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
-        title
-      )}`;
-      const { data, response } = await fetchWikipediaJson(url);
-
-      if (!response.ok) {
-        console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
+      } catch (error) {
+        console.error('[IMAGE_ERROR]', title, error);
         continue;
       }
+    }
 
-      const imageUrl =
-        data?.thumbnail?.source || data?.originalimage?.source || null;
-      console.log('[IMAGE_FOUND]', title, ':', imageUrl);
+    // Try search as fallback for images
+    try {
+      const { fullName } = normalizeCarNames(make, model);
+      const searchTitle = await fetchWikipediaSearchTitle(fullName, "en");
 
-      if (imageUrl) {
-        imageCache.set(cacheKey, imageUrl);
-        return imageUrl;
+      if (searchTitle) {
+        console.log('[IMAGE_FROM_SEARCH]', searchTitle);
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+          searchTitle
+        )}`;
+        const { data, response } = await fetchWikipediaJson(url);
+
+        if (response.ok) {
+          const imageUrl =
+            data?.thumbnail?.source || data?.originalimage?.source || null;
+          if (imageUrl) {
+            console.log('[IMAGE_FOUND_FROM_SEARCH]', searchTitle, ':', imageUrl);
+            imageCache.set(cacheKey, imageUrl);
+            return imageUrl;
+          }
+        }
       }
     } catch (error) {
-      console.error('[IMAGE_ERROR]', title, error);
-      continue;
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn('[IMAGE_SEARCH_ERROR]', message);
     }
-  }
 
-  console.log('[NO_IMAGE]', make, model);
-  imageCache.set(cacheKey, null);
-  return null;
+    // Try make-level candidates as final fallback
+    const makeCandidates = buildMakeCandidates(make);
+    for (const title of makeCandidates) {
+      try {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
+          title
+        )}`;
+        const { data, response } = await fetchWikipediaJson(url);
+
+        if (!response.ok) {
+          console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
+          continue;
+        }
+
+        const imageUrl =
+          data?.thumbnail?.source || data?.originalimage?.source || null;
+        console.log('[IMAGE_FOUND]', title, ':', imageUrl);
+
+        if (imageUrl) {
+          imageCache.set(cacheKey, imageUrl);
+          return imageUrl;
+        }
+      } catch (error) {
+        console.error('[IMAGE_ERROR]', title, error);
+        continue;
+      }
+    }
+
+    console.log('[NO_IMAGE]', make, model);
+    imageCache.set(cacheKey, null);
+    return null;
+  } catch (error) {
+    const result = handleApiError(error, {
+      apiName: 'Wikipedia',
+      action: `search_image_${make}_${model}`,
+    });
+    toastManager.show(result.message, 'error');
+    console.warn('[WIKIPEDIA_ERROR]', result.context);
+    return null;
+  }
 }
 
 export const getCarImageUrl = fetchWikipediaCarImage;
@@ -312,99 +324,109 @@ export const getCarDetails = async (
   model: string,
   language: string = "en"
 ): Promise<CarDetailsResult> => {
-  console.log('[DETAILS_REQUEST]', make, model, 'language:', language);
-  const cacheKey = `${language}:${make}:${model}`.toLowerCase();
-  if (detailsCache.has(cacheKey)) {
-    console.log('[CACHE_HIT]', cacheKey);
-    return detailsCache.get(cacheKey) || null;
-  }
-
-  const candidates = buildWikipediaCandidates(make, model);
-  const languages = Array.from(new Set([language, "en"].filter(Boolean)));
-  const { fullName } = normalizeCarNames(make, model);
-
-  for (const activeLanguage of languages) {
-    const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
-
-    if (exactDetails) {
-      console.log('[DETAILS_FROM_CANDIDATES]', activeLanguage);
-      const result: CarDetailsResult = { description: exactDetails };
-      detailsCache.set(cacheKey, result);
-      return result;
+  try {
+    console.log('[DETAILS_REQUEST]', make, model, 'language:', language);
+    const cacheKey = `${language}:${make}:${model}`.toLowerCase();
+    if (detailsCache.has(cacheKey)) {
+      console.log('[CACHE_HIT]', cacheKey);
+      return detailsCache.get(cacheKey) || null;
     }
 
-    try {
-      const searchTitle = await fetchWikipediaSearchTitle(
-        fullName,
-        activeLanguage
-      );
+    const candidates = buildWikipediaCandidates(make, model);
+    const languages = Array.from(new Set([language, "en"].filter(Boolean)));
+    const { fullName } = normalizeCarNames(make, model);
 
-      if (searchTitle) {
-        const searchDetails = await getDetailsForTitles(
-          [searchTitle],
+    for (const activeLanguage of languages) {
+      const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
+
+      if (exactDetails) {
+        console.log('[DETAILS_FROM_CANDIDATES]', activeLanguage);
+        const result: CarDetailsResult = { description: exactDetails };
+        detailsCache.set(cacheKey, result);
+        return result;
+      }
+
+      try {
+        const searchTitle = await fetchWikipediaSearchTitle(
+          fullName,
           activeLanguage
         );
 
-        if (searchDetails) {
-          console.log('[DETAILS_FROM_SEARCH]', searchTitle, 'for', activeLanguage);
-          const result: CarDetailsResult = { description: searchDetails };
+        if (searchTitle) {
+          const searchDetails = await getDetailsForTitles(
+            [searchTitle],
+            activeLanguage
+          );
+
+          if (searchDetails) {
+            console.log('[DETAILS_FROM_SEARCH]', searchTitle, 'for', activeLanguage);
+            const result: CarDetailsResult = { description: searchDetails };
+            detailsCache.set(cacheKey, result);
+            return result;
+          }
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn("Wikipedia details search threw", {
+          activeLanguage,
+          error: message,
+          fullName,
+        });
+      }
+
+      const makeDetails = await getDetailsForTitles(
+        buildMakeCandidates(make),
+        activeLanguage
+      );
+
+      if (makeDetails) {
+        console.log('[DETAILS_FROM_MAKE]', activeLanguage);
+        const result: CarDetailsResult = { description: makeDetails };
+        detailsCache.set(cacheKey, result);
+        return result;
+      }
+    }
+
+    // Fallback to Wikidata when Wikipedia fails
+    console.log('[WIKIPEDIA_FAILED_TRYING_WIKIDATA]', make, model);
+    try {
+      const wikidataId = await searchWikidataForCar(make, model, language);
+      if (wikidataId) {
+        const [basicDetails, specifications] = await Promise.all([
+          getWikidataDescription(wikidataId, language),
+          getCarSpecificationsFromWikidata(wikidataId, language),
+        ]);
+        if (basicDetails) {
+          console.log('[DETAILS_FROM_WIKIDATA]', make, model);
+          const result: CarDetailsResult = {
+            description: basicDetails,
+            ...(specifications ? { specifications } : {}),
+          };
           detailsCache.set(cacheKey, result);
           return result;
         }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.warn("Wikipedia details search threw", {
-        activeLanguage,
+      console.warn("Wikidata fallback threw", {
         error: message,
-        fullName,
+        make,
+        model,
       });
     }
 
-    const makeDetails = await getDetailsForTitles(
-      buildMakeCandidates(make),
-      activeLanguage
-    );
-
-    if (makeDetails) {
-      console.log('[DETAILS_FROM_MAKE]', activeLanguage);
-      const result: CarDetailsResult = { description: makeDetails };
-      detailsCache.set(cacheKey, result);
-      return result;
-    }
-  }
-
-  // Fallback to Wikidata when Wikipedia fails
-  console.log('[WIKIPEDIA_FAILED_TRYING_WIKIDATA]', make, model);
-  try {
-    const wikidataId = await searchWikidataForCar(make, model, language);
-    if (wikidataId) {
-      const [basicDetails, specifications] = await Promise.all([
-        getWikidataDescription(wikidataId, language),
-        getCarSpecificationsFromWikidata(wikidataId, language),
-      ]);
-      if (basicDetails) {
-        console.log('[DETAILS_FROM_WIKIDATA]', make, model);
-        const result: CarDetailsResult = {
-          description: basicDetails,
-          ...(specifications ? { specifications } : {}),
-        };
-        detailsCache.set(cacheKey, result);
-        return result;
-      }
-    }
+    console.log('[NO_DETAILS]', make, model);
+    detailsCache.set(cacheKey, null);
+    return null;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn("Wikidata fallback threw", {
-      error: message,
-      make,
-      model,
+    const result = handleApiError(error, {
+      apiName: 'Wikipedia',
+      action: `get_details_${make}_${model}`,
     });
+    toastManager.show(result.message, 'error');
+    console.warn('[WIKIPEDIA_ERROR]', result.context);
+    return null;
   }
-
-  console.log('[NO_DETAILS]', make, model);
-  detailsCache.set(cacheKey, null);
-  return null;
 };
 
 export const generateRequestedLink = (

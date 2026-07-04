@@ -333,3 +333,58 @@ describe("wikipediaApi", () => {
     expect(mockFetch).toHaveBeenCalledTimes(5);
   });
 });
+
+describe("Wikipedia API - Error Scenarios", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+    __clearCaches();
+  });
+
+  it("handles 500 server error in summary lookup", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
+
+    const result = await fetchWikipediaCarImage("Toyota", "Corolla");
+
+    expect(result).toBeNull();
+    expect(mockFetch).toHaveBeenCalled();
+  });
+
+  it("handles 503 service unavailable", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}));
+
+    const result = await fetchWikipediaCarImage("Honda", "Civic");
+
+    expect(result).toBeNull();
+  });
+
+  it("handles 429 rate limiting with fallback", async () => {
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.rateLimited429({}))
+      .mockResolvedValueOnce(
+        wikipediaSummaryResponse({ thumbnail: { source: "https://example.com/fallback.jpg" } })
+      );
+
+    const result = await fetchWikipediaCarImage("BMW", "M340i");
+
+    expect(result).toBe("https://example.com/fallback.jpg");
+  });
+
+  it("handles 404 not found gracefully", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.notFound404({}));
+
+    const result = await fetchWikipediaCarImage("Unknown", "Model");
+
+    expect(result).toBeNull();
+  });
+
+  it("error handler returns correct message for Wikipedia 503", () => {
+    const { handleApiError } = require("../../utils/errorHandler");
+    const result = handleApiError(
+      new Response(null, { status: 503 }),
+      { apiName: "Wikipedia", action: "search" }
+    );
+
+    expect(result.message).toContain("temporarily unavailable");
+    expect(result.shouldRetry).toBe(true);
+  });
+});
