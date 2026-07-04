@@ -55,8 +55,8 @@ const AppContent = () => {
   React.useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
-      // Log metrics when fonts are loaded
       perfMonitor.endMeasure("font-load");
+      // Log performance metrics (development/debugging)
       perfMonitor.logMetrics();
     }
   }, [fontsLoaded]);

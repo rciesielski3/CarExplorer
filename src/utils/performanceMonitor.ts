@@ -37,8 +37,13 @@ class PerformanceMonitor {
     this.startTimes = {};
   }
 
+  /**
+   * Development/debugging utility: logs performance metrics to console.
+   * Note: This is currently development-only. Production telemetry can be added
+   * in a future release by wiring logMetrics() output to an analytics backend.
+   */
   logMetrics(): void {
-    console.log('[Performance Metrics]', this.metrics);
+    console.log('[Performance Metrics (dev)]', this.metrics);
   }
 }
 
