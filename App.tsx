@@ -47,16 +47,16 @@ const AppContent = () => {
     DMSans_600SemiBold,
   });
 
-  // Track app startup performance on mount
+  // Track font loading performance on mount
   React.useEffect(() => {
-    perfMonitor.startMeasure("app-startup");
+    perfMonitor.startMeasure("font-load");
   }, []);
 
   React.useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
       // Log metrics when fonts are loaded
-      perfMonitor.endMeasure("app-startup");
+      perfMonitor.endMeasure("font-load");
       perfMonitor.logMetrics();
     }
   }, [fontsLoaded]);
