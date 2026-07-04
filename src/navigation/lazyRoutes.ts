@@ -18,13 +18,4 @@ export const LAZY_ROUTES = {
   WebViewScreen: lazy(() => import('../screens/WebViewScreen')),
 } as const;
 
-export function getLazyComponent(
-  componentName: keyof typeof LAZY_ROUTES
-): typeof LAZY_ROUTES[keyof typeof LAZY_ROUTES] {
-  if (!(componentName in LAZY_ROUTES)) {
-    throw new Error(`Invalid lazy route: ${componentName}`);
-  }
-  return LAZY_ROUTES[componentName];
-}
-
 export type LazyRouteName = keyof typeof LAZY_ROUTES;
