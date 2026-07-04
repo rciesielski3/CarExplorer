@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { StyleSheet, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AppNavigator from "./src/navigation/AppNavigator";
@@ -72,9 +72,7 @@ const AppContent = () => {
       end={{ x: 0.9, y: 1 }}
       style={styles.background}
     >
-      <Suspense fallback={<ActivityIndicator size="large" color="#000" />}>
-        <AppNavigator />
-      </Suspense>
+      <AppNavigator />
     </LinearGradient>
   );
 };

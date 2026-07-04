@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -11,9 +11,42 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
 import { MainTabParamList, RootStackParamList } from "../navigation/types";
 import { LAZY_ROUTES } from "./lazyRoutes";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+/**
+ * Wraps a lazily-loaded screen in its own Suspense boundary so only the
+ * screen's content shows a loading state while its code chunk downloads.
+ * Each screen gets an independent boundary (rather than one shared
+ * top-level Suspense around the whole navigator) so the tab bar and any
+ * surrounding navigation chrome stay mounted and interactive - switching
+ * tabs while another tab is still loading keeps working.
+ */
+function withSuspense(
+  LazyComponent: React.LazyExoticComponent<React.ComponentType<any>>,
+  screenName: string
+): React.ComponentType<any> {
+  const SuspendedScreen = (props: any) => (
+    <Suspense fallback={<LoadingIndicator />}>
+      <LazyComponent {...props} />
+    </Suspense>
+  );
+  SuspendedScreen.displayName = `Suspended(${screenName})`;
+  return SuspendedScreen;
+}
+
+const HomeScreen = withSuspense(LAZY_ROUTES.HomeScreen, "HomeScreen");
+const ExploreScreen = withSuspense(LAZY_ROUTES.ExploreScreen, "ExploreScreen");
+const QuizScreen = withSuspense(LAZY_ROUTES.QuizScreen, "QuizScreen");
+const FavoritesScreen = withSuspense(LAZY_ROUTES.FavoritesScreen, "FavoritesScreen");
+const NewsScreen = withSuspense(LAZY_ROUTES.NewsScreen, "NewsScreen");
+const CompareScreen = withSuspense(LAZY_ROUTES.CompareScreen, "CompareScreen");
+const VinCheckerScreen = withSuspense(LAZY_ROUTES.VinCheckerScreen, "VinCheckerScreen");
+const SettingsScreen = withSuspense(LAZY_ROUTES.SettingsScreen, "SettingsScreen");
+const DiscoverScreen = withSuspense(LAZY_ROUTES.DiscoverScreen, "DiscoverScreen");
+const WebViewScreen = withSuspense(LAZY_ROUTES.WebViewScreen, "WebViewScreen");
 
 const TabNavigator = () => {
   const { theme } = useTheme();
@@ -61,7 +94,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={LAZY_ROUTES.HomeScreen}
+        component={HomeScreen}
         options={{
           tabBarLabel: t("home"),
           tabBarIcon: ({ color, size }) => (
@@ -71,7 +104,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Explore"
-        component={LAZY_ROUTES.ExploreScreen}
+        component={ExploreScreen}
         options={{
           tabBarLabel: t("explore"),
           tabBarIcon: ({ color, size }) => (
@@ -81,7 +114,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Quiz"
-        component={LAZY_ROUTES.QuizScreen}
+        component={QuizScreen}
         options={{
           tabBarLabel: t("quiz"),
           tabBarIcon: ({ color, size }) => (
@@ -91,7 +124,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Favorites"
-        component={LAZY_ROUTES.FavoritesScreen}
+        component={FavoritesScreen}
         options={{
           tabBarLabel: t("garage", "Garage"),
           tabBarIcon: ({ color, size }) => (
@@ -101,7 +134,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="News"
-        component={LAZY_ROUTES.NewsScreen}
+        component={NewsScreen}
         options={{
           tabBarLabel: t("news"),
           tabBarIcon: ({ color, size }) => (
@@ -130,21 +163,21 @@ const AppNavigator = () => {
         <Stack.Screen name="MainTabs" component={TabNavigator} />
         <Stack.Screen
           name="Compare"
-          component={LAZY_ROUTES.CompareScreen}
+          component={CompareScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="Vin"
-          component={LAZY_ROUTES.VinCheckerScreen}
+          component={VinCheckerScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="Settings"
-          component={LAZY_ROUTES.SettingsScreen}
+          component={SettingsScreen}
           options={{
             headerShown: true,
             title: t("settings"),
@@ -152,14 +185,14 @@ const AppNavigator = () => {
         />
         <Stack.Screen
           name="Discover"
-          component={LAZY_ROUTES.DiscoverScreen}
+          component={DiscoverScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="WebViewScreen"
-          component={LAZY_ROUTES.WebViewScreen}
+          component={WebViewScreen}
           options={{ headerShown: true, title: "Article" }}
         />
       </Stack.Navigator>
