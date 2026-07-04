@@ -150,7 +150,6 @@ jobs:
           releaseFiles: '${{ env.AAB_PATH }}'
           tracks: '${{ github.event.inputs.track }}'
           status: ${{ github.event.inputs.status }}
-          skipCommitHash: true
 
       # --- GitHub Release (production track or explicit opt-in) ---
 
