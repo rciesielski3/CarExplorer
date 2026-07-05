@@ -8,6 +8,7 @@ import {
   wikidataEntityResponse,
   errorScenarios,
 } from "./mocks";
+import { handleApiError } from "../../utils/errorHandler";
 
 const mockFetch = jest.fn();
 
@@ -205,5 +206,53 @@ describe("wikidataApi", () => {
 
     const result = await searchWikidataForCar("Toyota", "Corolla");
     expect(result).toBeDefined();
+  });
+});
+
+describe('Wikidata API - Error Scenarios', () => {
+  it('handles 500 error in entity lookup', async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
+
+    const result = await getCarDetailsFromWikidata('Toyota', 'Corolla');
+
+    expect(result).toBeNull();
+  });
+
+  it('handles 503 service unavailable in search', async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}));
+
+    const result = await searchWikidataForCar('Honda', 'Civic');
+
+    expect(result).toBeNull();
+  });
+
+  it('handles 429 rate limiting with retry', async () => {
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.rateLimited429({}))
+      .mockResolvedValueOnce(
+        wikidataSearchResponse([{ id: 'Q654321', label: 'Fallback' }])
+      );
+
+    const result = await searchWikidataForCar('BMW', 'X5');
+
+    expect(result).toBeDefined();
+  });
+
+  it('handles 404 not found gracefully', async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.notFound404({}));
+
+    const result = await getCarDetailsFromWikidata('Unknown', 'Model');
+
+    expect(result).toBeNull();
+  });
+
+  it('error handler returns correct message for Wikidata 429', () => {
+    const result = handleApiError(
+      new Response(null, { status: 429 }),
+      { apiName: 'Wikidata', action: 'search' }
+    );
+
+    expect(result.message).toContain('Too many requests');
+    expect(result.shouldRetry).toBe(true);
   });
 });

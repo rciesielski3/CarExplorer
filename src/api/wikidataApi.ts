@@ -1,4 +1,6 @@
 import { CarSpecification } from '../types/CarSpecification';
+import { handleApiError } from '../utils/errorHandler';
+import { toastManager } from '../components/Toast';
 
 const wikidataCache = new Map<string, string | null>();
 
@@ -80,12 +82,13 @@ export const searchWikidataForCar = async (
 
     return null;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn("[WIKIDATA_SEARCH_ERROR]", {
-      error: message,
-      make,
-      model,
+    const err = error instanceof Error ? error : new Error(String(error));
+    const result = handleApiError(err, {
+      apiName: 'Wikidata',
+      action: `search_${make}_${model}`,
     });
+    toastManager.show(result.message, 'error');
+    console.warn('[WIKIDATA_ERROR]', result.context);
     return null;
   }
 };
@@ -126,11 +129,13 @@ export const getWikidataDescription = async (
 
     return null;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn("[WIKIDATA_DESC_ERROR]", {
-      error: message,
-      wikidataId,
+    const err = error instanceof Error ? error : new Error(String(error));
+    const result = handleApiError(err, {
+      apiName: 'Wikidata',
+      action: `description_${wikidataId}`,
     });
+    toastManager.show(result.message, 'error');
+    console.warn('[WIKIDATA_ERROR]', result.context);
     return null;
   }
 };
@@ -202,12 +207,13 @@ export const getCarDetailsFromWikidata = async (
     wikidataCache.set(cacheKey, null);
     return null;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn("[WIKIDATA_DETAILS_ERROR]", {
-      error: message,
-      make,
-      model,
+    const err = error instanceof Error ? error : new Error(String(error));
+    const result = handleApiError(err, {
+      apiName: 'Wikidata',
+      action: `details_${make}_${model}`,
     });
+    toastManager.show(result.message, 'error');
+    console.warn('[WIKIDATA_ERROR]', result.context);
     wikidataCache.set(cacheKey, null);
     return null;
   }
@@ -294,10 +300,13 @@ export const getCarSpecificationsFromWikidata = async (
 
     return Object.values(specs).some(arr => arr.length > 0) ? specs : null;
   } catch (error) {
-    console.warn('[WIKIDATA_SPECS_ERROR]', {
-      wikidataId,
-      error: error instanceof Error ? error.message : String(error),
+    const err = error instanceof Error ? error : new Error(String(error));
+    const result = handleApiError(err, {
+      apiName: 'Wikidata',
+      action: `specifications_${wikidataId}`,
     });
+    toastManager.show(result.message, 'error');
+    console.warn('[WIKIDATA_ERROR]', result.context);
     return null;
   }
 };
