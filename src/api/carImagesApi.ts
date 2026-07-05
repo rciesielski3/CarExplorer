@@ -1,12 +1,14 @@
 import Constants from "expo-constants";
-
-const CAR_IMAGES_API_KEY = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY;
+import { handleApiError } from "../utils/errorHandler";
+import { toastManager } from "../components/Toast";
 
 export async function getCarImagesFallbackUrl(params: {
   make: string;
   model?: string;
   year?: string | null;
 }): Promise<string | null> {
+  const CAR_IMAGES_API_KEY = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY;
+
   if (!CAR_IMAGES_API_KEY) {
     console.warn("CAR_IMAGES_API_KEY not configured");
     return null;
@@ -27,14 +29,25 @@ export async function getCarImagesFallbackUrl(params: {
       `https://carimagesapi.com/api/v1/signed-url?${query.toString()}`
     );
     if (!response.ok) {
-      console.warn("CarImages API error", { status: response.status });
+      const result = handleApiError(response as any, {
+        apiName: "CarImages",
+        action: `fetch_${params.make}_${params.model || ""}`,
+      });
+      toastManager.show(result.message, "error");
+      console.warn("[CARIMAGES_ERROR]", result.context);
       return null;
     }
 
     const data = await response.json();
     return data?.url || null;
   } catch (error) {
-    console.error("CarImages fallback fetch failed:", error);
+    const errorToThrow = error instanceof Error ? error : new Error(String(error));
+    const result = handleApiError(errorToThrow, {
+      apiName: "CarImages",
+      action: `fetch_${params.make}_${params.model || ""}`,
+    });
+    toastManager.show(result.message, "error");
+    console.warn("[CARIMAGES_ERROR]", result.context);
     return null;
   }
 }
