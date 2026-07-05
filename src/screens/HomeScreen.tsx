@@ -22,7 +22,8 @@ import { Colors } from "@/constants/Colors";
 
 import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "../navigation/types";
-import { AdBanner, ScreenContainer, LoadingIndicator } from "../components";
+import { AdBanner, ScreenContainer, LoadingIndicator, ErrorBoundary } from "../components";
+import { Toast } from "../components/Toast";
 import {
   findStaticAiAnswer,
   getStaticAiSuggestions,
@@ -87,8 +88,10 @@ const HomeScreen = () => {
   );
 
   return (
-    <ScreenContainer>
-      <KeyboardAvoidingView
+    <ErrorBoundary apiName="Home">
+      <Toast />
+      <ScreenContainer>
+        <KeyboardAvoidingView
         style={styles.screen}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
@@ -256,7 +259,8 @@ const HomeScreen = () => {
         </ScrollView>
         <AdBanner />
       </KeyboardAvoidingView>
-    </ScreenContainer>
+      </ScreenContainer>
+    </ErrorBoundary>
   );
 };
 

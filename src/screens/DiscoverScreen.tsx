@@ -21,7 +21,9 @@ import {
   ErrorMessage,
   LoadingIndicator,
   ScreenContainer,
+  ErrorBoundary,
 } from "../components";
+import { Toast } from "../components/Toast";
 
 interface CarDetails {
   make: string;
@@ -84,8 +86,10 @@ const DiscoverScreen = () => {
   };
 
   return (
-    <ScreenContainer>
-      <View style={stylesHome.container}>
+    <ErrorBoundary apiName="Discover">
+      <Toast />
+      <ScreenContainer>
+        <View style={stylesHome.container}>
         <Text style={styles.title}>{t("discover")}</Text>
         <CustomInput
           value={searchQuery}
@@ -117,9 +121,10 @@ const DiscoverScreen = () => {
             </View>
           </ScrollView>
         )}
-      </View>
-      <AdBanner />
-    </ScreenContainer>
+        </View>
+        <AdBanner />
+      </ScreenContainer>
+    </ErrorBoundary>
   );
 };
 
