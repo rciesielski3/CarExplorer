@@ -222,6 +222,9 @@ export async function fetchWikipediaCarImage(
     const candidates = buildWikipediaCandidates(make, model);
     console.log('[IMAGE_CANDIDATES]', candidates);
 
+    let lastError: Response | Error | null = null;
+    let foundImage = false;
+
     for (const title of candidates) {
       try {
         const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(
@@ -231,6 +234,7 @@ export async function fetchWikipediaCarImage(
 
         if (!response.ok) {
           console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
+          lastError = response;
           continue;
         }
 
@@ -244,6 +248,7 @@ export async function fetchWikipediaCarImage(
         }
       } catch (error) {
         console.error('[IMAGE_ERROR]', title, error);
+        lastError = error;
         continue;
       }
     }
@@ -268,11 +273,14 @@ export async function fetchWikipediaCarImage(
             imageCache.set(cacheKey, imageUrl);
             return imageUrl;
           }
+        } else {
+          lastError = response;
         }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.warn('[IMAGE_SEARCH_ERROR]', message);
+      lastError = error;
     }
 
     // Try make-level candidates as final fallback
@@ -286,6 +294,7 @@ export async function fetchWikipediaCarImage(
 
         if (!response.ok) {
           console.warn('[IMAGE_LOOKUP_FAILED]', title, 'status:', response.status);
+          lastError = response;
           continue;
         }
 
@@ -299,8 +308,14 @@ export async function fetchWikipediaCarImage(
         }
       } catch (error) {
         console.error('[IMAGE_ERROR]', title, error);
+        lastError = error;
         continue;
       }
+    }
+
+    // All fallbacks exhausted - if we have an error, throw it so outer catch fires
+    if (!foundImage && lastError) {
+      throw lastError;
     }
 
     console.log('[NO_IMAGE]', make, model);
@@ -335,6 +350,7 @@ export const getCarDetails = async (
     const candidates = buildWikipediaCandidates(make, model);
     const languages = Array.from(new Set([language, "en"].filter(Boolean)));
     const { fullName } = normalizeCarNames(make, model);
+    let lastError: Error | null = null;
 
     for (const activeLanguage of languages) {
       const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
@@ -372,6 +388,7 @@ export const getCarDetails = async (
           error: message,
           fullName,
         });
+        lastError = error instanceof Error ? error : new Error(message);
       }
 
       const makeDetails = await getDetailsForTitles(
@@ -413,6 +430,12 @@ export const getCarDetails = async (
         make,
         model,
       });
+      lastError = error instanceof Error ? error : new Error(message);
+    }
+
+    // All fallbacks exhausted - if we have an error, throw it so outer catch fires
+    if (lastError) {
+      throw lastError;
     }
 
     console.log('[NO_DETAILS]', make, model);

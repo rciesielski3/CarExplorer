@@ -1,4 +1,5 @@
 import { fetchWikipediaCarImage, getCarDetails, __clearCaches } from "../wikipediaApi";
+import { toastManager } from "../../components/Toast";
 import {
   mockResponse,
   wikipediaSummaryResponse,
@@ -9,6 +10,8 @@ import {
 const mockFetch = jest.fn();
 
 global.fetch = mockFetch as jest.Mock;
+
+jest.mock("../../components/Toast");
 
 const wikipediaNoPagesResponse = () =>
   Promise.resolve({
@@ -337,24 +340,59 @@ describe("wikipediaApi", () => {
 describe("Wikipedia API - Error Scenarios", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    jest.clearAllMocks();
     __clearCaches();
   });
 
-  it("handles 500 server error in summary lookup", async () => {
-    mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
+  it("handles 500 server error in summary lookup and shows toast", async () => {
+    // Mock all three exact candidate attempts to fail with 500
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.server500({}))
+      .mockResolvedValueOnce(errorScenarios.server500({}))
+      .mockResolvedValueOnce(errorScenarios.server500({}));
+    // Then search attempt fails
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ query: { search: [] } }, true, 200)
+    );
+    // Make-level candidates also fail with 500
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.server500({}))
+      .mockResolvedValueOnce(errorScenarios.server500({}))
+      .mockResolvedValueOnce(errorScenarios.server500({}));
 
     const result = await fetchWikipediaCarImage("Toyota", "Corolla");
 
     expect(result).toBeNull();
-    expect(mockFetch).toHaveBeenCalled();
+    expect(toastManager.show).toHaveBeenCalledWith(
+      expect.stringContaining("error"),
+      "error"
+    );
   });
 
-  it("handles 503 service unavailable", async () => {
-    mockFetch.mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}));
+  it("handles 503 service unavailable and shows toast", async () => {
+    // Mock all attempts to fail with 503
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}))
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}))
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}));
+    // Search attempt
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ query: { search: [] } }, true, 200)
+    );
+    // Make-level candidates
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}))
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}))
+      .mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}));
 
     const result = await fetchWikipediaCarImage("Honda", "Civic");
 
     expect(result).toBeNull();
+    // Error toast should be called with any error message
+    expect(toastManager.show).toHaveBeenCalledWith(
+      expect.any(String),
+      "error"
+    );
   });
 
   it("handles 429 rate limiting with fallback", async () => {
@@ -367,14 +405,33 @@ describe("Wikipedia API - Error Scenarios", () => {
     const result = await fetchWikipediaCarImage("BMW", "M340i");
 
     expect(result).toBe("https://example.com/fallback.jpg");
+    // No error toast should be shown when fallback succeeds
+    expect(toastManager.show).not.toHaveBeenCalled();
   });
 
-  it("handles 404 not found gracefully", async () => {
-    mockFetch.mockResolvedValueOnce(errorScenarios.notFound404({}));
+  it("handles 404 not found and shows toast when exhausting all fallbacks", async () => {
+    // All attempts return 404
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}));
+    // Search attempt
+    mockFetch.mockResolvedValueOnce(
+      mockResponse({ query: { search: [] } }, true, 200)
+    );
+    // Make-level candidates
+    mockFetch
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}))
+      .mockResolvedValueOnce(errorScenarios.notFound404({}));
 
     const result = await fetchWikipediaCarImage("Unknown", "Model");
 
     expect(result).toBeNull();
+    expect(toastManager.show).toHaveBeenCalledWith(
+      expect.any(String),
+      "error"
+    );
   });
 
   it("error handler returns correct message for Wikipedia 503", () => {
@@ -387,4 +444,5 @@ describe("Wikipedia API - Error Scenarios", () => {
     expect(result.message).toContain("temporarily unavailable");
     expect(result.shouldRetry).toBe(true);
   });
+
 });
