@@ -223,7 +223,6 @@ export async function fetchWikipediaCarImage(
     console.log('[IMAGE_CANDIDATES]', candidates);
 
     let lastError: Response | Error | null = null;
-    let foundImage = false;
 
     for (const title of candidates) {
       try {
@@ -248,7 +247,7 @@ export async function fetchWikipediaCarImage(
         }
       } catch (error) {
         console.error('[IMAGE_ERROR]', title, error);
-        lastError = error;
+        lastError = error instanceof Error ? error : new Error(String(error));
         continue;
       }
     }
@@ -280,7 +279,7 @@ export async function fetchWikipediaCarImage(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.warn('[IMAGE_SEARCH_ERROR]', message);
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
     }
 
     // Try make-level candidates as final fallback
@@ -308,13 +307,13 @@ export async function fetchWikipediaCarImage(
         }
       } catch (error) {
         console.error('[IMAGE_ERROR]', title, error);
-        lastError = error;
+        lastError = error instanceof Error ? error : new Error(String(error));
         continue;
       }
     }
 
     // All fallbacks exhausted - if we have an error, throw it so outer catch fires
-    if (!foundImage && lastError) {
+    if (lastError) {
       throw lastError;
     }
 
@@ -353,7 +352,17 @@ export const getCarDetails = async (
     let lastError: Error | null = null;
 
     for (const activeLanguage of languages) {
-      const exactDetails = await getDetailsForTitles(candidates, activeLanguage);
+      let exactDetails: string | null = null;
+      try {
+        exactDetails = await getDetailsForTitles(candidates, activeLanguage);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn("Wikipedia candidates threw", {
+          activeLanguage,
+          error: message,
+        });
+        lastError = error instanceof Error ? error : new Error(message);
+      }
 
       if (exactDetails) {
         console.log('[DETAILS_FROM_CANDIDATES]', activeLanguage);
@@ -369,10 +378,21 @@ export const getCarDetails = async (
         );
 
         if (searchTitle) {
-          const searchDetails = await getDetailsForTitles(
-            [searchTitle],
-            activeLanguage
-          );
+          let searchDetails: string | null = null;
+          try {
+            searchDetails = await getDetailsForTitles(
+              [searchTitle],
+              activeLanguage
+            );
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.warn("Wikipedia search details threw", {
+              activeLanguage,
+              error: message,
+              searchTitle,
+            });
+            lastError = error instanceof Error ? error : new Error(message);
+          }
 
           if (searchDetails) {
             console.log('[DETAILS_FROM_SEARCH]', searchTitle, 'for', activeLanguage);
@@ -391,10 +411,21 @@ export const getCarDetails = async (
         lastError = error instanceof Error ? error : new Error(message);
       }
 
-      const makeDetails = await getDetailsForTitles(
-        buildMakeCandidates(make),
-        activeLanguage
-      );
+      let makeDetails: string | null = null;
+      try {
+        makeDetails = await getDetailsForTitles(
+          buildMakeCandidates(make),
+          activeLanguage
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn("Wikipedia make details threw", {
+          activeLanguage,
+          error: message,
+          make,
+        });
+        lastError = error instanceof Error ? error : new Error(message);
+      }
 
       if (makeDetails) {
         console.log('[DETAILS_FROM_MAKE]', activeLanguage);
