@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LanguageProvider } from "./src/context/LanguageContext";
 import { PremiumProvider } from "./src/context/PremiumContext";
 import { SettingsProvider } from "./src/context/SettingsContext";
+import { Toast } from "./src/components/Toast";
 import { useFonts } from "expo-font";
 import {
   BarlowCondensed_700Bold,
@@ -66,14 +67,17 @@ const AppContent = () => {
   }
 
   return (
-    <LinearGradient
-      colors={Colors[theme].gradient as [string, string, ...string[]]}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
-      style={styles.background}
-    >
-      <AppNavigator />
-    </LinearGradient>
+    <>
+      <LinearGradient
+        colors={Colors[theme].gradient as [string, string, ...string[]]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 0.9, y: 1 }}
+        style={styles.background}
+      >
+        <AppNavigator />
+      </LinearGradient>
+      <Toast />
+    </>
   );
 };
 

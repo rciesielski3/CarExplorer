@@ -11,7 +11,7 @@ import { Colors } from "@/constants/Colors";
 import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
 import { useSettings } from "../context/SettingsContext";
-import { AdBanner, CustomButton, ScreenContainer, SpecRange } from "../components";
+import { AdBanner, CustomButton, ScreenContainer, SpecRange, ErrorBoundary } from "../components";
 import { RootStackParamList } from "../navigation/types";
 import {
   convertPower,
@@ -171,8 +171,9 @@ const CompareScreen = () => {
   const hasFullComparison = compareList.length === 2;
 
   return (
-    <ScreenContainer>
-      <ScrollView
+    <ErrorBoundary apiName="Compare">
+      <ScreenContainer>
+        <ScrollView
         contentContainerStyle={styles.compareContent}
         showsVerticalScrollIndicator={false}
       >
@@ -277,9 +278,10 @@ const CompareScreen = () => {
             </View>
           </>
         )}
-      </ScrollView>
-      <AdBanner />
-    </ScreenContainer>
+        </ScrollView>
+        <AdBanner />
+      </ScreenContainer>
+    </ErrorBoundary>
   );
 };
 

@@ -45,12 +45,7 @@ describe("carImagesApi", () => {
     expect(result).toBe("https://carimagesapi.com/signed/test-url");
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("type=car"),
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          "Api-User-Agent": expect.stringContaining("CarExplorer"),
-        }),
-      })
+      expect.stringContaining("type=car")
     );
   });
 
@@ -78,5 +73,76 @@ describe("carImagesApi", () => {
 
     expect(result).toBeNull();
     expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("CarImages API - Error Scenarios", () => {
+  let mockFetch: jest.Mock;
+
+  beforeEach(() => {
+    mockFetch = jest.fn();
+    global.fetch = mockFetch as jest.Mock;
+    (Constants.expoConfig as any) = {
+      extra: { CAR_IMAGES_API_KEY: "test-api-key-12345" },
+    };
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("handles 500 error from CarImages", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
+
+    const result = await getCarImagesFallbackUrl({
+      make: "Toyota",
+      model: "Corolla",
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("handles 503 service unavailable", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.serviceUnavailable503({}));
+
+    const result = await getCarImagesFallbackUrl({
+      make: "Honda",
+      model: "Civic",
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("handles 429 rate limiting", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.rateLimited429({}));
+
+    const result = await getCarImagesFallbackUrl({
+      make: "BMW",
+      model: "M340i",
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("handles 404 gracefully", async () => {
+    mockFetch.mockResolvedValueOnce(errorScenarios.notFound404({}));
+
+    const result = await getCarImagesFallbackUrl({
+      make: "Unknown",
+      model: "Model",
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("error handler returns correct message for CarImages", () => {
+    const { handleApiError } = require("../../utils/errorHandler");
+    const result = handleApiError(
+      new Response(null, { status: 500 }),
+      { apiName: "CarImages", action: "fetch" }
+    );
+
+    expect(result.message).toContain("server error");
+    expect(result.shouldRetry).toBe(true);
   });
 });

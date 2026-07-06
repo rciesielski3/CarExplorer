@@ -11,7 +11,7 @@ import {
 import { fetchNews } from "../api/newsApi";
 import { useTheme } from "../context/ThemeContext";
 import { useAppLanguage } from "../context/LanguageContext";
-import { AdBanner, ErrorMessage, LoadingIndicator, ScreenContainer } from "../components";
+import { AdBanner, ErrorMessage, LoadingIndicator, ScreenContainer, ErrorBoundary } from "../components";
 import NewsCard from "../components/NewsCard";
 import { NEWS_API } from "../config/apiConfig";
 
@@ -56,9 +56,10 @@ const NewsScreen = () => {
   }
 
   return (
-    <ScreenContainer>
-      <View style={homeStyles.container}>
-        <Text style={styles.title}>{t("newsTitle")}</Text>
+    <ErrorBoundary apiName="News">
+      <ScreenContainer>
+        <View style={homeStyles.container}>
+          <Text style={styles.title}>{t("newsTitle")}</Text>
         {!NEWS_API.SUPPORTED_LANGUAGES.includes(language) && (
           <ErrorMessage message={t("languageFallbackMessage")} />
         )}
@@ -73,9 +74,10 @@ const NewsScreen = () => {
             renderItem={({ item }) => <NewsCard article={item} />}
           />
         )}
-      </View>
-      <AdBanner />
-    </ScreenContainer>
+        </View>
+        <AdBanner />
+      </ScreenContainer>
+    </ErrorBoundary>
   );
 };
 

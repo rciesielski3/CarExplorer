@@ -28,6 +28,7 @@ import {
   ErrorMessage,
   LoadingIndicator,
   ScreenContainer,
+  ErrorBoundary,
 } from "../components";
 import CarCard from "../components/CarCard";
 import ReusableModalSelector from "../components/ReusableModalSelector";
@@ -163,9 +164,10 @@ const ExploreScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer>
-      <View style={stylesHome.container}>
-        <Text style={styles.title}>{selectedMake || t("exploreCars")}</Text>
+    <ErrorBoundary apiName="Explore">
+      <ScreenContainer>
+        <View style={stylesHome.container}>
+          <Text style={styles.title}>{selectedMake || t("exploreCars")}</Text>
         <Text style={stylesHome.subtitle}>
           {selectedMake ? t("selectVehicleType") : t("quickExploreSubtitle")}
         </Text>
@@ -281,10 +283,11 @@ const ExploreScreen = () => {
             </View>
           </>
         )}
-      </View>
-      <CompareFloatingBar />
-      <AdBanner />
-    </ScreenContainer>
+        </View>
+        <CompareFloatingBar />
+        <AdBanner />
+      </ScreenContainer>
+    </ErrorBoundary>
   );
 };
 

@@ -26,6 +26,7 @@ import {
   ErrorMessage,
   LoadingIndicator,
   ScreenContainer,
+  ErrorBoundary,
 } from "../components";
 import QuizQuestion from "../components/QuizQuestion";
 import { RootStackParamList } from "../navigation/types";
@@ -93,8 +94,9 @@ const QuizScreen = () => {
   }, [loadQuestions]);
 
   return (
-    <ScreenContainer>
-      <View style={stylesHome.container}>
+    <ErrorBoundary apiName="Quiz">
+      <ScreenContainer>
+        <View style={stylesHome.container}>
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel={t("back", "Back")}
@@ -188,8 +190,9 @@ const QuizScreen = () => {
             </View>
           </View>
         </Modal>
-      </View>
-    </ScreenContainer>
+        </View>
+      </ScreenContainer>
+    </ErrorBoundary>
   );
 };
 

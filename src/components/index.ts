@@ -8,6 +8,8 @@ import CompareFloatingBar from "./CompareFloatingBar";
 import ConfirmModal from "./ConfirmModal";
 import ScreenContainer from "./ScreenContainer";
 import { SpecRange } from "./SpecRange";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { Toast, toastManager } from "./Toast";
 
 export {
   AdBanner,
@@ -20,4 +22,7 @@ export {
   LoadingIndicator,
   ScreenContainer,
   SpecRange,
+  ErrorBoundary,
+  Toast,
+  toastManager,
 };
