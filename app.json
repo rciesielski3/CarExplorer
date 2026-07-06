@@ -26,6 +26,9 @@
       "favicon": "./assets/images/favicon.png"
     },
     "assetBundlePatterns": ["**/*"],
-    "plugins": ["expo-font"]
+    "plugins": ["expo-font"],
+    "extra": {
+      "CAR_IMAGES_API_KEY": "your-api-key-here"
+    }
   }
 }

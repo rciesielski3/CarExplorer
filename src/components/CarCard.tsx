@@ -14,7 +14,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
-import { getCarImagesFallbackUrl } from "../api/carImagesApi";
+import { getCarImagesFallbackUrl, getGenericCarImageFallback } from "../api/carImagesApi";
 import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
@@ -40,7 +40,7 @@ const CarCard: React.FC<CarCardProps> = ({
 }) => {
   const [imageUri, setImageUri] = React.useState<string | null>(null);
   const [sourceStep, setSourceStep] = React.useState<
-    "wiki" | "carimages" | "fallback"
+    "wiki" | "carimages" | "generic" | "fallback"
   >("wiki");
   const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
@@ -127,8 +127,9 @@ const CarCard: React.FC<CarCardProps> = ({
         setImageUri(carImagesUrl);
         setSourceStep("carimages");
       } else {
-        setImageUri(null);
-        setSourceStep("fallback");
+        const genericImage = await getGenericCarImageFallback();
+        setImageUri(genericImage);
+        setSourceStep("generic");
       }
       setLoading(false);
     }
@@ -142,7 +143,20 @@ const CarCard: React.FC<CarCardProps> = ({
     if (sourceStep === "wiki") {
       getCarImagesFallbackUrl({ make, model, year }).then((url) => {
         setImageUri(url);
-        setSourceStep(url ? "carimages" : "fallback");
+        setSourceStep(url ? "carimages" : "generic");
+        if (!url) {
+          getGenericCarImageFallback().then((genericUrl) => {
+            setImageUri(genericUrl);
+            setSourceStep("generic");
+          });
+        }
+      });
+      return;
+    }
+    if (sourceStep === "carimages") {
+      getGenericCarImageFallback().then((genericUrl) => {
+        setImageUri(genericUrl);
+        setSourceStep("generic");
       });
       return;
     }
@@ -151,7 +165,7 @@ const CarCard: React.FC<CarCardProps> = ({
   };
 
   const renderImageContent = () =>
-    imageUri && sourceStep !== "fallback" ? (
+    imageUri ? (
       <Image
         source={{ uri: imageUri }}
         style={styles.imageCard}
