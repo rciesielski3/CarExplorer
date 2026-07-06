@@ -45,7 +45,7 @@ export const handleApiError = (
         message = `${context.apiName} returned an error (${error.status}). Please try again.`;
         shouldRetry = true;
     }
-  } else if (error instanceof TypeError && error.message.includes('fetch')) {
+  } else if (error instanceof TypeError && error.message.includes('network')) {
     message = 'Network error. Please check your connection and try again.';
     shouldRetry = true;
   } else if (error instanceof Error) {

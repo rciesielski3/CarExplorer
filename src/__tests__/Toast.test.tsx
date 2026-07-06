@@ -37,19 +37,21 @@ describe('Toast', () => {
     jest.useRealTimers();
   });
 
-  it('renders multiple toasts and limits to 3', async () => {
+  it('implements FIFO queue - removes oldest when max capacity reached', async () => {
     render(<Toast />);
 
     await act(async () => {
       toastManager.show('Message 1', 'error');
       toastManager.show('Message 2', 'error');
       toastManager.show('Message 3', 'error');
-      toastManager.show('Message 4', 'error'); // Should not render
+      toastManager.show('Message 4', 'error'); // Should shift out Message 1
     });
 
-    expect(screen.getByText('Message 1')).toBeTruthy();
+    // Message 1 should be removed (FIFO)
+    expect(screen.queryByText('Message 1')).toBeNull();
+    // Messages 2, 3, 4 should be visible
     expect(screen.getByText('Message 2')).toBeTruthy();
     expect(screen.getByText('Message 3')).toBeTruthy();
-    expect(screen.queryByText('Message 4')).toBeNull();
+    expect(screen.getByText('Message 4')).toBeTruthy();
   });
 });

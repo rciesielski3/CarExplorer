@@ -23,7 +23,6 @@ import {
   ScreenContainer,
   ErrorBoundary,
 } from "../components";
-import { Toast } from "../components/Toast";
 
 interface CarDetails {
   make: string;
@@ -87,7 +86,6 @@ const DiscoverScreen = () => {
 
   return (
     <ErrorBoundary apiName="Discover">
-      <Toast />
       <ScreenContainer>
         <View style={stylesHome.container}>
         <Text style={styles.title}>{t("discover")}</Text>

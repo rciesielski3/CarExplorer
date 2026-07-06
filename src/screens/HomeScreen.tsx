@@ -23,7 +23,6 @@ import { Colors } from "@/constants/Colors";
 import { useTheme } from "../context/ThemeContext";
 import { RootStackParamList } from "../navigation/types";
 import { AdBanner, ScreenContainer, LoadingIndicator, ErrorBoundary } from "../components";
-import { Toast } from "../components/Toast";
 import {
   findStaticAiAnswer,
   getStaticAiSuggestions,
@@ -89,7 +88,6 @@ const HomeScreen = () => {
 
   return (
     <ErrorBoundary apiName="Home">
-      <Toast />
       <ScreenContainer>
         <KeyboardAvoidingView
         style={styles.screen}

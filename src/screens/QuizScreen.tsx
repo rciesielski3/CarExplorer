@@ -28,7 +28,6 @@ import {
   ScreenContainer,
   ErrorBoundary,
 } from "../components";
-import { Toast } from "../components/Toast";
 import QuizQuestion from "../components/QuizQuestion";
 import { RootStackParamList } from "../navigation/types";
 
@@ -96,7 +95,6 @@ const QuizScreen = () => {
 
   return (
     <ErrorBoundary apiName="Quiz">
-      <Toast />
       <ScreenContainer>
         <View style={stylesHome.container}>
         <TouchableOpacity

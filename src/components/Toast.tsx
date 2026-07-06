@@ -33,12 +33,18 @@ class ToastManager {
   }
 
   show(message: string, type: ToastType = 'info', duration: number = 4000) {
-    if (this.messages.length >= MAX_TOASTS) {
-      return; // Don't add more than MAX_TOASTS
-    }
-
     const id = String(toastId++);
     const toast: ToastMessage = { id, message, type, duration };
+
+    if (this.messages.length >= MAX_TOASTS) {
+      // Remove the oldest toast (FIFO)
+      const oldestToast = this.messages.shift();
+      if (oldestToast) {
+        const timeout = this.timeouts.get(oldestToast.id);
+        if (timeout) clearTimeout(timeout);
+        this.timeouts.delete(oldestToast.id);
+      }
+    }
 
     this.messages.push(toast);
     this.notify();

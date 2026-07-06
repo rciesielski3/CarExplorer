@@ -12,7 +12,6 @@ import { fetchNews } from "../api/newsApi";
 import { useTheme } from "../context/ThemeContext";
 import { useAppLanguage } from "../context/LanguageContext";
 import { AdBanner, ErrorMessage, LoadingIndicator, ScreenContainer, ErrorBoundary } from "../components";
-import { Toast } from "../components/Toast";
 import NewsCard from "../components/NewsCard";
 import { NEWS_API } from "../config/apiConfig";
 
@@ -58,7 +57,6 @@ const NewsScreen = () => {
 
   return (
     <ErrorBoundary apiName="News">
-      <Toast />
       <ScreenContainer>
         <View style={homeStyles.container}>
           <Text style={styles.title}>{t("newsTitle")}</Text>

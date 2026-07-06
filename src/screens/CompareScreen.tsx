@@ -12,7 +12,6 @@ import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
 import { useSettings } from "../context/SettingsContext";
 import { AdBanner, CustomButton, ScreenContainer, SpecRange, ErrorBoundary } from "../components";
-import { Toast } from "../components/Toast";
 import { RootStackParamList } from "../navigation/types";
 import {
   convertPower,
@@ -173,7 +172,6 @@ const CompareScreen = () => {
 
   return (
     <ErrorBoundary apiName="Compare">
-      <Toast />
       <ScreenContainer>
         <ScrollView
         contentContainerStyle={styles.compareContent}
