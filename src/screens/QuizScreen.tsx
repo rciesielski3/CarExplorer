@@ -142,21 +142,18 @@ const QuizScreen = () => {
         >
           <View
             style={[
-              styles.modalContainer,
               quizStyles.answersModalOverlay,
               {
+                flex: 1,
                 paddingTop: Math.max(insets.top + 24, 44),
                 paddingBottom: Math.max(insets.bottom + 24, 44),
               },
             ]}
           >
-            <View style={[styles.modalContent, quizStyles.answersModalContent]}>
+            <View style={quizStyles.answersModalContent}>
               <ScrollView
-                style={[styles.scrollContainer, quizStyles.answersScroll]}
-                contentContainerStyle={[
-                  styles.modalScrollContent,
-                  quizStyles.answersScrollContent,
-                ]}
+                style={quizStyles.answersScroll}
+                contentContainerStyle={quizStyles.answersScrollContent}
                 showsVerticalScrollIndicator
               >
                 <Text style={styles.subtitle}>{t("yourAnswers")}</Text>
@@ -207,18 +204,19 @@ const quizStyles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   answersModalContent: {
+    flex: 1,
     alignSelf: "center",
-    flexShrink: 1,
     maxHeight: "90%",
     width: "100%",
     borderRadius: 12,
     backgroundColor: Colors["light"].card,
+    overflow: "hidden",
   },
   answersScroll: {
-    flexShrink: 1,
-    maxHeight: "85%",
+    flex: 1,
   },
   answersScrollContent: {
+    flexGrow: 1,
     paddingBottom: 8,
   },
   modalButton: {
