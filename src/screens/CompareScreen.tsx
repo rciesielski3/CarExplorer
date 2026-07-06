@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -11,7 +11,10 @@ import { Colors } from "@/constants/Colors";
 import { useCompare, CompareCar } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
 import { useSettings } from "../context/SettingsContext";
+import { useAppLanguage } from "../context/LanguageContext";
 import { AdBanner, CustomButton, ScreenContainer, SpecRange, ErrorBoundary } from "../components";
+import { getCarDetails } from "../api/wikipediaApi";
+import { toastManager } from "../components/Toast";
 import { RootStackParamList } from "../navigation/types";
 import {
   convertPower,
@@ -164,11 +167,46 @@ const CompareScreen = () => {
   const styles = createGlobalStyles(theme);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { compareList, resetCompare, removeFromCompare } = useCompare();
+  const { compareList, resetCompare, removeFromCompare, updateCompare } = useCompare();
   const { settings } = useSettings();
+  const { language } = useAppLanguage();
   const isImperial = settings.preferredUnitSystem === "imperial";
 
   const hasFullComparison = compareList.length === 2;
+
+  // Fetch missing specifications for cars in compare list
+  useEffect(() => {
+    const fetchMissingSpecs = async () => {
+      try {
+        const updatedCars = await Promise.all(
+          compareList.map(async (car) => {
+            // Skip if car already has specifications
+            if (car.specifications) {
+              return car;
+            }
+
+            // Fetch specs from API
+            const details = await getCarDetails(car.make, car.model, language);
+            return {
+              ...car,
+              specifications: details?.specifications || undefined,
+            };
+          })
+        );
+
+        // Update context with specs-populated cars
+        updateCompare(updatedCars);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to fetch specifications";
+        console.error("Error fetching specifications:", message);
+        toastManager.show("Could not fetch all specifications", "error");
+      }
+    };
+
+    if (compareList.length > 0) {
+      fetchMissingSpecs();
+    }
+  }, [compareList.length, language, updateCompare]);
 
   return (
     <ErrorBoundary apiName="Compare">

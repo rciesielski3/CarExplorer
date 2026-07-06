@@ -15,6 +15,7 @@ interface CompareContextProps {
   removeFromCompare: (car: CompareCar) => void;
   resetCompare: () => void;
   isInCompare: (car: CompareCar) => boolean;
+  updateCompare: (updatedCars: CompareCar[]) => void;
 }
 
 const CompareContext = React.createContext<CompareContextProps | undefined>(
@@ -65,6 +66,10 @@ export const CompareProvider: React.FC<{ children: ReactNode }> = ({
     [compareList]
   );
 
+  const updateCompare = React.useCallback((updatedCars: CompareCar[]) => {
+    setCompareList(updatedCars);
+  }, []);
+
   const value = React.useMemo(
     () => ({
       compareList,
@@ -72,8 +77,9 @@ export const CompareProvider: React.FC<{ children: ReactNode }> = ({
       removeFromCompare,
       resetCompare,
       isInCompare,
+      updateCompare,
     }),
-    [addToCompare, compareList, isInCompare, removeFromCompare, resetCompare]
+    [addToCompare, compareList, isInCompare, removeFromCompare, resetCompare, updateCompare]
   );
 
   return (
