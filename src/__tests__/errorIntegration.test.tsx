@@ -18,7 +18,7 @@ describe('End-to-End Error Handling', () => {
     );
 
     expect(screen.getByText(/error occurred/i)).toBeTruthy();
-    expect(screen.getByText(/try again/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /try again/i })).toBeTruthy();
   });
 
   it('toast shows when API error is handled', async () => {

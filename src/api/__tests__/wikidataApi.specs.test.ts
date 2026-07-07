@@ -2,6 +2,46 @@ import { getCarSpecificationsFromWikidata } from '../wikidataApi';
 import { mockResponse } from "./mocks";
 
 describe('Wikidata API - Specifications', () => {
+  beforeAll(() => {
+    global.fetch = jest.fn((url: string) => {
+      // Mock response for Q1420 (BMW)
+      if (url.includes('Q1420')) {
+        return Promise.resolve(
+          mockResponse({
+            entities: {
+              Q1420: {
+                claims: {
+                  P4389: [{ mainsnak: { datavalue: { value: '3.0L' } } }],
+                  P2048: [{ mainsnak: { datavalue: { value: '300' } } }],
+                  P2873: [{ mainsnak: { datavalue: { value: '350' } } }],
+                },
+              },
+            },
+          })
+        );
+      }
+      // Mock response for invalid entity (Q999999999)
+      if (url.includes('Q999999999')) {
+        return Promise.resolve(
+          mockResponse({
+            entities: {
+              Q999999999: { missing: '' },
+            },
+          })
+        );
+      }
+      // Default fallback
+      return Promise.resolve(
+        mockResponse({
+          entities: {},
+        })
+      );
+    });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
   it('fetches car specifications from Wikidata entity', async () => {
     const result = await getCarSpecificationsFromWikidata('Q1420', 'en');
 
