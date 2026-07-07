@@ -41,6 +41,10 @@ export const handleApiError = (
         message = 'Invalid request. Please check your input.';
         shouldRetry = false;
         break;
+      case 403:
+        message = 'Access denied. Wikipedia service may be temporarily unavailable.';
+        shouldRetry = true;
+        break;
       default:
         message = `${context.apiName} returned an error (${error.status}). Please try again.`;
         shouldRetry = true;
