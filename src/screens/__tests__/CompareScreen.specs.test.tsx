@@ -186,11 +186,13 @@ describe('CompareScreen - Specifications', () => {
       renderer = TestRenderer.create(
         <NavigationContainer>
         <ThemeProvider>
-          <CompareProvider>
-            <SettingsProvider>
-              <TestProbe />
-            </SettingsProvider>
-          </CompareProvider>
+          <LanguageProvider>
+            <CompareProvider>
+              <SettingsProvider>
+                <TestProbe />
+              </SettingsProvider>
+            </CompareProvider>
+          </LanguageProvider>
         </ThemeProvider>
         </NavigationContainer>
       );
