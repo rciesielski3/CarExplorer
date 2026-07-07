@@ -328,26 +328,36 @@ describe('CompareScreen - Specifications', () => {
     const carWithSpecs1: CompareCar = {
       make: 'Toyota',
       model: 'Camry',
+      year: '2023',
+      vehicleType: 'Sedan',
       specifications: {
         engine: ['2.5L 4-cyl'],
         power: ['165 kW'],
         torque: ['209 N⋅m'],
-        type: ['Sedan'],
-        year: '2023',
-        driveType: ['FWD'],
+        acceleration: ['10.5 s'],
+        weight: ['1500 kg'],
+        dimensions: ['4850x1850x1480 mm'],
+        fuelType: ['Petrol'],
+        transmission: ['Automatic'],
+        topSpeed: ['200 km/h'],
       },
     };
 
     const carWithSpecs2: CompareCar = {
       make: 'Honda',
       model: 'Accord',
+      year: '2023',
+      vehicleType: 'Sedan',
       specifications: {
         engine: ['2.0L 4-cyl Turbo'],
         power: ['180 kW'],
         torque: ['310 N⋅m'],
-        type: ['Sedan'],
-        year: '2023',
-        driveType: ['FWD'],
+        acceleration: ['9.8 s'],
+        weight: ['1550 kg'],
+        dimensions: ['4850x1850x1480 mm'],
+        fuelType: ['Petrol'],
+        transmission: ['Automatic'],
+        topSpeed: ['220 km/h'],
       },
     };
 
