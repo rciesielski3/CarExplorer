@@ -199,8 +199,18 @@ const CompareScreen = () => {
           result.status === 'fulfilled' ? result.value : compareList[i]
         );
 
-        // Update context with specs-populated cars
-        updateCompare(updatedCars);
+        // Only update if specs actually changed, otherwise updateCompare would
+        // create a new compareList reference every run and re-trigger this
+        // effect indefinitely (infinite loop / CPU pin).
+        const specsChanged = updatedCars.some((car, i) => {
+          const oldSpecs = compareList[i]?.specifications;
+          const newSpecs = car.specifications;
+          return JSON.stringify(oldSpecs) !== JSON.stringify(newSpecs);
+        });
+
+        if (specsChanged) {
+          updateCompare(updatedCars);
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : "Failed to fetch specifications";
         console.error("Error fetching specifications:", message);
