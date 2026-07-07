@@ -173,7 +173,7 @@ describe("CarCard", () => {
     expect(image).toBeTruthy();
   });
 
-  it("shows initials fallback after the image fails to load", async () => {
+  it("shows generic fallback image after the Wikipedia image fails to load", async () => {
     mockedFetchWikipediaCarImage.mockResolvedValue(
       "https://upload.wikimedia.org/toyota-supra.jpg"
     );
@@ -188,14 +188,24 @@ describe("CarCard", () => {
       image?.props.onError();
     });
 
-    expect(renderer.root.findByProps({ children: "TO" })).toBeTruthy();
+    // After wiki image fails, it falls back to generic image
+    const genericImage = findImageByUri(
+      renderer,
+      "https://via.placeholder.com/300x200?text=Car+Image"
+    );
+    expect(genericImage).toBeTruthy();
   });
 
-  it("shows initials fallback when Wikipedia has no image without rendering a dead URL", async () => {
+  it("shows generic fallback image when Wikipedia has no image", async () => {
     const renderer = await renderCarCard();
 
-    expect(renderer.root.findAllByType(Image)).toHaveLength(0);
-    expect(renderer.root.findByProps({ children: "TO" })).toBeTruthy();
+    // When no Wikipedia or CarImages URLs available, uses generic fallback
+    expect(renderer.root.findAllByType(Image)).toHaveLength(1);
+    const genericImage = findImageByUri(
+      renderer,
+      "https://via.placeholder.com/300x200?text=Car+Image"
+    );
+    expect(genericImage).toBeTruthy();
   });
 
   it("shows loaded details in the modal", async () => {
