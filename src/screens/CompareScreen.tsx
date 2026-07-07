@@ -178,7 +178,7 @@ const CompareScreen = () => {
   useEffect(() => {
     const fetchMissingSpecs = async () => {
       try {
-        const updatedCars = await Promise.all(
+        const results = await Promise.allSettled(
           compareList.map(async (car) => {
             // Skip if car already has specifications
             if (car.specifications) {
@@ -192,6 +192,11 @@ const CompareScreen = () => {
               specifications: details?.specifications || undefined,
             };
           })
+        );
+
+        // Preserve partial results: fulfilled specs, rejected specs from original list
+        const updatedCars = results.map((result, i) =>
+          result.status === 'fulfilled' ? result.value : compareList[i]
         );
 
         // Update context with specs-populated cars

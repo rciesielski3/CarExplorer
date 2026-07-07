@@ -17,6 +17,7 @@ jest.mock("../../api/wikipediaApi", () => ({
 
 jest.mock("../../api/carImagesApi", () => ({
   getCarImagesFallbackUrl: jest.fn(),
+  getGenericCarImageFallback: jest.fn().mockResolvedValue("https://via.placeholder.com/300x200?text=Car+Image"),
 }));
 
 jest.mock(

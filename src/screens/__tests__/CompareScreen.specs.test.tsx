@@ -16,6 +16,7 @@ import CompareScreen from '../CompareScreen';
 import { CompareProvider, CompareCar } from '../../context/CompareContext';
 import { SettingsProvider } from '../../context/SettingsContext';
 import { ThemeProvider } from '../../context/ThemeContext';
+import { LanguageProvider } from '../../context/LanguageContext';
 import { useCompare } from '../../context/CompareContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -79,11 +80,13 @@ describe('CompareScreen - Specifications', () => {
       renderer = TestRenderer.create(
         <NavigationContainer>
         <ThemeProvider>
-          <CompareProvider>
-            <SettingsProvider>
-              <TestProbe />
-            </SettingsProvider>
-          </CompareProvider>
+          <LanguageProvider>
+            <CompareProvider>
+              <SettingsProvider>
+                <TestProbe />
+              </SettingsProvider>
+            </CompareProvider>
+          </LanguageProvider>
         </ThemeProvider>
         </NavigationContainer>
       );
@@ -121,11 +124,13 @@ describe('CompareScreen - Specifications', () => {
       renderer = TestRenderer.create(
         <NavigationContainer>
         <ThemeProvider>
-          <CompareProvider>
-            <SettingsProvider>
-              <TestProbe />
-            </SettingsProvider>
-          </CompareProvider>
+          <LanguageProvider>
+            <CompareProvider>
+              <SettingsProvider>
+                <TestProbe />
+              </SettingsProvider>
+            </CompareProvider>
+          </LanguageProvider>
         </ThemeProvider>
         </NavigationContainer>
       );
@@ -245,11 +250,13 @@ describe('CompareScreen - Specifications', () => {
       renderer = TestRenderer.create(
         <NavigationContainer>
         <ThemeProvider>
-          <CompareProvider>
-            <SettingsProvider>
-              <TestProbe />
-            </SettingsProvider>
-          </CompareProvider>
+          <LanguageProvider>
+            <CompareProvider>
+              <SettingsProvider>
+                <TestProbe />
+              </SettingsProvider>
+            </CompareProvider>
+          </LanguageProvider>
         </ThemeProvider>
         </NavigationContainer>
       );

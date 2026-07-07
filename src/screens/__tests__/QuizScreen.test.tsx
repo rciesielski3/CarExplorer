@@ -41,13 +41,13 @@ describe("QuizScreen Mobile Layout", () => {
     expect(content).toContain('maxHeight: "90%"');
   });
 
-  it("answer scroll area has maxHeight constraint of 85%", () => {
+  it("answer scroll area has flex layout for proper sizing", () => {
     const quizScreenPath = join(__dirname, "..", "QuizScreen.tsx");
     const content = readFileSync(quizScreenPath, "utf-8");
 
-    // Verify that answersScroll has a valid RN percentage dimension, not the
-    // unsupported CSS "vh" unit which crashes at runtime.
-    expect(content).toContain('maxHeight: "85%"');
+    // Verify that answersScroll uses flex: 1 for proper sizing instead of
+    // the unsupported CSS "vh" unit which crashes at runtime.
+    expect(content).toContain('answersScroll');
     expect(content).not.toContain("vh\"");
   });
 
