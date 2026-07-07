@@ -211,7 +211,7 @@ const CompareScreen = () => {
     if (compareList.length > 0) {
       fetchMissingSpecs();
     }
-  }, [compareList.length, language, updateCompare]);
+  }, [compareList, language]); // Compare full list, not just length
 
   return (
     <ErrorBoundary apiName="Compare">
