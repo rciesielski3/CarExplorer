@@ -22,12 +22,17 @@
 - **Benefit:** Quiz results readable on all screen sizes
 
 ## Testing
-- 159 tests passing
-- TypeScript strict mode: PASS
+- 164 tests passing
+- TypeScript strict mode: 4 errors remaining (in test files)
 - All error scenarios covered
+- Render loop regression test added
 
 ## Known Issues
-- None at release
+- TypeScript: 4 errors in test files blocking strict mode compliance:
+  - wikidataApi.specs.test.ts(6): fetch mock type signature mismatch
+  - CompareScreen.specs.test.tsx(275): missing 'description' field in mock data
+  - CompareScreen.specs.test.tsx(334,347): 'type' property invalid in CarSpecification mock
+- **Blocking Fix Required:** Task 3 (Fix TypeScript Errors in Test Files) must complete before production release
 
 ## Compatibility
 - Minimum: Android 8.0 (API 26)
