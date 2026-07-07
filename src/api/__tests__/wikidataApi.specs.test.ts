@@ -36,7 +36,7 @@ describe('Wikidata API - Specifications', () => {
           entities: {},
         })
       );
-    });
+    }) as any;
   });
 
   afterAll(() => {

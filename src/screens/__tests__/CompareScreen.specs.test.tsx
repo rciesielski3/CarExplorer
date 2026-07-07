@@ -273,6 +273,7 @@ describe('CompareScreen - Specifications', () => {
     const mockGetCarDetails = getCarDetails as jest.MockedFunction<typeof getCarDetails>;
     mockGetCarDetails.mockClear();
     mockGetCarDetails.mockResolvedValue({
+      description: 'A test car description',
       specifications: {
         engine: ['2.0L'],
         power: ['150 kW'],
