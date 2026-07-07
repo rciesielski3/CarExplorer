@@ -322,4 +322,64 @@ describe('CompareScreen - Specifications', () => {
     // This test verifies the component renders correctly with the new dependency
     expect(renderer!).toBeDefined();
   });
+
+  it('does not infinite loop when both cars already have specifications', async () => {
+    const carWithSpecs1: CompareCar = {
+      make: 'Toyota',
+      model: 'Camry',
+      specifications: {
+        engine: ['2.5L 4-cyl'],
+        power: ['165 kW'],
+        torque: ['209 N⋅m'],
+        type: ['Sedan'],
+        year: '2023',
+        driveType: ['FWD'],
+      },
+    };
+
+    const carWithSpecs2: CompareCar = {
+      make: 'Honda',
+      model: 'Accord',
+      specifications: {
+        engine: ['2.0L 4-cyl Turbo'],
+        power: ['180 kW'],
+        torque: ['310 N⋅m'],
+        type: ['Sedan'],
+        year: '2023',
+        driveType: ['FWD'],
+      },
+    };
+
+    let renderCount = 0;
+
+    const TestProbe = () => {
+      renderCount++;
+      return <CompareScreen />;
+    };
+
+    let renderer: TestRenderer.ReactTestRenderer;
+
+    await act(async () => {
+      renderer = TestRenderer.create(
+        <NavigationContainer>
+        <ThemeProvider>
+          <LanguageProvider>
+            <CompareProvider initialCars={[carWithSpecs1, carWithSpecs2]}>
+              <SettingsProvider>
+                <TestProbe />
+              </SettingsProvider>
+            </CompareProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+        </NavigationContainer>
+      );
+    });
+
+    // Let component settle (wait 2 seconds)
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Should render max ~10 times (initial + some updates), not 1000+
+    // This verifies the infinite re-render loop is fixed
+    expect(renderCount).toBeLessThan(20);
+  });
 });

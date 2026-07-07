@@ -27,10 +27,11 @@ const getCompareKey = (car: CompareCar) =>
     .map((value) => value.trim().toLowerCase())
     .join("|");
 
-export const CompareProvider: React.FC<{ children: ReactNode }> = ({
+export const CompareProvider: React.FC<{ children: ReactNode; initialCars?: CompareCar[] }> = ({
   children,
+  initialCars = [],
 }) => {
-  const [compareList, setCompareList] = React.useState<CompareCar[]>([]);
+  const [compareList, setCompareList] = React.useState<CompareCar[]>(initialCars);
 
   const addToCompare = React.useCallback((car: CompareCar) => {
     setCompareList((currentList) => {
