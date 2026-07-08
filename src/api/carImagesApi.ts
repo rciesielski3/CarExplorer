@@ -9,10 +9,10 @@ export async function getCarImagesFallbackUrl(params: {
   model?: string;
   year?: string | null;
 }): Promise<string | null> {
-  const CAR_IMAGES_API_KEY = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY;
+  const apiKey = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY;
 
   // Guard: skip this optional tier if API key is not configured or is a placeholder
-  if (!CAR_IMAGES_API_KEY || CAR_IMAGES_API_KEY.includes("your-api-key") || CAR_IMAGES_API_KEY.includes("placeholder")) {
+  if (!apiKey || apiKey.includes("your-api-key")) {
     console.warn(
       "[CAR_IMAGES_API] API key not configured. This is an optional tier. Check app.json extra.CAR_IMAGES_API_KEY if you want to enable CarImages API fallback."
     );
@@ -20,19 +20,14 @@ export async function getCarImagesFallbackUrl(params: {
   }
 
   try {
-    const query = new URLSearchParams({
-      type: "car",
-      make: params.make,
-      width: "800",
-      format: "webp",
-      api_key: CAR_IMAGES_API_KEY,
-    });
-    if (params.model) query.set("model", params.model);
-    if (params.year) query.set("year", params.year);
+    const url = new URL("https://carimagesapi.com/api/v1/signed-url");
+    url.searchParams.append("api_key", apiKey);
+    url.searchParams.append("make", params.make);
+    if (params.model) {
+      url.searchParams.append("model", params.model);
+    }
 
-    const response = await fetch(
-      `https://carimagesapi.com/api/v1/signed-url?${query.toString()}`
-    );
+    const response = await fetch(url.toString());
     if (!response.ok) {
       const result = handleApiError(response as any, {
         apiName: "CarImages",

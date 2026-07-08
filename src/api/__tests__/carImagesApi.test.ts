@@ -45,7 +45,13 @@ describe("carImagesApi", () => {
     expect(result).toBe("https://carimagesapi.com/signed/test-url");
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("type=car")
+      expect.stringContaining("api_key=test-api-key-12345")
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("make=Toyota")
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("model=Corolla")
     );
   });
 
