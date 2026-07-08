@@ -2,7 +2,7 @@ import Constants from "expo-constants";
 import { handleApiError } from "../utils/errorHandler";
 import { toastManager } from "../components/Toast";
 
-const GENERIC_CAR_IMAGE = "https://via.placeholder.com/300x200?text=Car+Image";
+const GENERIC_CAR_IMAGE = "https://placehold.co/300x200?text=Car+Image";
 
 export async function getCarImagesFallbackUrl(params: {
   make: string;
@@ -11,9 +11,10 @@ export async function getCarImagesFallbackUrl(params: {
 }): Promise<string | null> {
   const CAR_IMAGES_API_KEY = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY;
 
-  if (!CAR_IMAGES_API_KEY) {
+  // Guard: skip this optional tier if API key is not configured or is a placeholder
+  if (!CAR_IMAGES_API_KEY || CAR_IMAGES_API_KEY.includes("your-api-key") || CAR_IMAGES_API_KEY.includes("placeholder")) {
     console.warn(
-      "[CAR_IMAGES_API] API key not configured. Check app.json extra.CAR_IMAGES_API_KEY"
+      "[CAR_IMAGES_API] API key not configured. This is an optional tier. Check app.json extra.CAR_IMAGES_API_KEY if you want to enable CarImages API fallback."
     );
     return null;
   }
