@@ -8,7 +8,7 @@ const WIKIDATA_FETCH_OPTIONS = {
   headers: {
     Accept: "application/json",
     "User-Agent":
-      "CarExplorer/2.0.5 (https://rciesielski3.github.io/portfolio/#/contact)",
+      "CarExplorer/2.2.1 (https://rciesielski3.github.io/portfolio/#/contact)",
   },
 };
 

@@ -16,6 +16,7 @@ import { Colors } from "@/constants/Colors";
 
 import { getCarImagesFallbackUrl, getGenericCarImageFallback } from "../api/carImagesApi";
 import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
+import { wikipediaThrottler } from "../utils/requestThrottler";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { CompareCar, useCompare } from "../context/CompareContext";
@@ -108,7 +109,9 @@ const CarCard: React.FC<CarCardProps> = ({
     let mounted = true;
     async function loadImage() {
       setLoading(true);
-      const wikiImage = await fetchWikipediaCarImage(make, model);
+      const wikiImage = await wikipediaThrottler.execute(() =>
+        fetchWikipediaCarImage(make, model)
+      );
       if (!mounted) return;
       if (wikiImage) {
         setImageUri(wikiImage);

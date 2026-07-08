@@ -94,7 +94,11 @@ describe("wikipediaApi", () => {
 
   it("does not block REST details fallback when action API returns missing", async () => {
     mockFetch
+      // Wikidata search (called FIRST, returns empty)
+      .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
+      // Wikipedia details (action API returns missing)
       .mockResolvedValueOnce(wikipediaDetailsResponse({ missing: true }))
+      // Wikipedia summary fallback
       .mockResolvedValueOnce(
         wikipediaSummaryResponse({
           extract: "The Renault Zoe is a battery electric car.",
@@ -104,7 +108,7 @@ describe("wikipediaApi", () => {
     await expect(getCarDetails("Renault", "Zoe", "en")).resolves.toEqual({
       description: "The Renault Zoe is a battery electric car.",
     });
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
   it("uses Wikipedia search fallback when exact detail candidates are empty", async () => {
@@ -157,7 +161,11 @@ describe("wikipediaApi", () => {
 
   it("falls back to Wikipedia summary extract when query details are empty", async () => {
     mockFetch
+      // Wikidata search (called FIRST, returns empty)
+      .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
+      // Wikipedia details (empty extract)
       .mockResolvedValueOnce(wikipediaDetailsResponse({ extract: "" }))
+      // Wikipedia summary fallback
       .mockResolvedValueOnce(
         wikipediaSummaryResponse({
           extract: "The Ford Crown Victoria is a full-size sedan.",
@@ -232,11 +240,15 @@ describe("wikipediaApi", () => {
 
   it("caches details and images separately", async () => {
     mockFetch
+      // Wikidata search (called FIRST for getCarDetails, returns empty)
+      .mockResolvedValueOnce(wikipediaSummaryResponse({ query: { search: [] } }))
+      // Wikipedia details
       .mockResolvedValueOnce(
         wikipediaDetailsResponse({
           extract: "The Volvo 240 is a compact executive car.",
         })
       )
+      // Wikipedia summary with image (for fetchWikipediaCarImage)
       .mockResolvedValueOnce(
         wikipediaSummaryResponse({
           thumbnail: { source: "https://example.com/volvo-240.jpg" },
@@ -255,7 +267,7 @@ describe("wikipediaApi", () => {
     await expect(fetchWikipediaCarImage("Volvo", "240")).resolves.toBe(
       "https://example.com/volvo-240.jpg"
     );
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
   it("handles server errors gracefully", async () => {
