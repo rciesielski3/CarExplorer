@@ -9,7 +9,7 @@ export async function getCarImagesFallbackUrl(params: {
   model?: string;
   year?: string | null;
 }): Promise<string | null> {
-  const apiKey = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY;
+  const apiKey = Constants.expoConfig?.extra?.CAR_IMAGES_API_KEY || process.env.EXPO_PUBLIC_CAR_IMAGES_API_KEY;
 
   // Guard: skip this optional tier if API key is not configured or is a placeholder
   if (!apiKey || apiKey.includes("your-api-key")) {

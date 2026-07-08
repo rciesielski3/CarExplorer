@@ -2,7 +2,7 @@
   "expo": {
     "name": "CarExplorer",
     "slug": "car-explorer",
-    "version": "2.2.2",
+    "version": "2.2.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/carexplorer512.png",
     "splash": {
@@ -16,7 +16,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.adateo.carexplorer",
-      "versionCode": 69
+      "versionCode": 70
     },
     "ios": {
       "supportsTablet": true,
@@ -28,8 +28,8 @@
     "assetBundlePatterns": ["**/*"],
     "plugins": ["expo-font"],
     "extra": {
-      "CAR_IMAGES_API_KEY": "ci_40237f221adc1b9e6fe2b03d3ec8bd71fb0e5751189f3199505b8f97",
-      "CAR_IMAGES_API_SECRET": "22ef54cc15e0c5ab3b2d1c2f3124d25d137e523f36129856ee7faa6e1c3b94b1"
+      "CAR_IMAGES_API_KEY": "${EXPO_PUBLIC_CAR_IMAGES_API_KEY}",
+      "CAR_IMAGES_API_SECRET": "${EXPO_PUBLIC_CAR_IMAGES_API_SECRET}"
     }
   }
 }
