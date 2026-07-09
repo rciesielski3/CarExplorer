@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface CarModel {
   id: number;
@@ -20,6 +20,12 @@ export const usePaginatedModels = (
 ): UsePaginatedModelsReturn => {
   const [displayedCount, setDisplayedCount] = useState(BATCH_SIZE);
   const [isPreloading, setIsPreloading] = useState(false);
+
+  useEffect(() => {
+    if (allModels.length > 0) {
+      setDisplayedCount(BATCH_SIZE);
+    }
+  }, [allModels]);
 
   const displayedModels = useMemo(
     () => allModels.slice(0, displayedCount),
