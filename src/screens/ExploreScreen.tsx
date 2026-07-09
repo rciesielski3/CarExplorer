@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
@@ -151,6 +153,21 @@ const ExploreScreen = () => {
     }
   }, [selectedMake, fetchModels]);
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const distanceFromBottom =
+      contentSize.height - layoutMeasurement.height - contentOffset.y;
+
+    // Trigger preload when within 200px of bottom
+    if (
+      distanceFromBottom < 200 &&
+      !isPreloading &&
+      displayedModels.length < totalCount
+    ) {
+      triggerPreload();
+    }
+  };
+
   React.useEffect(() => {
     const loadLogos = async () => {
       setLoadingLogos(true);
@@ -256,6 +273,8 @@ const ExploreScreen = () => {
                   styles.listContent,
                   styles.listContentWithStickyAction,
                 ]}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 renderItem={({ item }) => (
                   <CarCard
                     make={selectedMake!}
