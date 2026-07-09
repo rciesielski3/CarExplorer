@@ -865,6 +865,11 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       lineHeight: 18,
       flex: 1,
     },
+    loadMoreContainer: {
+      padding: 16,
+      paddingBottom: 32,
+      alignItems: 'center',
+    },
   });
 
 export const createHomeScreenStyles = (theme: "light" | "dark") =>

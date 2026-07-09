@@ -272,6 +272,16 @@ const ExploreScreen = () => {
                 )}
               />
             )}
+            {displayedModels.length < totalCount && (
+              <View style={styles.loadMoreContainer}>
+                <CustomButton
+                  title={isPreloading ? t("loading") : t("loadMore")}
+                  onPress={handleLoadMore}
+                  variant="primary"
+                  disabled={isPreloading}
+                />
+              </View>
+            )}
             <View
               style={[
                 styles.stickyNavFooter,

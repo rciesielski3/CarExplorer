@@ -146,5 +146,7 @@
   "compareFuelType": "Fuel Type",
   "compareTransmission": "Transmission",
   "compareTopSpeed": "Top Speed",
-  "unitSystem": "Unit System"
+  "unitSystem": "Unit System",
+  "loadMore": "Load More Models",
+  "loading": "Loading..."
 }
