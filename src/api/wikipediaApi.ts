@@ -13,7 +13,7 @@ const WIKIPEDIA_FETCH_OPTIONS = {
   headers: {
     Accept: "application/json",
     "User-Agent":
-      "CarExplorer/2.2.2.2 (https://rciesielski3.github.io/portfolio/#/contact)",
+      "CarExplorer/2.2.2.3 (https://rciesielski3.github.io/portfolio/#/contact)",
   },
 };
 
