@@ -15,6 +15,7 @@ import {
   createGlobalStyles,
   createHomeScreenStyles,
 } from "@/constants/GlobalStyles";
+import { usePaginatedModels } from "../hooks/usePaginatedModels";
 
 import {
   fetchModelsForMake,
@@ -47,7 +48,8 @@ const numColumns = screenWidth < 400 ? 2 : 3;
 
 const ExploreScreen = () => {
   const [selectedMake, setSelectedMake] = React.useState<string | null>(null);
-  const [models, setModels] = React.useState<CarModel[]>([]);
+  const [allModels, setAllModels] = React.useState<CarModel[]>([]);
+  const { displayedModels, totalCount, handleLoadMore, isPreloading, triggerPreload } = usePaginatedModels(allModels);
   const [loading, setLoading] = React.useState(false);
   const [loadingLogos, setLoadingLogos] = React.useState(false);
   const [modelYear, setModelYear] = React.useState<string | null>(null);
@@ -78,7 +80,7 @@ const ExploreScreen = () => {
       setSelectedMake(null);
       setModelYear(null);
       setVehicleType(null);
-      setModels([]);
+      setAllModels([]);
       setErrorMessage(null);
     }, [])
   );
@@ -112,11 +114,11 @@ const ExploreScreen = () => {
         setErrorMessage(t("noModelsFound"));
       }
 
-      setModels(modelData);
+      setAllModels(modelData);
     } catch (error) {
       console.error("Error fetching models:", error);
       setErrorMessage(t("errorFetchingData"));
-      setModels([]);
+      setAllModels([]);
     } finally {
       setLoading(false);
     }
@@ -125,6 +127,7 @@ const ExploreScreen = () => {
   const resetFilters = () => {
     setModelYear(null);
     setVehicleType(null);
+    setAllModels([]);  // Clear models to reset pagination
   };
 
   const handleSelectMake = (make: string) => {
@@ -138,7 +141,7 @@ const ExploreScreen = () => {
     setSelectedMake(null);
     setModelYear(null);
     setVehicleType(null);
-    setModels([]);
+    setAllModels([]);
     setErrorMessage(null);
   };
 
@@ -246,7 +249,7 @@ const ExploreScreen = () => {
               <ErrorMessage message={errorMessage} />
             ) : (
               <FlatList
-                data={models}
+                data={displayedModels}
                 keyExtractor={(item) => item.id.toString()}
                 style={styles.flexFill}
                 contentContainerStyle={[
