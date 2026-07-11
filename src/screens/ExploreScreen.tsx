@@ -268,11 +268,14 @@ const ExploreScreen = () => {
               <FlatList
                 data={displayedModels}
                 keyExtractor={(item) => item.id.toString()}
+                numColumns={numColumns}
                 style={styles.flexFill}
                 contentContainerStyle={[
                   styles.listContent,
                   styles.listContentWithStickyAction,
                 ]}
+                maxToRenderPerBatch={12}
+                updateCellsBatchingPeriod={50}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
                 renderItem={({ item }) => (
