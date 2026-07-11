@@ -268,7 +268,6 @@ const ExploreScreen = () => {
               <FlatList
                 data={displayedModels}
                 keyExtractor={(item) => item.id.toString()}
-                numColumns={numColumns}
                 style={styles.flexFill}
                 contentContainerStyle={[
                   styles.listContent,
