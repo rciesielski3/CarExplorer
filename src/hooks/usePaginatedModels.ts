@@ -41,7 +41,10 @@ export const usePaginatedModels = (
 
   const triggerPreload = () => {
     if (displayedCount < allModels.length) {
-      setIsPreloading(true);
+      // Actually load the next batch when preloading is triggered
+      const nextCount = displayedCount + BATCH_SIZE;
+      setDisplayedCount(Math.min(nextCount, allModels.length));
+      setIsPreloading(false); // Clear loading flag since we already loaded
     }
   };
 
