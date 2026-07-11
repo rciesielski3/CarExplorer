@@ -11,6 +11,7 @@ interface ButtonProps {
   color?: string;
   variant?: "primary" | "secondary" | "danger" | "success";
   style?: StyleProp<ViewStyle>;
+  disabled?: boolean;
 }
 
 const CustomButton: React.FC<ButtonProps> = ({
@@ -19,6 +20,7 @@ const CustomButton: React.FC<ButtonProps> = ({
   color,
   variant = "primary",
   style,
+  disabled,
 }) => {
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
@@ -42,6 +44,7 @@ const CustomButton: React.FC<ButtonProps> = ({
         style,
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       <Text
         style={[styles.buttonText, isSecondary && styles.buttonSecondaryText]}
