@@ -24,6 +24,7 @@ export const usePaginatedModels = (
   useEffect(() => {
     if (allModels.length > 0) {
       setDisplayedCount(BATCH_SIZE);
+      setIsPreloading(false);
     }
   }, [allModels]);
 
