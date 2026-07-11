@@ -123,16 +123,16 @@ describe("usePaginatedModels", () => {
     expect(result.current.displayedModels).toHaveLength(50);
   });
 
-  it("should return true for isPreloading when next batch is being preloaded", () => {
+  it("should load next batch when triggerPreload is called", () => {
     const { result } = renderHook(() => usePaginatedModels(mockModels));
-
-    expect(result.current.isPreloading).toBe(false);
+    expect(result.current.displayedModels).toHaveLength(12); // Initial batch
 
     act(() => {
       result.current.triggerPreload();
     });
 
-    expect(result.current.isPreloading).toBe(true);
+    expect(result.current.displayedModels).toHaveLength(24); // Next batch loaded
+    expect(result.current.isPreloading).toBe(false); // Flag cleared
   });
 });
 
