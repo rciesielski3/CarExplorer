@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from "@testing-library/react-native";
-import { useParallelImageFetch } from "../useParallelImageFetch";
+import { useParallelImageFetch, UseParallelImageFetchParams } from "../useParallelImageFetch";
 import * as wikipediaApi from "../../api/wikipediaApi";
 import * as carImagesApi from "../../api/carImagesApi";
 
@@ -135,7 +135,7 @@ describe("useParallelImageFetch", () => {
     mockGetCarImagesFallbackUrl.mockResolvedValueOnce(null);
 
     const { result, rerender } = renderHook(
-      (props) => useParallelImageFetch(props),
+      (props: UseParallelImageFetchParams) => useParallelImageFetch(props),
       { initialProps: { make: "Toyota", model: "Camry" } }
     );
 

@@ -3,7 +3,7 @@ import { fetchWikipediaCarImage } from "../api/wikipediaApi";
 import { getCarImagesFallbackUrl, getGenericCarImageFallback } from "../api/carImagesApi";
 import { wikipediaThrottler } from "../utils/requestThrottler";
 
-interface UseParallelImageFetchParams {
+export interface UseParallelImageFetchParams {
   make: string;
   model: string;
   year?: string | null;
