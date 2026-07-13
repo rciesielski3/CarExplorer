@@ -1,6 +1,7 @@
 import React from "react";
 import { fetchWikipediaCarImage } from "../api/wikipediaApi";
 import { getCarImagesFallbackUrl, getGenericCarImageFallback } from "../api/carImagesApi";
+import { wikipediaThrottler } from "../utils/requestThrottler";
 
 interface UseParallelImageFetchParams {
   make: string;
@@ -24,16 +25,39 @@ export function useParallelImageFetch(
   const [sourceStep, setSourceStep] = React.useState<"wiki" | "carimages" | "generic" | "fallback">("wiki");
   const [error, setError] = React.useState<string | null>(null);
 
+  // Tracks whether the component is still mounted so async callbacks can
+  // avoid updating state after unmount.
+  const mountedRef = React.useRef(true);
+
+  const setImageUriIfMounted = React.useCallback((uri: string | null) => {
+    if (mountedRef.current) setImageUri(uri);
+  }, []);
+  const setSourceStepIfMounted = React.useCallback(
+    (step: "wiki" | "carimages" | "generic" | "fallback") => {
+      if (mountedRef.current) setSourceStep(step);
+    },
+    []
+  );
+  const setIsLoadingIfMounted = React.useCallback((loading: boolean) => {
+    if (mountedRef.current) setIsLoading(loading);
+  }, []);
+  const setErrorIfMounted = React.useCallback((err: string | null) => {
+    if (mountedRef.current) setError(err);
+  }, []);
+
   const fetchImages = React.useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoadingIfMounted(true);
+    setErrorIfMounted(null);
 
     try {
-      // Wrap each promise to track which API won
-      const wikiPromise = fetchWikipediaCarImage(params.make, params.model).then((url) => ({
-        source: "wiki" as const,
-        url,
-      }));
+      // Wrap each promise to track which API won. Wikipedia requests are
+      // throttled to avoid unthrottled concurrent hits against their API.
+      const wikiPromise = wikipediaThrottler
+        .execute(() => fetchWikipediaCarImage(params.make, params.model))
+        .then((url) => ({
+          source: "wiki" as const,
+          url,
+        }));
 
       const carImagesPromise = getCarImagesFallbackUrl({
         make: params.make,
@@ -44,25 +68,31 @@ export function useParallelImageFetch(
         url,
       }));
 
-      // Race both APIs in parallel
-      const result = await Promise.race([wikiPromise, carImagesPromise]);
+      // Race both APIs in parallel. Rejections are converted to a
+      // null-result so a fast failure on one API doesn't abort the race
+      // before the other API has a chance to respond (spec: only fall back
+      // to generic once BOTH APIs have failed/returned null).
+      const result = await Promise.race([
+        wikiPromise.catch(() => ({ source: "wiki" as const, url: null })),
+        carImagesPromise.catch(() => ({ source: "carimages" as const, url: null })),
+      ]);
 
       if (result.url) {
-        setImageUri(result.url);
-        setSourceStep(result.source);
-        setIsLoading(false);
+        setImageUriIfMounted(result.url);
+        setSourceStepIfMounted(result.source);
+        setIsLoadingIfMounted(false);
         return;
       }
 
-      // If the winner returned null, try the other one
+      // If the winner returned null (or rejected), try the other one
       try {
         const loser = result.source === "wiki" ? carImagesPromise : wikiPromise;
         const fallbackResult = await loser;
 
         if (fallbackResult.url) {
-          setImageUri(fallbackResult.url);
-          setSourceStep(fallbackResult.source);
-          setIsLoading(false);
+          setImageUriIfMounted(fallbackResult.url);
+          setSourceStepIfMounted(fallbackResult.source);
+          setIsLoadingIfMounted(false);
           return;
         }
       } catch {
@@ -71,44 +101,46 @@ export function useParallelImageFetch(
 
       // Fall back to generic image
       const genericImage = await getGenericCarImageFallback();
-      setImageUri(genericImage);
-      setSourceStep("generic");
-      setIsLoading(false);
+      setImageUriIfMounted(genericImage);
+      setSourceStepIfMounted("generic");
+      setIsLoadingIfMounted(false);
     } catch (err) {
       // Both APIs failed with exceptions
       try {
         const genericImage = await getGenericCarImageFallback();
-        setImageUri(genericImage);
-        setSourceStep("generic");
-        setError(err instanceof Error ? err.message : "Unknown error");
-        setIsLoading(false);
+        setImageUriIfMounted(genericImage);
+        setSourceStepIfMounted("generic");
+        setErrorIfMounted(err instanceof Error ? err.message : "Unknown error");
+        setIsLoadingIfMounted(false);
       } catch (fallbackErr) {
-        setError(fallbackErr instanceof Error ? fallbackErr.message : "Unknown error");
-        setImageUri(null);
-        setSourceStep("fallback");
-        setIsLoading(false);
+        setErrorIfMounted(fallbackErr instanceof Error ? fallbackErr.message : "Unknown error");
+        setImageUriIfMounted(null);
+        setSourceStepIfMounted("fallback");
+        setIsLoadingIfMounted(false);
       }
     }
-  }, [params.make, params.model, params.year]);
+  }, [
+    params.make,
+    params.model,
+    params.year,
+    setImageUriIfMounted,
+    setSourceStepIfMounted,
+    setIsLoadingIfMounted,
+    setErrorIfMounted,
+  ]);
 
   const refresh = React.useCallback(() => {
+    if (!mountedRef.current) return;
     fetchImages();
   }, [fetchImages]);
 
   React.useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
-    const load = async () => {
-      await fetchImages();
-      if (!mounted) {
-        setIsLoading(false);
-      }
-    };
-
-    load();
+    fetchImages();
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
     };
   }, [params.make, params.model, params.year, fetchImages]);
 

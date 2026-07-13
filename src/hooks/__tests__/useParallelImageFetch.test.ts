@@ -166,6 +166,20 @@ describe("useParallelImageFetch", () => {
     expect(result.current.sourceStep).toBe("carimages");
   });
 
+  it("returns CarImages when Wikipedia rejects but CarImages succeeds", async () => {
+    mockFetchWikipediaCarImage.mockRejectedValueOnce(new Error("Wiki API error"));
+    mockGetCarImagesFallbackUrl.mockResolvedValueOnce("https://carimages.jpg");
+
+    const { result } = renderHook(() =>
+      useParallelImageFetch({ make: "Toyota", model: "Camry" })
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.imageUri).toBe("https://carimages.jpg");
+    expect(result.current.sourceStep).toBe("carimages");
+  });
+
   it("passes year parameter to CarImages API when provided", async () => {
     mockFetchWikipediaCarImage.mockResolvedValueOnce(null);
     mockGetCarImagesFallbackUrl.mockResolvedValueOnce("https://carimages.jpg");
