@@ -2,7 +2,7 @@
   "expo": {
     "name": "CarExplorer",
     "slug": "car-explorer",
-    "version": "2.2.2.3",
+    "version": "2.2.3",
     "orientation": "portrait",
     "icon": "./assets/images/carexplorer512.png",
     "splash": {
