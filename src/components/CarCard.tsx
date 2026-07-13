@@ -14,13 +14,12 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createGlobalStyles } from "@/constants/GlobalStyles";
 import { Colors } from "@/constants/Colors";
 
-import { getCarImagesFallbackUrl, getGenericCarImageFallback } from "../api/carImagesApi";
-import { fetchWikipediaCarImage, getCarDetails } from "../api/wikipediaApi";
-import { wikipediaThrottler } from "../utils/requestThrottler";
+import { getCarDetails } from "../api/wikipediaApi";
 import { useAppLanguage } from "../context/LanguageContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { CompareCar, useCompare } from "../context/CompareContext";
 import { useTheme } from "../context/ThemeContext";
+import { useParallelImageFetch } from "../hooks/useParallelImageFetch";
 import LoadingIndicator from "./LoadingIndicator";
 import CustomButton from "./CustomButton";
 
@@ -39,11 +38,6 @@ const CarCard: React.FC<CarCardProps> = ({
   showCompare = false,
   compareCar,
 }) => {
-  const [imageUri, setImageUri] = React.useState<string | null>(null);
-  const [sourceStep, setSourceStep] = React.useState<
-    "wiki" | "carimages" | "generic" | "fallback"
-  >("wiki");
-  const [loading, setLoading] = React.useState<boolean>(true);
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
   const [carDetails, setCarDetails] = React.useState<string | null>(null);
   const [detailsStatus, setDetailsStatus] = React.useState<
@@ -54,6 +48,12 @@ const CarCard: React.FC<CarCardProps> = ({
 
   const { theme } = useTheme();
   const styles = createGlobalStyles(theme);
+
+  const { imageUri, isLoading, sourceStep, refresh } = useParallelImageFetch({
+    make,
+    model,
+    year,
+  });
 
   const { language } = useAppLanguage();
   const activeLanguage = language || "en";
@@ -105,66 +105,12 @@ const CarCard: React.FC<CarCardProps> = ({
     addToCompare(activeCompareCar);
   };
 
-  React.useEffect(() => {
-    let mounted = true;
-    async function loadImage() {
-      setLoading(true);
-      const wikiImage = await wikipediaThrottler.execute(() =>
-        fetchWikipediaCarImage(make, model)
-      );
-      if (!mounted) return;
-      if (wikiImage) {
-        setImageUri(wikiImage);
-        setSourceStep("wiki");
-        setLoading(false);
-        return;
-      }
-
-      const carImagesUrl = await getCarImagesFallbackUrl({
-        make,
-        model,
-        year,
-      });
-      if (!mounted) return;
-      if (carImagesUrl) {
-        setImageUri(carImagesUrl);
-        setSourceStep("carimages");
-      } else {
-        const genericImage = await getGenericCarImageFallback();
-        setImageUri(genericImage);
-        setSourceStep("generic");
-      }
-      setLoading(false);
-    }
-    loadImage();
-    return () => {
-      mounted = false;
-    };
-  }, [make, model, year]);
-
   const handleImageError = () => {
-    if (sourceStep === "wiki") {
-      getCarImagesFallbackUrl({ make, model, year }).then((url) => {
-        setImageUri(url);
-        setSourceStep(url ? "carimages" : "generic");
-        if (!url) {
-          getGenericCarImageFallback().then((genericUrl) => {
-            setImageUri(genericUrl);
-            setSourceStep("generic");
-          });
-        }
-      });
-      return;
+    // If the current image URL fails to load (broken link, network hiccup),
+    // trigger a refresh to re-race both APIs and try again.
+    if (sourceStep === "wiki" || sourceStep === "carimages") {
+      refresh();
     }
-    if (sourceStep === "carimages") {
-      getGenericCarImageFallback().then((genericUrl) => {
-        setImageUri(genericUrl);
-        setSourceStep("generic");
-      });
-      return;
-    }
-    setImageUri(null);
-    setSourceStep("fallback");
   };
 
   const renderImageContent = () =>
@@ -188,7 +134,7 @@ const CarCard: React.FC<CarCardProps> = ({
   return (
     <TouchableOpacity testID="car-card-pressable" onPress={handleCardPress}>
       <View style={styles.card}>
-        {loading ? <LoadingIndicator /> : renderImageContent()}
+        {isLoading ? <LoadingIndicator /> : renderImageContent()}
         {showCompare && (
           <TouchableOpacity
             testID="car-compare-pressable"
@@ -235,6 +181,19 @@ const CarCard: React.FC<CarCardProps> = ({
               contentContainerStyle={styles.modalScrollContent}
             >
               {renderImageContent()}
+              {imageUri && (
+                <TouchableOpacity
+                  onPress={refresh}
+                  style={styles.refreshImageButton}
+                  testID="refresh-image-button"
+                >
+                  <FontAwesome
+                    name="refresh"
+                    size={16}
+                    color={Colors[theme].accent}
+                  />
+                </TouchableOpacity>
+              )}
               <Text style={styles.subtitle}>
                 {make} {model}
               </Text>

@@ -471,6 +471,14 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       height: 72,
       resizeMode: "contain",
     },
+    refreshImageButton: {
+      position: "absolute",
+      top: 12,
+      right: 12,
+      padding: 8,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      borderRadius: 20,
+    },
     favoriteIcon: {
       position: "absolute",
       top: 10,

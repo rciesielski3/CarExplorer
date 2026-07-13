@@ -7,18 +7,14 @@ import { CompareProvider } from "../../context/CompareContext";
 import { FavoritesProvider } from "../../context/FavoritesContext";
 import { LanguageProvider } from "../../context/LanguageContext";
 import { ThemeProvider } from "../../context/ThemeContext";
-import { fetchWikipediaCarImage, getCarDetails, CarDetailsResult } from "../../api/wikipediaApi";
-import { getCarImagesFallbackUrl } from "../../api/carImagesApi";
+import { getCarDetails, CarDetailsResult } from "../../api/wikipediaApi";
+import { useParallelImageFetch } from "../../hooks/useParallelImageFetch";
 
 jest.mock("../../api/wikipediaApi", () => ({
   getCarDetails: jest.fn(),
-  fetchWikipediaCarImage: jest.fn(),
 }));
 
-jest.mock("../../api/carImagesApi", () => ({
-  getCarImagesFallbackUrl: jest.fn(),
-  getGenericCarImageFallback: jest.fn().mockResolvedValue("https://via.placeholder.com/300x200?text=Car+Image"),
-}));
+jest.mock("../../hooks/useParallelImageFetch");
 
 jest.mock(
   "@react-native-async-storage/async-storage",
@@ -48,10 +44,21 @@ jest.mock("../LoadingIndicator", () => {
 const mockedGetCarDetails = getCarDetails as jest.MockedFunction<
   typeof getCarDetails
 >;
-const mockedFetchWikipediaCarImage =
-  fetchWikipediaCarImage as jest.MockedFunction<typeof fetchWikipediaCarImage>;
-const mockedGetCarImagesFallbackUrl =
-  getCarImagesFallbackUrl as jest.MockedFunction<typeof getCarImagesFallbackUrl>;
+const mockUseParallelImageFetch =
+  useParallelImageFetch as jest.MockedFunction<typeof useParallelImageFetch>;
+
+const GENERIC_IMAGE_URL = "https://via.placeholder.com/300x200?text=Car+Image";
+
+const mockImageFetchResult = (
+  overrides: Partial<ReturnType<typeof useParallelImageFetch>> = {}
+) => ({
+  imageUri: null,
+  isLoading: false,
+  sourceStep: "wiki" as const,
+  error: null,
+  refresh: jest.fn(),
+  ...overrides,
+});
 
 const renderCarCard = async () => {
   let renderer: TestRenderer.ReactTestRenderer;
@@ -90,8 +97,9 @@ const createDeferred = <T,>() => {
 describe("CarCard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedFetchWikipediaCarImage.mockResolvedValue(null);
-    mockedGetCarImagesFallbackUrl.mockResolvedValue(null);
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({ imageUri: GENERIC_IMAGE_URL, sourceStep: "generic" })
+    );
     mockedGetCarDetails.mockResolvedValue({ description: "Toyota Supra details" });
   });
 
@@ -159,9 +167,12 @@ describe("CarCard", () => {
     expect(mockedGetCarDetails).not.toHaveBeenCalled();
   });
 
-  it("renders the Wikipedia image when the API returns an image URL", async () => {
-    mockedFetchWikipediaCarImage.mockResolvedValue(
-      "https://upload.wikimedia.org/toyota-supra.jpg"
+  it("renders the Wikipedia image when the hook returns an image URL", async () => {
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({
+        imageUri: "https://upload.wikimedia.org/toyota-supra.jpg",
+        sourceStep: "wiki",
+      })
     );
 
     const renderer = await renderCarCard();
@@ -173,9 +184,26 @@ describe("CarCard", () => {
     expect(image).toBeTruthy();
   });
 
-  it("shows generic fallback image after the Wikipedia image fails to load", async () => {
-    mockedFetchWikipediaCarImage.mockResolvedValue(
-      "https://upload.wikimedia.org/toyota-supra.jpg"
+  it("shows loading indicator while fetching", async () => {
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({ imageUri: null, isLoading: true })
+    );
+
+    const renderer = await renderCarCard();
+
+    expect(
+      renderer.root.findAllByProps({ testID: "loading-indicator" }).length
+    ).toBeGreaterThan(0);
+  });
+
+  it("calls refresh when the image fails to load", async () => {
+    const mockRefresh = jest.fn();
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({
+        imageUri: "https://upload.wikimedia.org/toyota-supra.jpg",
+        sourceStep: "wiki",
+        refresh: mockRefresh,
+      })
     );
 
     const renderer = await renderCarCard();
@@ -188,24 +216,99 @@ describe("CarCard", () => {
       image?.props.onError();
     });
 
-    // After wiki image fails, it falls back to generic image
-    const genericImage = findImageByUri(
-      renderer,
-      "https://via.placeholder.com/300x200?text=Car+Image"
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it("does not call refresh when a fallback image fails to load", async () => {
+    const mockRefresh = jest.fn();
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({
+        imageUri: GENERIC_IMAGE_URL,
+        sourceStep: "generic",
+        refresh: mockRefresh,
+      })
     );
+
+    const renderer = await renderCarCard();
+    const image = findImageByUri(renderer, GENERIC_IMAGE_URL);
+
+    await act(async () => {
+      image?.props.onError();
+    });
+
+    expect(mockRefresh).not.toHaveBeenCalled();
+  });
+
+  it("displays generic placeholder image when hook resolves to the generic fallback", async () => {
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({ imageUri: GENERIC_IMAGE_URL, sourceStep: "generic" })
+    );
+
+    const renderer = await renderCarCard();
+
+    expect(renderer.root.findAllByType(Image)).toHaveLength(1);
+    const genericImage = findImageByUri(renderer, GENERIC_IMAGE_URL);
     expect(genericImage).toBeTruthy();
   });
 
-  it("shows generic fallback image when Wikipedia has no image", async () => {
+  it("displays fallback initials when no image is available", async () => {
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({ imageUri: null, sourceStep: "fallback" })
+    );
+
     const renderer = await renderCarCard();
 
-    // When no Wikipedia or CarImages URLs available, uses generic fallback
-    expect(renderer.root.findAllByType(Image)).toHaveLength(1);
-    const genericImage = findImageByUri(
-      renderer,
-      "https://via.placeholder.com/300x200?text=Car+Image"
+    expect(renderer.root.findAllByType(Image)).toHaveLength(0);
+    expect(renderer.root.findByProps({ children: "TO" })).toBeTruthy();
+  });
+
+  it("calls refresh when the refresh button in the modal is pressed", async () => {
+    const mockRefresh = jest.fn();
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({
+        imageUri: "https://upload.wikimedia.org/toyota-supra.jpg",
+        sourceStep: "wiki",
+        refresh: mockRefresh,
+      })
     );
-    expect(genericImage).toBeTruthy();
+
+    const renderer = await renderCarCard();
+    const [cardPressable] = renderer.root.findAllByProps({
+      testID: "car-card-pressable",
+    });
+
+    await act(async () => {
+      cardPressable.props.onPress();
+    });
+
+    const [refreshButton] = renderer.root.findAllByProps({
+      testID: "refresh-image-button",
+    });
+
+    await act(async () => {
+      refreshButton.props.onPress();
+    });
+
+    expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it("does not render a refresh button when there is no image", async () => {
+    mockUseParallelImageFetch.mockReturnValue(
+      mockImageFetchResult({ imageUri: null, sourceStep: "fallback" })
+    );
+
+    const renderer = await renderCarCard();
+    const [cardPressable] = renderer.root.findAllByProps({
+      testID: "car-card-pressable",
+    });
+
+    await act(async () => {
+      cardPressable.props.onPress();
+    });
+
+    expect(
+      renderer.root.findAllByProps({ testID: "refresh-image-button" })
+    ).toHaveLength(0);
   });
 
   it("shows loaded details in the modal", async () => {
