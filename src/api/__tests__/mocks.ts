@@ -36,6 +36,17 @@ export const wikipediaDetailsResponse = (
 ): Response =>
   mockResponse({ query: { pages: { "123": page } } }, true, 200);
 
+export const wikipediaSearchResponse = (title?: string): Response =>
+  mockResponse(
+    {
+      query: {
+        search: title ? [{ title }] : [],
+      },
+    },
+    true,
+    200
+  );
+
 export const wikidataSearchResponse = (
   results?: Record<string, unknown>[]
 ): Response =>

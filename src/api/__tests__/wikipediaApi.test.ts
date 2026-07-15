@@ -4,6 +4,7 @@ import {
   mockResponse,
   wikipediaSummaryResponse,
   wikipediaDetailsResponse,
+  wikipediaSearchResponse,
   errorScenarios,
 } from "./mocks";
 
@@ -12,25 +13,6 @@ const mockFetch = jest.fn();
 global.fetch = mockFetch as jest.Mock;
 
 jest.mock("../../components/Toast");
-
-const wikipediaNoPagesResponse = () =>
-  Promise.resolve({
-    ok: false,
-    status: 404,
-    json: () => Promise.resolve({ query: {} }),
-  });
-
-const wikipediaSearchResponse = (title?: string) =>
-  Promise.resolve({
-    ok: true,
-    status: 200,
-    json: () =>
-      Promise.resolve({
-        query: {
-          search: title ? [{ title }] : [],
-        },
-      }),
-  });
 
 describe("wikipediaApi", () => {
   beforeEach(() => {
