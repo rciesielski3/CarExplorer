@@ -43,6 +43,9 @@ const CarCard: React.FC<CarCardProps> = ({
   const [detailsStatus, setDetailsStatus] = React.useState<
     "idle" | "loading" | "loaded" | "noDetails"
   >("idle");
+  const [imageRefreshCount, setImageRefreshCount] = React.useState(0);
+
+  const MAX_IMAGE_REFRESH_ATTEMPTS = 3;
 
   const { t } = useTranslation();
 
@@ -54,6 +57,12 @@ const CarCard: React.FC<CarCardProps> = ({
     model,
     year,
   });
+
+  // Reset the retry counter whenever the car being displayed changes so a
+  // new car gets its own full set of retry attempts.
+  React.useEffect(() => {
+    setImageRefreshCount(0);
+  }, [make, model, year]);
 
   const { language } = useAppLanguage();
   const activeLanguage = language || "en";
@@ -107,9 +116,14 @@ const CarCard: React.FC<CarCardProps> = ({
 
   const handleImageError = () => {
     // If the current image URL fails to load (broken link, network hiccup),
-    // trigger a refresh to re-race both APIs and try again.
-    if (sourceStep === "wiki" || sourceStep === "carimages") {
+    // trigger a refresh to re-race both APIs and try again. Cap the number
+    // of retries so a persistently broken image doesn't refresh forever.
+    if (
+      (sourceStep === "wiki" || sourceStep === "carimages") &&
+      imageRefreshCount < MAX_IMAGE_REFRESH_ATTEMPTS
+    ) {
       refresh();
+      setImageRefreshCount((count) => count + 1);
     }
   };
 
