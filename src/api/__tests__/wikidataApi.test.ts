@@ -189,7 +189,7 @@ describe("wikidataApi", () => {
   it("handles server errors in entity lookups", async () => {
     mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
 
-    const result = await getCarDetailsFromWikidata("Q123456", "en");
+    const result = await getCarDetailsFromWikidata("Toyota", "Corolla");
     expect(result).toBeNull();
   });
 
@@ -210,6 +210,10 @@ describe("wikidataApi", () => {
 });
 
 describe('Wikidata API - Error Scenarios', () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it('handles 500 error in entity lookup', async () => {
     mockFetch.mockResolvedValueOnce(errorScenarios.server500({}));
 
