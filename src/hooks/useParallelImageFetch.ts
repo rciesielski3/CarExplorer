@@ -29,25 +29,42 @@ export function useParallelImageFetch(
   // avoid updating state after unmount.
   const mountedRef = React.useRef(true);
 
-  const setImageUriIfMounted = React.useCallback((uri: string | null) => {
-    if (mountedRef.current) setImageUri(uri);
-  }, []);
-  const setSourceStepIfMounted = React.useCallback(
-    (step: "wiki" | "carimages" | "generic" | "fallback") => {
-      if (mountedRef.current) setSourceStep(step);
+  // Tracks the ID of the most recently started fetch. Because two
+  // fetchImages() calls can be in flight at once (e.g. params change
+  // mid-fetch), each call captures its own ID and every state update is
+  // gated on that ID still being the current one. This prevents a stale,
+  // slower fetch from overwriting the result of a newer fetch.
+  const fetchIdRef = React.useRef(0);
+
+  const setImageUriIfMounted = React.useCallback(
+    (uri: string | null, fetchId: number) => {
+      if (mountedRef.current && fetchId === fetchIdRef.current) setImageUri(uri);
     },
     []
   );
-  const setIsLoadingIfMounted = React.useCallback((loading: boolean) => {
-    if (mountedRef.current) setIsLoading(loading);
-  }, []);
-  const setErrorIfMounted = React.useCallback((err: string | null) => {
-    if (mountedRef.current) setError(err);
-  }, []);
+  const setSourceStepIfMounted = React.useCallback(
+    (step: "wiki" | "carimages" | "generic" | "fallback", fetchId: number) => {
+      if (mountedRef.current && fetchId === fetchIdRef.current) setSourceStep(step);
+    },
+    []
+  );
+  const setIsLoadingIfMounted = React.useCallback(
+    (loading: boolean, fetchId: number) => {
+      if (mountedRef.current && fetchId === fetchIdRef.current) setIsLoading(loading);
+    },
+    []
+  );
+  const setErrorIfMounted = React.useCallback(
+    (err: string | null, fetchId: number) => {
+      if (mountedRef.current && fetchId === fetchIdRef.current) setError(err);
+    },
+    []
+  );
 
   const fetchImages = React.useCallback(async () => {
-    setIsLoadingIfMounted(true);
-    setErrorIfMounted(null);
+    const currentFetchId = ++fetchIdRef.current;
+    setIsLoadingIfMounted(true, currentFetchId);
+    setErrorIfMounted(null, currentFetchId);
 
     try {
       // Wrap each promise to track which API won. Wikipedia requests are
@@ -78,9 +95,9 @@ export function useParallelImageFetch(
       ]);
 
       if (result.url) {
-        setImageUriIfMounted(result.url);
-        setSourceStepIfMounted(result.source);
-        setIsLoadingIfMounted(false);
+        setImageUriIfMounted(result.url, currentFetchId);
+        setSourceStepIfMounted(result.source, currentFetchId);
+        setIsLoadingIfMounted(false, currentFetchId);
         return;
       }
 
@@ -90,9 +107,9 @@ export function useParallelImageFetch(
         const fallbackResult = await loser;
 
         if (fallbackResult.url) {
-          setImageUriIfMounted(fallbackResult.url);
-          setSourceStepIfMounted(fallbackResult.source);
-          setIsLoadingIfMounted(false);
+          setImageUriIfMounted(fallbackResult.url, currentFetchId);
+          setSourceStepIfMounted(fallbackResult.source, currentFetchId);
+          setIsLoadingIfMounted(false, currentFetchId);
           return;
         }
       } catch {
@@ -101,22 +118,28 @@ export function useParallelImageFetch(
 
       // Fall back to generic image
       const genericImage = await getGenericCarImageFallback();
-      setImageUriIfMounted(genericImage);
-      setSourceStepIfMounted("generic");
-      setIsLoadingIfMounted(false);
+      setImageUriIfMounted(genericImage, currentFetchId);
+      setSourceStepIfMounted("generic", currentFetchId);
+      setIsLoadingIfMounted(false, currentFetchId);
     } catch (err) {
       // Both APIs failed with exceptions
       try {
         const genericImage = await getGenericCarImageFallback();
-        setImageUriIfMounted(genericImage);
-        setSourceStepIfMounted("generic");
-        setErrorIfMounted(err instanceof Error ? err.message : "Unknown error");
-        setIsLoadingIfMounted(false);
+        setImageUriIfMounted(genericImage, currentFetchId);
+        setSourceStepIfMounted("generic", currentFetchId);
+        setErrorIfMounted(
+          err instanceof Error ? err.message : "Unknown error",
+          currentFetchId
+        );
+        setIsLoadingIfMounted(false, currentFetchId);
       } catch (fallbackErr) {
-        setErrorIfMounted(fallbackErr instanceof Error ? fallbackErr.message : "Unknown error");
-        setImageUriIfMounted(null);
-        setSourceStepIfMounted("fallback");
-        setIsLoadingIfMounted(false);
+        setErrorIfMounted(
+          fallbackErr instanceof Error ? fallbackErr.message : "Unknown error",
+          currentFetchId
+        );
+        setImageUriIfMounted(null, currentFetchId);
+        setSourceStepIfMounted("fallback", currentFetchId);
+        setIsLoadingIfMounted(false, currentFetchId);
       }
     }
   }, [
