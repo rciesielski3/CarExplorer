@@ -108,8 +108,8 @@ android {
         applicationId 'com.adateo.carexplorer'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 73
-        versionName "2.2.4"
+        versionCode 74
+        versionName "2.2.5"
         manifestPlaceholders = [
             googleMobileAdsAppId: androidAdmobAppId
         ]
