@@ -45,62 +45,31 @@ jobs:
         with:
           ref: ${{ github.event.inputs.version_tag }}
 
-      # --- Attempt to reuse a pre-built artifact ---
+      # --- Always build fresh (skip cached artifact) ---
 
-      - name: Try to download pre-built artifact
-        id: download
-        uses: dawidd6/action-download-artifact@v3
-        continue-on-error: true
-        with:
-          workflow: build-release-bundle.yml
-          name: release-bundle-${{ github.event.inputs.version_tag }}
-          path: downloaded-artifact/
-          if_no_artifact_found: warn
-
-      - name: Locate downloaded AAB
-        id: locate-aab
-        run: |
-          AAB_FILE=$(find downloaded-artifact/ -name "*.aab" -type f 2>/dev/null | head -1)
-          if [ -n "$AAB_FILE" ]; then
-            echo "found=true"  >> $GITHUB_OUTPUT
-            echo "path=${AAB_FILE}" >> $GITHUB_OUTPUT
-            echo "Pre-built artifact found: ${AAB_FILE}"
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-            echo "No pre-built artifact found — will build from source as fallback."
-          fi
-
-      # --- Fallback: build if no pre-built artifact ---
-
-      - name: Set up JDK (fallback build)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK (fallback build)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Node.js (fallback build)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install dependencies (fallback build)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Install dependencies
         run: npm install
 
-      - name: Decode keystore (fallback build)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Decode keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/release.keystore
           echo "KEYSTORE_PATH=/tmp/release.keystore" >> $GITHUB_ENV
 
-      - name: Build release bundle (fallback)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Build release bundle (clean build)
         env:
           CAREXPLORER_UPLOAD_STORE_FILE: ${{ env.KEYSTORE_PATH }}
           CAREXPLORER_UPLOAD_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -109,18 +78,13 @@ jobs:
           EXPO_PUBLIC_ADMOB_ANDROID_APP_ID: ${{ secrets.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID }}
         run: |
           cd android
-          ./gradlew bundleRelease
+          ./gradlew clean bundleRelease
 
       # --- Resolve final AAB path ---
 
-      - name: Set AAB path (pre-built artifact)
-        if: steps.locate-aab.outputs.found == 'true'
-        run: echo "AAB_PATH=${{ steps.locate-aab.outputs.path }}" >> $GITHUB_ENV
-
-      - name: Set AAB path (fallback fresh build)
-        if: steps.locate-aab.outputs.found == 'false'
+      - name: Set AAB path (fresh build)
         run: |
-          # Search for AAB file in fallback build outputs
+          # Search for AAB file in build outputs
           AAB_FILE=$(find android/app/build/outputs/bundle -name "*.aab" -type f 2>/dev/null | head -1)
           if [ -z "$AAB_FILE" ]; then
             echo "ERROR: AAB file not found in build outputs!"
@@ -128,7 +92,7 @@ jobs:
             find android/app/build -type f -name "*.aab" 2>/dev/null || echo "No AAB files found anywhere in build directory"
             exit 1
           fi
-          echo "Found AAB from fallback build: ${AAB_FILE}"
+          echo "Found AAB from fresh build: ${AAB_FILE}"
           echo "AAB_PATH=${AAB_FILE}" >> $GITHUB_ENV
 
       - name: Verify AAB file exists before upload
