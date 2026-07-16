@@ -2,7 +2,7 @@
   "expo": {
     "name": "CarExplorer",
     "slug": "car-explorer",
-    "version": "2.2.3",
+    "version": "2.2.4",
     "orientation": "portrait",
     "icon": "./assets/images/carexplorer512.png",
     "splash": {
@@ -16,7 +16,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.adateo.carexplorer",
-      "versionCode": 72
+      "versionCode": 73
     },
     "ios": {
       "supportsTablet": true,

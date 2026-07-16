@@ -1,37 +1,35 @@
-# CarExplorer v2.0.8 - Play Store Release Notes
+# CarExplorer v2.2.4 - Play Store Release Notes
 
 ## 🚀 What's New
 
-### [EN] Improved Reliability & Stability
-**Enhanced:** CarExplorer now has even better reliability when fetching car information. Whether you're on a fast connection or a slower network, you'll get consistent, accurate data about vehicles.
+### [EN] Smoother Image Loading on Explore Screen
+**Fixed:** CarExplorer now delivers a seamless image browsing experience on the Explore screen. Critical improvements prevent flickering, stale images, and refresh button issues that were interrupting your car browsing.
 
-**[PL] Ulepszona niezawodność i stabilność**
-Ulepszenie: CarExplorer zapewnia jeszcze lepszą niezawodność przy pobieraniu informacji o samochodach. Niezależnie od szybkości Twojego połączenia, będziesz otrzymywać spójne i dokładne dane o pojazdach.
+**[PL] Płynniejsze ładowanie obrazów na ekranie Eksploracji**
+Naprawiono: CarExplorer zapewnia teraz bezpośrednie doświadczenie przeglądania obrazów na ekranie Eksploracji. Krytyczne ulepszenia zapobiegają migotaniu, nieświeżym obrazom i problemom z przyciskiem odświeżania.
 
 ---
 
 ## 🔧 What We Fixed
 
-### [EN] Better Error Handling & Performance
-- Improved handling of network errors and timeouts
-- Faster response times when loading car specifications
-- More reliable image loading
-- Better app performance overall
+### [EN] Critical Image Loading Issues
+- **Race condition in parallel image fetching:** Fixed issue where stale images could overwrite fresh ones
+- **Refresh button infinite loop:** Fixed retry mechanism to prevent the refresh button from hanging
+- **Pagination preloading:** Improved pagination state handling for smooth browsing
 
-**[PL] Lepsza obsługa błędów i wydajność**
-- Ulepszona obsługa błędów sieciowych i limitów czasu
-- Szybsze czasy ładowania specyfikacji samochodów
-- Bardziej niezawodne ładowanie obrazów
-- Lepsza wydajność aplikacji
+**[PL] Krytyczne problemy z ładowaniem obrazów**
+- **Race condition w równoległym pobieraniu obrazów:** Naprawiono problem, w którym stare obrazy mogłyby zastąpić świeże
+- **Nieskończona pętla przycisku odświeżania:** Naprawiono mechanizm ponawiania, aby zapobiec zawieszeniu przycisku odświeżania
+- **Preładowanie paginacji:** Ulepszono obsługę stanu paginacji dla płynnego przeglądania
 
 ---
 
 ## 📱 What Users Will Experience
 
-- **More reliable data fetching:** Consistent access to car information
-- **Faster load times:** Quicker response when searching for vehicles
-- **Better stability:** Improved error recovery
-- **Smoother experience:** Enhanced overall performance
+- **No more image flickering:** Stable, consistent image display
+- **Reliable refresh button:** Refresh works smoothly without getting stuck
+- **Faster pagination:** Smoother transitions between car listings
+- **Better overall experience:** More responsive and predictable behavior on Explore screen
 
 ---
 
@@ -48,4 +46,4 @@ Having issues? Visit our [Contact Page](https://rciesielski3.github.io/portfolio
 
 ---
 
-*v2.0.8 - Released July 2, 2026*
+*v2.2.4 - Released July 16, 2026*
