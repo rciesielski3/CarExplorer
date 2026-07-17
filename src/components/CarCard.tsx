@@ -194,7 +194,7 @@ const CarCard: React.FC<CarCardProps> = ({
               style={styles.scrollContainer}
               contentContainerStyle={styles.modalScrollContent}
             >
-              {renderImageContent()}
+              {isLoading ? <LoadingIndicator /> : renderImageContent()}
               {imageUri && (
                 <TouchableOpacity
                   onPress={refresh}
