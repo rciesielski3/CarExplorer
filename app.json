@@ -16,7 +16,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.adateo.carexplorer",
-      "versionCode": 74
+      "versionCode": 75
     },
     "ios": {
       "supportsTablet": true,
