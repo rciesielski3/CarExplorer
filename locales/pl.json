@@ -146,5 +146,6 @@
   "compareFuelType": "Typ paliwa",
   "compareTransmission": "Skrzynia biegów",
   "compareTopSpeed": "Prędkość maksymalna",
-  "unitSystem": "System jednostek"
+  "unitSystem": "System jednostek",
+  "load_more_models": "Wczytaj więcej modeli"
 }
