@@ -6,8 +6,6 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
@@ -51,7 +49,7 @@ const numColumns = screenWidth < 400 ? 2 : 3;
 const ExploreScreen = () => {
   const [selectedMake, setSelectedMake] = React.useState<string | null>(null);
   const [allModels, setAllModels] = React.useState<CarModel[]>([]);
-  const { displayedModels, totalCount, handleLoadMore, isPreloading, triggerPreload } = usePaginatedModels(allModels);
+  const { displayedModels, hasMore, handleLoadMore } = usePaginatedModels(allModels, { batchSize: 25 });
   const [loading, setLoading] = React.useState(false);
   const [loadingLogos, setLoadingLogos] = React.useState(false);
   const [modelYear, setModelYear] = React.useState<string | null>(null);
@@ -129,7 +127,12 @@ const ExploreScreen = () => {
   const resetFilters = () => {
     setModelYear(null);
     setVehicleType(null);
-    setAllModels([]);  // Clear models to reset pagination
+    setErrorMessage(null);
+
+    // Re-fetch all models for selected make (no year/type filter)
+    if (selectedMake) {
+      fetchModels();
+    }
   };
 
   const handleSelectMake = (make: string) => {
@@ -153,20 +156,6 @@ const ExploreScreen = () => {
     }
   }, [selectedMake, fetchModels]);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
-    const distanceFromBottom =
-      contentSize.height - layoutMeasurement.height - contentOffset.y;
-
-    // Trigger preload when within 200px of bottom
-    if (
-      distanceFromBottom < 200 &&
-      !isPreloading &&
-      displayedModels.length < totalCount
-    ) {
-      triggerPreload();
-    }
-  };
 
   React.useEffect(() => {
     const loadLogos = async () => {
@@ -182,6 +171,19 @@ const ExploreScreen = () => {
     };
     loadLogos();
   }, []);
+
+  const renderLoadMoreButton = () => {
+    if (!hasMore) return null;
+    return (
+      <View style={{ padding: 16, alignItems: 'center' }}>
+        <CustomButton
+          onPress={handleLoadMore}
+          title={t('loadMore')}
+          style={{ paddingVertical: 12 }}
+        />
+      </View>
+    );
+  };
 
   return (
     <ErrorBoundary apiName="Explore">
@@ -281,8 +283,8 @@ const ExploreScreen = () => {
                 }}
                 maxToRenderPerBatch={12}
                 updateCellsBatchingPeriod={50}
-                onScroll={handleScroll}
                 scrollEventThrottle={16}
+                ListFooterComponent={renderLoadMoreButton}
                 renderItem={({ item }) => (
                   <CarCard
                     make={selectedMake!}
@@ -298,16 +300,6 @@ const ExploreScreen = () => {
                   />
                 )}
               />
-            )}
-            {displayedModels.length < totalCount && (
-              <View style={styles.loadMoreContainer}>
-                <CustomButton
-                  title={isPreloading ? t("loading") : t("loadMore")}
-                  onPress={handleLoadMore}
-                  variant="primary"
-                  disabled={isPreloading}
-                />
-              </View>
             )}
             <View
               style={[
