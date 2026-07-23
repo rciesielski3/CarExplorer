@@ -93,24 +93,24 @@ describe("usePaginatedModels", () => {
     name: `Model ${i}`,
   }));
 
-  it("should display first 12 models initially", () => {
+  it("should display first 25 models initially with default batchSize", () => {
     const { result } = renderHook(() => usePaginatedModels(mockModels));
-    expect(result.current.displayedModels).toHaveLength(12);
-    expect(result.current.totalCount).toBe(50);
+    expect(result.current.displayedModels).toHaveLength(25);
+    expect(result.current.hasMore).toBe(true);
   });
 
-  it("should load next 12 models on handleLoadMore", () => {
+  it("should load next 25 models on handleLoadMore", () => {
     const { result } = renderHook(() => usePaginatedModels(mockModels));
-    expect(result.current.displayedModels).toHaveLength(12);
+    expect(result.current.displayedModels).toHaveLength(25);
 
     act(() => {
       result.current.handleLoadMore();
     });
 
-    expect(result.current.displayedModels).toHaveLength(24);
+    expect(result.current.displayedModels).toHaveLength(50);
   });
 
-  it("should not exceed total models count", () => {
+  it("should set hasMore to false when all models loaded", () => {
     const { result } = renderHook(() => usePaginatedModels(mockModels));
 
     // Load all batches
@@ -121,18 +121,12 @@ describe("usePaginatedModels", () => {
     }
 
     expect(result.current.displayedModels).toHaveLength(50);
+    expect(result.current.hasMore).toBe(false);
   });
 
-  it("should load next batch when triggerPreload is called", () => {
-    const { result } = renderHook(() => usePaginatedModels(mockModels));
-    expect(result.current.displayedModels).toHaveLength(12); // Initial batch
-
-    act(() => {
-      result.current.triggerPreload();
-    });
-
-    expect(result.current.displayedModels).toHaveLength(24); // Next batch loaded
-    expect(result.current.isPreloading).toBe(false); // Flag cleared
+  it("should respect custom batchSize option", () => {
+    const { result } = renderHook(() => usePaginatedModels(mockModels, { batchSize: 10 }));
+    expect(result.current.displayedModels).toHaveLength(10);
   });
 });
 
@@ -148,7 +142,8 @@ describe("ExploreScreen Pagination Integration", () => {
     await selectFirstMake();
 
     await waitFor(() => {
-      expect(screen.queryByText("Load More Models")).toBeOnTheScreen();
+      // The button text comes from t('loadMore') translation
+      expect(screen.queryByRole("button", { name: /load.*more/i })).toBeOnTheScreen();
     });
   });
 
@@ -158,14 +153,14 @@ describe("ExploreScreen Pagination Integration", () => {
     await selectFirstMake();
 
     await waitFor(() => {
-      expect(screen.getByText("Load More Models")).toBeOnTheScreen();
+      expect(screen.getByRole("button", { name: /load.*more/i })).toBeOnTheScreen();
     });
 
-    const loadMoreButton = screen.getByText("Load More Models");
+    const loadMoreButton = screen.getByRole("button", { name: /load.*more/i });
     fireEvent.press(loadMoreButton);
 
     await waitFor(() => {
-      expect(screen.queryByText("Load More Models")).toBeOnTheScreen();
+      expect(screen.queryByRole("button", { name: /load.*more/i })).toBeOnTheScreen();
     });
   });
 
@@ -175,18 +170,19 @@ describe("ExploreScreen Pagination Integration", () => {
     await selectFirstMake();
 
     await waitFor(() => {
-      expect(screen.getByText("Load More Models")).toBeOnTheScreen();
+      expect(screen.getByRole("button", { name: /load.*more/i })).toBeOnTheScreen();
     });
 
     // Simulate clicking Load More multiple times
     for (let i = 0; i < 10; i++) {
-      if (screen.queryByText("Load More Models")) {
-        fireEvent.press(screen.getByText("Load More Models"));
+      const loadMoreButton = screen.queryByRole("button", { name: /load.*more/i });
+      if (loadMoreButton) {
+        fireEvent.press(loadMoreButton);
       }
     }
 
     await waitFor(() => {
-      expect(screen.queryByText("Load More Models")).not.toBeOnTheScreen();
+      expect(screen.queryByRole("button", { name: /load.*more/i })).not.toBeOnTheScreen();
     });
   });
 });
