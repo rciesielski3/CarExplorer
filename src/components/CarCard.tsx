@@ -265,9 +265,11 @@ const CarCard: React.FC<CarCardProps> = ({
               {detailsStatus === "loading" ? (
                 <LoadingIndicator />
               ) : (
-                <Text style={styles.description}>
-                  {carDetails || t("noDetails")}
-                </Text>
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={styles.description}>
+                    {carDetails || t("noDetails")}
+                  </Text>
+                </View>
               )}
             </ScrollView>
             <CustomButton
