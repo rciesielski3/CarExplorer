@@ -1,65 +1,54 @@
-import { useState, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 
 interface CarModel {
   id: number;
   name: string;
 }
 
-interface UsePaginatedModelsReturn {
-  displayedModels: CarModel[];
-  totalCount: number;
-  handleLoadMore: () => void;
-  isPreloading: boolean;
-  triggerPreload: () => void;
+interface UsePaginatedModelsOptions {
+  batchSize?: number;
 }
 
-const BATCH_SIZE = 12;
+interface UsePaginatedModelsResult {
+  displayedModels: CarModel[];
+  totalCount: number;
+  loadedCount: number;
+  hasMore: boolean;
+  handleLoadMore: () => void;
+  isPreloading: boolean;
+}
 
 export const usePaginatedModels = (
-  allModels: CarModel[]
-): UsePaginatedModelsReturn => {
-  const [displayedCount, setDisplayedCount] = useState(BATCH_SIZE);
+  allModels: CarModel[],
+  options: UsePaginatedModelsOptions = {}
+): UsePaginatedModelsResult => {
+  const { batchSize = 25 } = options;
+  const [displayedCount, setDisplayedCount] = useState(batchSize);
   const [isPreloading, setIsPreloading] = useState(false);
 
-  useEffect(() => {
-    if (allModels.length > 0) {
-      setDisplayedCount(BATCH_SIZE);
-      setIsPreloading(false);
-    }
-  }, [allModels]);
-
+  // Slice models to currently displayed count
   const displayedModels = useMemo(
     () => allModels.slice(0, displayedCount),
     [allModels, displayedCount]
   );
 
-  const handleLoadMore = () => {
-    const nextCount = displayedCount + BATCH_SIZE;
-    setDisplayedCount(Math.min(nextCount, allModels.length));
-    setIsPreloading(false);
-  };
+  // Determine if more models exist
+  const hasMore = useMemo(
+    () => displayedCount < allModels.length,
+    [displayedCount, allModels.length]
+  );
 
-  const triggerPreload = () => {
-    if (displayedCount < allModels.length) {
-      setIsPreloading(true);
-      const nextCount = displayedCount + BATCH_SIZE;
-      setDisplayedCount(Math.min(nextCount, allModels.length));
-    }
-  };
-
-  // Clear the preloading flag once the next batch has been applied
-  // (displayedCount reflects the newly loaded models).
-  useEffect(() => {
-    if (isPreloading) {
-      setIsPreloading(false);
-    }
-  }, [displayedCount, isPreloading]);
+  // Load more handler
+  const handleLoadMore = useCallback(() => {
+    setDisplayedCount((prev) => Math.min(prev + batchSize, allModels.length));
+  }, [batchSize, allModels.length]);
 
   return {
     displayedModels,
     totalCount: allModels.length,
+    loadedCount: displayedCount,
+    hasMore,
     handleLoadMore,
     isPreloading,
-    triggerPreload,
   };
 };
