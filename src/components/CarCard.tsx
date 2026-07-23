@@ -3,12 +3,14 @@ import {
   View,
   Text,
   Image,
+  StyleSheet,
   TouchableOpacity,
   Modal,
   ScrollView,
   GestureResponderEvent,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import Svg, { G, Circle, Path, Ellipse } from "react-native-svg";
 
 import { FontAwesome } from "@expo/vector-icons";
 import { createGlobalStyles } from "@/constants/GlobalStyles";
@@ -30,6 +32,31 @@ interface CarCardProps {
   showCompare?: boolean;
   compareCar?: CompareCar;
 }
+
+// Minimalist car silhouette used as a placeholder while an image is loading
+// or when no image could be found for a car.
+const CarSilhouette: React.FC<{ color: string; opacity?: number }> = ({
+  color,
+  opacity = 1,
+}) => (
+  <Svg width="55%" height="55%" viewBox="0 0 200 200">
+    <G
+      stroke={color}
+      strokeWidth={2}
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    >
+      <Ellipse cx={100} cy={130} rx={70} ry={28} />
+      <Path d="M 70 95 Q 100 80 130 95 L 130 120 Q 100 115 70 120 Z" />
+      <Circle cx={60} cy={158} r={14} />
+      <Circle cx={60} cy={158} r={10} />
+      <Circle cx={140} cy={158} r={14} />
+      <Circle cx={140} cy={158} r={10} />
+    </G>
+  </Svg>
+);
 
 const CarCard: React.FC<CarCardProps> = ({
   make,
@@ -135,7 +162,15 @@ const CarCard: React.FC<CarCardProps> = ({
         onError={handleImageError}
       />
     ) : (
-      <View style={[styles.imageCard, styles.imageFallback]}>
+      <View
+        testID="image-placeholder"
+        style={[styles.imageCard, styles.imageFallback]}
+      >
+        <View style={StyleSheet.absoluteFillObject}>
+          <View style={styles.loader}>
+            <CarSilhouette color={Colors[theme].icon} opacity={0.2} />
+          </View>
+        </View>
         <Text style={styles.imageFallbackInitials}>
           {make.slice(0, 2).toUpperCase()}
         </Text>
@@ -145,10 +180,26 @@ const CarCard: React.FC<CarCardProps> = ({
       </View>
     );
 
+  // Shown while the image is being fetched: the car silhouette placeholder
+  // with the loading animation layered on top.
+  const renderLoadingPlaceholder = () => (
+    <View
+      testID="image-placeholder-loading"
+      style={[styles.imageCard, styles.imageFallback]}
+    >
+      <View style={StyleSheet.absoluteFillObject}>
+        <View style={styles.loader}>
+          <CarSilhouette color={Colors[theme].icon} opacity={0.2} />
+        </View>
+      </View>
+      <LoadingIndicator />
+    </View>
+  );
+
   return (
     <TouchableOpacity testID="car-card-pressable" onPress={handleCardPress}>
       <View style={styles.card}>
-        {isLoading ? <LoadingIndicator /> : renderImageContent()}
+        {isLoading ? renderLoadingPlaceholder() : renderImageContent()}
         {showCompare && (
           <TouchableOpacity
             testID="car-compare-pressable"
@@ -194,7 +245,7 @@ const CarCard: React.FC<CarCardProps> = ({
               style={styles.scrollContainer}
               contentContainerStyle={styles.modalScrollContent}
             >
-              {isLoading ? <LoadingIndicator /> : renderImageContent()}
+              {isLoading ? renderLoadingPlaceholder() : renderImageContent()}
               {imageUri && (
                 <TouchableOpacity
                   onPress={refresh}
