@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 
 interface CarModel {
   id: number;
@@ -42,6 +42,11 @@ export const usePaginatedModels = (
   const handleLoadMore = useCallback(() => {
     setDisplayedCount((prev) => Math.min(prev + batchSize, allModels.length));
   }, [batchSize, allModels.length]);
+
+  // Reset pagination whenever the underlying model list changes (new make/filter selection)
+  useEffect(() => {
+    setDisplayedCount(batchSize);
+  }, [allModels, batchSize]);
 
   return {
     displayedModels,
