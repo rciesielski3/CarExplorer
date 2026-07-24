@@ -352,6 +352,7 @@ export const createGlobalStyles = (theme: "light" | "dark") =>
       color: Colors[theme].not,
     },
     card: {
+      flex: 1,
       backgroundColor: Colors[theme].card,
       borderRadius: 8,
       padding: 16,
