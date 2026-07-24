@@ -129,10 +129,12 @@ const ExploreScreen = () => {
     setVehicleType(null);
     setErrorMessage(null);
 
-    // Re-fetch all models for selected make (no year/type filter)
-    if (selectedMake) {
-      fetchModels();
-    }
+    // Do not call fetchModels() here: it would use stale modelYear/vehicleType
+    // values from this closure (state updates above are async). The
+    // useEffect below depends on [selectedMake, fetchModels], and fetchModels
+    // itself depends on [selectedMake, modelYear, vehicleType, t], so once
+    // modelYear/vehicleType actually update, fetchModels is re-created and
+    // the effect re-fetches with the correct (reset) filter values.
   };
 
   const handleSelectMake = (make: string) => {
