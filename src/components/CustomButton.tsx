@@ -37,6 +37,7 @@ const CustomButton: React.FC<ButtonProps> = ({
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
       style={[
         styles.button,
         backgroundColor ? { backgroundColor } : null,
