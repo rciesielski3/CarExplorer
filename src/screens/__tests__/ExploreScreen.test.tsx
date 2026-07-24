@@ -160,7 +160,7 @@ describe("ExploreScreen Pagination Integration", () => {
     fireEvent.press(loadMoreButton);
 
     await waitFor(() => {
-      expect(screen.queryByRole("button", { name: /load.*more/i })).toBeOnTheScreen();
+      expect(screen.queryByRole("button", { name: /load.*more/i })).not.toBeOnTheScreen();
     });
   });
 
