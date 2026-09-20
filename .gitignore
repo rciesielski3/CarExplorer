@@ -47,8 +47,8 @@ gemini.md
 planCarImagesFallback.md
 quickFixes16062026.md
 .superpowers/
-docs/superpowers/
+docs/
 .codex/
-docs/android-release-signing.md
-docs/product-roadmap.md
+AGENTS.md
+AGENT_KNOWLEDGE.md
 files_carexplorerfinal/
