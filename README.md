@@ -237,7 +237,7 @@ Output: `android/app/build/outputs/apk/release/app-release.apk`
 
 ## 🔄 GitHub Actions Workflows
 
-The project uses two automated workflows for building and releasing to Google Play Store.
+The project uses two automated workflows for building and releasing to Google Play Store. For comprehensive release procedures and troubleshooting, see [Release Runbook](docs/release-runbook.md).
 
 ### Workflow 1: Build Release Bundle
 
