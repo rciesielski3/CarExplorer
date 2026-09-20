@@ -76,6 +76,34 @@ jobs:
           cd android
           ./gradlew bundleRelease
 
+      - name: Verify bundle signature (SHA1)
+        run: |
+          # Find the generated AAB file
+          AAB_FILE=$(find android/app/build/outputs/bundle -name "*.aab" -type f 2>/dev/null | head -1)
+
+          if [ -z "$AAB_FILE" ]; then
+            echo "ERROR: AAB file not found in build outputs!"
+            exit 1
+          fi
+
+          echo "Verifying signature of: $AAB_FILE"
+
+          # Extract and verify the certificate SHA1
+          CERT_SHA1=$(keytool -printcert -jarfile "$AAB_FILE" 2>/dev/null | grep -i "SHA1:" | awk '{print $NF}')
+          EXPECTED_SHA1="AC:F5:2A:DD:61:C8:8B:AA:B7:54:74:F9:B2:D5:6E:7E:9F:00:A4:E3"
+
+          echo "Certificate SHA1: $CERT_SHA1"
+          echo "Expected SHA1:    $EXPECTED_SHA1"
+
+          if [ "$CERT_SHA1" != "$EXPECTED_SHA1" ]; then
+            echo "ERROR: Certificate SHA1 mismatch!"
+            echo "The bundle was not signed with the expected certificate."
+            echo "Ensure the keystore credentials are correct."
+            exit 1
+          fi
+
+          echo "✓ Bundle signature verified successfully"
+
       - name: Build release APK (optional)
         if: ${{ github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both' }}
         env:

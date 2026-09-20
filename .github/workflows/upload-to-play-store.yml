@@ -45,7 +45,31 @@ jobs:
         with:
           ref: ${{ github.event.inputs.version_tag }}
 
-      # --- Always build fresh (skip cached artifact) ---
+      # --- Try to download artifact from build-release-bundle workflow ---
+
+      - name: Download release artifact
+        id: download-artifact
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: build-release-bundle.yml
+          name: release-bundle-${{ github.event.inputs.version_tag }}
+          path: ./downloaded-artifact
+
+      - name: Check if artifact was downloaded
+        id: artifact-status
+        run: |
+          if [ -d "./downloaded-artifact" ] && [ "$(ls -A ./downloaded-artifact)" ]; then
+            echo "artifact-found=true" >> $GITHUB_OUTPUT
+            AAB_FILE=$(find ./downloaded-artifact -name "*.aab" -type f 2>/dev/null | head -1)
+            if [ -n "$AAB_FILE" ]; then
+              echo "Downloaded artifact from cache: $AAB_FILE"
+              echo "artifact-path=$AAB_FILE" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "artifact-found=false" >> $GITHUB_OUTPUT
+            echo "No cached artifact found; will build fresh"
+          fi
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -69,7 +93,8 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > /tmp/release.keystore
           echo "KEYSTORE_PATH=/tmp/release.keystore" >> $GITHUB_ENV
 
-      - name: Build release bundle (clean build)
+      - name: Build release bundle (fallback - fresh build)
+        if: steps.artifact-status.outputs.artifact-found == 'false'
         env:
           CAREXPLORER_UPLOAD_STORE_FILE: ${{ env.KEYSTORE_PATH }}
           CAREXPLORER_UPLOAD_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -81,11 +106,19 @@ jobs:
           cd android
           ./gradlew clean bundleRelease
 
-      # --- Resolve final AAB path ---
+      # --- Resolve final AAB path (artifact or fresh build) ---
 
-      - name: Set AAB path (fresh build)
+      - name: Set AAB path from cache
+        if: steps.artifact-status.outputs.artifact-found == 'true'
         run: |
-          # Search for AAB file in build outputs
+          AAB_PATH="${{ steps.artifact-status.outputs.artifact-path }}"
+          echo "Using artifact from cache: $AAB_PATH"
+          echo "AAB_PATH=${AAB_PATH}" >> $GITHUB_ENV
+
+      - name: Set AAB path from fresh build
+        if: steps.artifact-status.outputs.artifact-found == 'false'
+        run: |
+          # Search for AAB file in build outputs from fresh build
           AAB_FILE=$(find android/app/build/outputs/bundle -name "*.aab" -type f 2>/dev/null | head -1)
           if [ -z "$AAB_FILE" ]; then
             echo "ERROR: AAB file not found in build outputs!"
@@ -93,7 +126,7 @@ jobs:
             find android/app/build -type f -name "*.aab" 2>/dev/null || echo "No AAB files found anywhere in build directory"
             exit 1
           fi
-          echo "Found AAB from fresh build: ${AAB_FILE}"
+          echo "Built fresh AAB: ${AAB_FILE}"
           echo "AAB_PATH=${AAB_FILE}" >> $GITHUB_ENV
 
       - name: Verify AAB file exists before upload
