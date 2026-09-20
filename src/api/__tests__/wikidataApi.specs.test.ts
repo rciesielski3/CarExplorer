@@ -3,7 +3,7 @@ import { mockResponse } from "./mocks";
 
 describe('Wikidata API - Specifications', () => {
   beforeAll(() => {
-    global.fetch = jest.fn((url: string) => {
+    (global.fetch as jest.Mock) = jest.fn((url: string) => {
       // Mock response for Q1420 (BMW)
       if (url.includes('Q1420')) {
         return Promise.resolve(
